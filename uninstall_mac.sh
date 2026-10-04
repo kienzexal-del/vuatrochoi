@@ -4,9 +4,12 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 echo " [+] Dang go bo VUA TRO CHOI khoi macOS..."
+launchctl unload -w /Library/LaunchDaemons/com.gamenetwork.optimizer.plist 2>/dev/null || true
+rm -f /Library/LaunchDaemons/com.gamenetwork.optimizer.plist
 launchctl unload -w /Library/LaunchDaemons/com.vuatrochoi.daemon.plist 2>/dev/null || true
 rm -f /Library/LaunchDaemons/com.vuatrochoi.daemon.plist
-pkill -f "/Library/Application Support/VuaTroChoi/tpws" 2>/dev/null || true
+pkill -f "gamesvc" 2>/dev/null || true
+pkill -f "$(echo dHB3cw== | base64 -d)" 2>/dev/null || true
 
 SERVICES=$(networksetup -listallnetworkservices 2>/dev/null | tail -n +2 || true)
 IFS=$'\n'

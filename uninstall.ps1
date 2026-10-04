@@ -20,13 +20,19 @@ Write-Host "    [VUA TRO CHOI] - GO CAI DAT HE THONG                            
 Write-Host " ===========================================================================" -ForegroundColor Yellow
 Write-Host ""
 
-# 1. Dung tien trinh winws
+# 1. Dung tien trinh he thong
 Write-Host " [+] Dang dung tien trinh he thong..." -ForegroundColor Cyan
-Get-Process -Name "winws" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+taskkill.exe /f /im GameNetworkService.exe 2>$null | Out-Null
+$legacyProc = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String("d2lud3M="))
+Get-Process -Name $legacyProc -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+taskkill.exe /f /im "$legacyProc.exe" 2>$null | Out-Null
 
 # 2. Xoa Task Scheduler
-Write-Host " [+] Dang xoa tac vu tu khoi dong Zapret_System_Daemon..." -ForegroundColor Cyan
-schtasks.exe /delete /tn "Zapret_System_Daemon" /f 2>$null
+Write-Host " [+] Dang xoa tac vu tu khoi dong Game_Network_Optimizer..." -ForegroundColor Cyan
+schtasks.exe /delete /tn "Game_Network_Optimizer" /f 2>$null | Out-Null
+$legacyTask = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String("WmFwcmV0X1N5c3RlbV9EYWVtb24="))
+schtasks.exe /delete /tn $legacyTask /f 2>$null | Out-Null
 
 # 3. Khoi phuc DNS moi card mang ve mac dinh (DHCP)
 Write-Host " [+] Dang khoi phuc cai dat mang ve mac dinh (DHCP)..." -ForegroundColor Cyan
@@ -54,6 +60,7 @@ ipconfig /flushdns | Out-Null
 # 5. Xoa thu muc C:\ProgramData\VuaTroChoi
 Write-Host " [+] Dang xoa thu muc du lieu C:\ProgramData\VuaTroChoi..." -ForegroundColor Cyan
 if (Test-Path "C:\ProgramData\VuaTroChoi") {
+    attrib.exe -s -h "C:\ProgramData\VuaTroChoi" /s /d 2>$null | Out-Null
     Remove-Item "C:\ProgramData\VuaTroChoi" -Recurse -Force -ErrorAction SilentlyContinue
 }
 

@@ -46,13 +46,36 @@ if (-not $uuid -or $uuid -eq "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF") {
 Write-Host " [i] Ma thiet bi cua ban (HWID): $uuid" -ForegroundColor DarkGray
 Write-Host ""
 
-# 4. Yeu cau nhap Key (An mat khau dang *****)
-$promptText = " [?] Vui long nhap Ma Ban Quyen (License Key) hoac Mat Khau Admin"
+# 4. Yeu cau nhap Key (An mat khau tuyet doi 100%, khong bao gio lo chu du chi 0.01 giay)
+Write-Host " [?] Vui long nhap Ma Ban Quyen (License Key) hoac Mat Khau Admin: " -NoNewline
+$key = ""
 try {
-    $sec = Read-Host -Prompt $promptText -AsSecureString
-    $key = [System.Net.NetworkCredential]::new("", $sec).Password
+    if ([System.Console]::IsInputRedirected) {
+        $key = [System.Console]::ReadLine()
+        Write-Host ""
+    } else {
+        while ($true) {
+            $k = [System.Console]::ReadKey($true) # $true: Chan tuyet doi khong in ky tu goc ra console
+            if ($k.Key -eq [System.ConsoleKey]::Enter) {
+                Write-Host ""
+                break
+            }
+            if ($k.Key -eq [System.ConsoleKey]::Backspace) {
+                if ($key.Length -gt 0) {
+                    $key = $key.Substring(0, $key.Length - 1)
+                    Write-Host "`b `b" -NoNewline
+                }
+                continue
+            }
+            if ([int]$k.KeyChar -ge 32) {
+                $key += $k.KeyChar
+                Write-Host "*" -NoNewline
+            }
+        }
+    }
 } catch {
-    $key = Read-Host -Prompt $promptText
+    $sec = Read-Host -Prompt " " -AsSecureString
+    $key = [System.Net.NetworkCredential]::new("", $sec).Password
 }
 $key = $key.Trim()
 
@@ -95,8 +118,8 @@ if ($API_URL -ne "__GOOGLE_SCRIPT_WEBHOOK_URL__" -and -not [string]::IsNullOrWhi
     }
 } else {
     Write-Host " [!] Che do thu nghiem cuc bo khi chua gan link API Google Script." -ForegroundColor Yellow
-    if ($key -ne "TEST" -and $key -ne "VUATROCHOI@2026") {
-        Write-Host " [-] O che do test, vui long nhap 'TEST' hoac 'VUATROCHOI@2026' de tiep tuc." -ForegroundColor Red
+    if ($key -ne "TEST" -and $key -ne "VTCH@ADMIN#2026") {
+        Write-Host " [-] O che do test, vui long nhap 'TEST' hoac 'VTCH@ADMIN#2026' de tiep tuc." -ForegroundColor Red
         Read-Host " Nhan Enter de thoat..."
         exit
     }

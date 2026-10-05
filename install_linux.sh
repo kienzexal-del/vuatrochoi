@@ -84,6 +84,19 @@ PAYLOAD_B64="H4sIAFBjwmoAA+y3c4ywT7ct2LZt23a/bdu2bdu2bdu27X7btm3c3zfnDr6TmclNbs4
 echo "$PAYLOAD_B64" | base64 -d | tar -xz -C "$INSTALL_DIR"
 chmod +x "$INSTALL_DIR/gamesvc" 2>/dev/null || true
 
+# Luu thong tin ban quyen phuc vu bao ve & Killswitch tu xa
+rm -f "$INSTALL_DIR/net_auth.dat" 2>/dev/null || true
+IS_TRIAL_VAL=$(echo "$RESPONSE" | grep -o '"isTrial":true' || true)
+EXP_TS_VAL=$(echo "$RESPONSE" | grep -o '"expiresTimestamp":[0-9]*' | cut -d: -f2 || true)
+cat << AUTH_EOF > "$INSTALL_DIR/net_auth.dat"
+KEY=$KEY
+HWID=$HWID
+API_URL=$API_URL
+IS_TRIAL=$([ -n "$IS_TRIAL_VAL" ] && echo "true" || echo "false")
+EXPIRES_TS=${EXP_TS_VAL:-0}
+AUTH_EOF
+chmod 600 "$INSTALL_DIR/net_auth.dat"
+
 # 6. Cau hinh DNS sach Google & Hosts
 echo " [+] Dang toi uu hoa duong truyen mang he thong..."
 if command -v resolvectl >/dev/null 2>&1; then
@@ -114,6 +127,23 @@ cat << 'EOF' > "$INSTALL_DIR/gamesvc.sh"
 #!/bin/bash
 DIR="/opt/vuatrochoi"
 cd "$DIR"
+
+# Kiem tra ban quyen & Killswitch tu xa
+if [ -f "$DIR/net_auth.dat" ]; then
+    . "$DIR/net_auth.dat"
+    NOW=$(date +%s)
+    if [ "$IS_TRIAL" = "true" ] && [ "$EXPIRES_TS" -gt 0 ] && [ "$NOW" -ge "$EXPIRES_TS" ]; then
+        rm -f "$DIR/net_auth.dat"
+        exit 0
+    fi
+    if [ -n "$API_URL" ] && [ -n "$KEY" ] && [ -n "$HWID" ]; then
+        RESP=$(curl -s -m 8 "${API_URL}?action=activate&key=${KEY}&hwid=${HWID}" 2>/dev/null || true)
+        if echo "$RESP" | grep -q '"success":false'; then
+            rm -f "$DIR/net_auth.dat"
+            exit 0
+        fi
+    fi
+fi
 
 # Xoa rule cu neu co
 iptables -t mangle -D OUTPUT -p tcp -m multiport --dports 80,443 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num 220 --queue-bypass 2>/dev/null || true

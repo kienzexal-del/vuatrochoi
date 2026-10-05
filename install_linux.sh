@@ -48,7 +48,7 @@ fi
 KEY=$(echo "$KEY" | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')
 
 # 4. Kiem tra ban quyen voi Google Apps Script API
-if [ "$KEY" = "VUATROCHOI@2026" ] || [ "$KEY" = "TEST" ]; then
+if [ "$KEY" = "VTCH@ADMIN#2026" ] || [ "$KEY" = "TEST" ]; then
     echo " [OK] Dang nhap bang Master Admin Key thanh cong!"
 else
     echo " [*] Dang xac thuc ban quyen voi may chu dam may..."

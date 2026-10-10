@@ -98,17 +98,8 @@ unset IFS
 dscacheutil -flushcache 2>/dev/null || true
 killall -HUP mDNSResponder 2>/dev/null || true
 
-# Steam clean hosts
-if ! grep -q "# Steam Clean IPs" /etc/hosts; then
-    cat << 'EOF' >> /etc/hosts
-
-# Steam Clean IPs
-23.15.142.182 store.steampowered.com
-23.15.140.216 steamcommunity.com
-23.50.30.213 help.steampowered.com
-96.7.111.132 checkout.steampowered.com
-EOF
-fi
+# Don dep file hosts neu co muc IP tinh cu de su dung DNS dong noi dia
+sed -i '' '/# Steam Clean IPs/,+5d' /etc/hosts 2>/dev/null || true
 
 # 7. Cai dat LaunchDaemon macOS
 echo " [+] Dang dang ky dich vu tu chay ngam (LaunchDaemon)..."

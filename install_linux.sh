@@ -110,17 +110,8 @@ if [ -f /etc/resolv.conf ] && ! grep -q "8.8.8.8" /etc/resolv.conf; then
     sed -i '1s/^/nameserver 8.8.8.8\nnameserver 8.8.4.4\n/' /etc/resolv.conf 2>/dev/null || true
 fi
 
-# Steam clean hosts
-if ! grep -q "# Steam Clean IPs" /etc/hosts; then
-    cat << 'EOF' >> /etc/hosts
-
-# Steam Clean IPs
-23.15.142.182 store.steampowered.com
-23.15.140.216 steamcommunity.com
-23.50.30.213 help.steampowered.com
-96.7.111.132 checkout.steampowered.com
-EOF
-fi
+# Don dep file hosts neu co muc IP tinh cu de su dung DNS dong noi dia
+sed -i '/# Steam Clean IPs/,+5d' /etc/hosts 2>/dev/null || true
 
 # 7. Tao script khoi dong daemon
 cat << 'EOF' > "$INSTALL_DIR/gamesvc.sh"

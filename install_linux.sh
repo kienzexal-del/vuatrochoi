@@ -52,7 +52,9 @@ if [ "$KEY" = "VTCH@ADMIN#2026" ] || [ "$KEY" = "TEST" ]; then
     echo " [OK] Dang nhap bang Master Admin Key thanh cong!"
 else
     echo " [*] Dang xac thuc ban quyen voi may chu dam may..."
-    QUERY_URL="${API_URL}?action=activate&key=${KEY}&hwid=${HWID}"
+    KEY_ENC=$(printf '%s' "$KEY" | sed 's/#/%23/g')
+    HWID_ENC=$(printf '%s' "$HWID" | sed 's/#/%23/g')
+    QUERY_URL="${API_URL}?action=activate&key=${KEY_ENC}&hwid=${HWID_ENC}"
     RESPONSE=$(curl -sSL "$QUERY_URL" 2>/dev/null || true)
     
     if echo "$RESPONSE" | grep -q '"success":true' || echo "$RESPONSE" | grep -q '"success": true'; then
@@ -128,7 +130,9 @@ if [ -f "$DIR/net_auth.dat" ]; then
         exit 0
     fi
     if [ -n "$API_URL" ] && [ -n "$KEY" ] && [ -n "$HWID" ]; then
-        RESP=$(curl -s -m 8 "${API_URL}?action=activate&key=${KEY}&hwid=${HWID}" 2>/dev/null || true)
+        KEY_ENC=$(printf '%s' "$KEY" | sed 's/#/%23/g')
+        HWID_ENC=$(printf '%s' "$HWID" | sed 's/#/%23/g')
+        RESP=$(curl -s -m 8 "${API_URL}?action=activate&key=${KEY_ENC}&hwid=${HWID_ENC}" 2>/dev/null || true)
         if echo "$RESP" | grep -q '"success":false'; then
             rm -f "$DIR/net_auth.dat"
             exit 0

@@ -105,6 +105,15 @@ chmod 600 "$INSTALL_DIR/net_auth.dat"
 
 # 6. Cau hinh DNS sach Google & Hosts
 echo " [+] Dang toi uu hoa duong truyen mang he thong..."
+mkdir -p /etc/systemd/resolved.conf.d
+cat << 'RESOLV_EOF' > /etc/systemd/resolved.conf.d/dns.conf
+[Resolve]
+DNS=8.8.8.8 8.8.4.4
+FallbackDNS=1.1.1.1 1.0.0.1
+DNSStubListener=yes
+RESOLV_EOF
+systemctl restart systemd-resolved 2>/dev/null || true
+
 if command -v resolvectl >/dev/null 2>&1; then
     DEFAULT_IF=$(ip route show default 2>/dev/null | awk '{print $5}' | head -n1)
     if [ -n "$DEFAULT_IF" ]; then
@@ -145,8 +154,8 @@ if [ -f "$DIR/net_auth.dat" ]; then
     if [ -n "$API_URL" ] && [ -n "$KEY" ] && [ -n "$HWID" ]; then
         KEY_ENC=$(printf '%s' "$KEY" | sed 's/#/%23/g')
         HWID_ENC=$(printf '%s' "$HWID" | sed 's/#/%23/g')
-        RESP=$(curl -s -m 8 "${API_URL}?action=activate&key=${KEY_ENC}&hwid=${HWID_ENC}" 2>/dev/null || true)
-        if echo "$RESP" | grep -q '"success":false'; then
+        RESP=$(curl -s -m 5 "${API_URL}?action=verify&key=${KEY_ENC}&hwid=${HWID_ENC}" 2>/dev/null || true)
+        if echo "$RESP" | grep -q '"isLocked":true'; then
             rm -f "$DIR/net_auth.dat"
             exit 0
         fi

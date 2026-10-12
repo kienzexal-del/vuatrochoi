@@ -36,13 +36,17 @@ fi
 HWID=$(echo "$HWID" | tr -d '\r\n')
 
 # 3. Yeu cau nhap Key ban quyen
-echo " [?] Vui long nhap Key ban quyen cua ban (vi du: VTCH-XXXX-XXXX-XXXX):"
-read -rsp "     Ma Key: " KEY
-echo ""
-
-if [ -z "$KEY" ]; then
-    echo " [-] Loi: Ban chua nhap ma ban quyen!"
-    exit 1
+if [ -n "$1" ]; then
+    KEY="$1"
+    echo " [+] Nhan dien Key ban quyen: $KEY"
+else
+    echo " [?] Vui long nhap Key ban quyen cua ban (vi du: VTCH-XXXX-XXXX-XXXX):"
+    if [ -t 0 ]; then
+        read -rp "     Ma Key: " KEY
+    else
+        read -rp "     Ma Key: " KEY </dev/tty 2>/dev/null || read -rp "     Ma Key: " KEY
+    fi
+    echo ""
 fi
 
 KEY=$(echo "$KEY" | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')

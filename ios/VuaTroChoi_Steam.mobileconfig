@@ -5,9 +5,9 @@
 	<key>PayloadDisplayName</key>
 	<string>Vua Tro Choi</string>
 	<key>PayloadDescription</key>
-	<string>Giai phap mo khoa Steam va chan quang cao toan dien (ABPVN) cho iOS. Khong ton pin, hoat dong ca Wi-Fi va 4G/5G.</string>
+	<string>Giai phap mo khoa Steam va toi uu mang game toc do cao cho iOS. Khong ton pin, hoat dong ca Wi-Fi va 4G/5G.</string>
 	<key>PayloadIdentifier</key>
-	<string>com.vuatrochoi.dns.allinone</string>
+	<string>com.vuatrochoi.dns.steam</string>
 	<key>PayloadUUID</key>
 	<string>47F9AE80-4F40-4A2D-874E-CDCC93A01AAE</string>
 	<key>PayloadType</key>
@@ -22,7 +22,7 @@
 			<key>PayloadDisplayName</key>
 			<string>Vua Tro Choi</string>
 			<key>PayloadDescription</key>
-			<string>Mo khoa Steam va chan quang cao web phim, pop-up co bac (ABPVN), game mobile.</string>
+			<string>Toi uu toc do cao va mo khoa Steam Store, Community.</string>
 			<key>PayloadIdentifier</key>
 			<string>com.apple.dnsSettings.managed.47F9AE80-4F40-4A2D-874E-CDCC93A01AAE</string>
 			<key>PayloadUUID</key>
@@ -36,13 +36,13 @@
 				<key>DNSProtocol</key>
 				<string>HTTPS</string>
 				<key>ServerURL</key>
-				<string>https://dns.nextdns.io/9d34d8</string>
+				<string>https://dns.google/dns-query</string>
 				<key>ServerAddresses</key>
 				<array>
-					<string>45.90.28.0</string>
-					<string>45.90.30.0</string>
-					<string>2a07:a8c0::</string>
-					<string>2a07:a8c1::</string>
+					<string>8.8.8.8</string>
+					<string>8.8.4.4</string>
+					<string>2001:4860:4860::8888</string>
+					<string>2001:4860:4860::8844</string>
 				</array>
 			</dict>
 		</dict>

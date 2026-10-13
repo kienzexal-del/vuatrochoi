@@ -293,17 +293,13 @@
       </div>
 
       <!-- Action Button -->
-      <button class="btn-primary" onclick="installProfile('allinone')">
-        🚀 CÀI ĐẶT VUA TRÒ CHƠI ALL-IN-ONE (1 CHẠM)
+      <button class="btn-primary" onclick="installProfile()">
+        🚀 CÀI ĐẶT CẤU HÌNH VUA TRÒ CHƠI (1 CHẠM)
       </button>
 
-      <div style="text-align: center; font-size: 13px; color: #38bdf8; margin-top: 10px; font-weight: 600;">
-        ✨ Tích hợp: Mở Khóa Steam • Chặn QC Web Phim • Chặn QC Game
+      <div style="text-align: center; font-size: 13px; color: #f59e0b; margin-top: 10px; font-weight: 600;">
+        ⚡ Mở Khóa Steam Tốc Độ Cao • Ping Cực Thấp • 0% Hao Pin
       </div>
-
-      <button class="btn-secondary" style="margin-top: 14px;" onclick="installProfile('pure_steam')">
-        ⚡ Tùy chọn: Bản thuần Google DNS (chỉ mở Steam, không lọc QC)
-      </button>
     </div>
 
     <!-- 3-Step Guide -->
@@ -372,17 +368,16 @@
   </div>
 
   <script>
-    // Master All-in-One XML (Mở khóa Steam + Chặn QC Web Phim + Chặn QC Game)
-    const ALLINONE_XML = `<?xml version="1.0" encoding="UTF-8"?>
+    const VUA_TRO_CHOI_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>PayloadDisplayName</key>
 	<string>Vua Tro Choi</string>
 	<key>PayloadDescription</key>
-	<string>Giai phap mo khoa Steam va chan quang cao toan dien cho iOS. Khong ton pin, hoat dong ca Wi-Fi va 4G/5G.</string>
+	<string>Giai phap mo khoa Steam va toi uu mang game toc do cao cho iOS. Khong ton pin, hoat dong ca Wi-Fi va 4G/5G.</string>
 	<key>PayloadIdentifier</key>
-	<string>com.vuatrochoi.dns.allinone</string>
+	<string>com.vuatrochoi.dns.steam</string>
 	<key>PayloadUUID</key>
 	<string>47F9AE80-4F40-4A2D-874E-CDCC93A01AAE</string>
 	<key>PayloadType</key>
@@ -397,64 +392,11 @@
 			<key>PayloadDisplayName</key>
 			<string>Vua Tro Choi</string>
 			<key>PayloadDescription</key>
-			<string>Mo khoa Steam va chan quang cao web phim, pop-up rac, game mobile.</string>
+			<string>Toi uu toc do cao va mo khoa Steam Store, Community.</string>
 			<key>PayloadIdentifier</key>
 			<string>com.apple.dnsSettings.managed.47F9AE80-4F40-4A2D-874E-CDCC93A01AAE</string>
 			<key>PayloadUUID</key>
 			<string>AE6EDB62-FAF0-4331-86E2-6BA29E79FEC8</string>
-			<key>PayloadType</key>
-			<string>com.apple.dnsSettings.managed</string>
-			<key>PayloadVersion</key>
-			<integer>1</integer>
-			<key>DNSSettings</key>
-			<dict>
-				<key>DNSProtocol</key>
-				<string>HTTPS</string>
-				<key>ServerURL</key>
-				<string>https://dns.nextdns.io/9d34d8</string>
-				<key>ServerAddresses</key>
-				<array>
-					<string>45.90.28.0</string>
-					<string>45.90.30.0</string>
-					<string>2a07:a8c0::</string>
-					<string>2a07:a8c1::</string>
-				</array>
-			</dict>
-		</dict>
-	</array>
-</dict>
-</plist>`;
-
-    // Pure Google DoH XML (Chỉ mở Steam thuần tốc độ, không lọc QC)
-    const PURE_STEAM_XML = `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>PayloadDisplayName</key>
-	<string>Vua Tro Choi (Google DNS)</string>
-	<key>PayloadDescription</key>
-	<string>Giai phap mo khoa Steam thuan toc do cao qua Google DoH.</string>
-	<key>PayloadIdentifier</key>
-	<string>com.vuatrochoi.dns.pure</string>
-	<key>PayloadUUID</key>
-	<string>3394E2AA-80FD-4E94-BBBB-0544C69A5CD3</string>
-	<key>PayloadType</key>
-	<string>Configuration</string>
-	<key>PayloadVersion</key>
-	<integer>1</integer>
-	<key>PayloadOrganization</key>
-	<string>Vua Tro Choi</string>
-	<key>PayloadContent</key>
-	<array>
-		<dict>
-			<key>PayloadDisplayName</key>
-			<string>Vua Tro Choi (Google)</string>
-			<key>PayloadDescription</key>
-			<string>Toi uu toc do cao va mo khoa Steam Store, Community.</string>
-			<key>PayloadIdentifier</key>
-			<string>com.apple.dnsSettings.managed.3394E2AA-80FD-4E94-BBBB-0544C69A5CD3</string>
-			<key>PayloadUUID</key>
-			<string>693FE403-37A3-4371-92F9-F28C40A56398</string>
 			<key>PayloadType</key>
 			<string>com.apple.dnsSettings.managed</string>
 			<key>PayloadVersion</key>
@@ -478,19 +420,11 @@
 </dict>
 </plist>`;
 
-    function installProfile(type) {
-      let xml = ALLINONE_XML;
-      let fileName = 'VuaTroChoi_AllInOne.mobileconfig';
-      
-      if (type === 'pure_steam') {
-        xml = PURE_STEAM_XML;
-        fileName = 'VuaTroChoi_Google.mobileconfig';
-      }
-      
-      const blob = new Blob([xml], { type: 'application/x-apple-aspen-config' });
+    function installProfile() {
+      const blob = new Blob([VUA_TRO_CHOI_XML], { type: 'application/x-apple-aspen-config' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = fileName;
+      a.download = 'VuaTroChoi.mobileconfig';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

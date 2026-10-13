@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>PayloadDisplayName</key>
-	<string>Vua Tro Choi - Chan Quang Cao</string>
+	<string>Vua Tro Choi</string>
 	<key>PayloadDescription</key>
-	<string>Mo khoa Steam va chan quang cao web phim, pop-up rac tren toan he thong iOS.</string>
+	<string>Mo khoa Steam va chan video quang cao game mobile offline tren toan he thong iOS.</string>
 	<key>PayloadIdentifier</key>
 	<string>com.vuatrochoi.dns.adblock</string>
 	<key>PayloadUUID</key>
@@ -20,9 +20,9 @@
 	<array>
 		<dict>
 			<key>PayloadDisplayName</key>
-			<string>Vua Tro Choi (Chan QC)</string>
+			<string>Vua Tro Choi</string>
 			<key>PayloadDescription</key>
-			<string>Mo khoa Steam, chan quang cao web phim, pop-up co bac va theo doi.</string>
+			<string>Mo khoa Steam va chan video quang cao 30s game offline.</string>
 			<key>PayloadIdentifier</key>
 			<string>com.apple.dnsSettings.managed.3394E2AA-80FD-4E94-BBBB-0544C69A5CD3</string>
 			<key>PayloadUUID</key>

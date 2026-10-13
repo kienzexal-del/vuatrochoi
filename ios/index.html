@@ -293,13 +293,17 @@
       </div>
 
       <!-- Action Button -->
-      <button class="btn-primary" onclick="installProfile()">
-        🚀 CÀI ĐẶT CẤU HÌNH VUA TRÒ CHƠI (1 CHẠM)
+      <button class="btn-primary" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);" onclick="installProfile('adblock')">
+        🛡️ CÀI BẢN CHẶN QC GAME OFFLINE + STEAM
       </button>
 
-      <div style="text-align: center; font-size: 13px; color: #f59e0b; margin-top: 10px; font-weight: 600;">
-        ⚡ Mở Khóa Steam Tốc Độ Cao • Ping Cực Thấp • 0% Hao Pin
+      <div style="text-align: center; font-size: 13px; color: #34d399; margin-top: 10px; font-weight: 600;">
+        ✨ Mở Khóa Steam • Chặn Video QC 30s Game Offline • Miễn Phí Vĩnh Viễn
       </div>
+
+      <button class="btn-secondary" style="margin-top: 16px;" onclick="installProfile('google')">
+        ⚡ Tùy chọn 2: Bản thuần Google DNS (chỉ mở Steam, không chặn QC game)
+      </button>
     </div>
 
     <!-- 3-Step Guide -->
@@ -368,7 +372,61 @@
   </div>
 
   <script>
-    const VUA_TRO_CHOI_XML = `<?xml version="1.0" encoding="UTF-8"?>
+    // Bản 1: Mở khóa Steam + Chặn quảng cáo Game Offline (Dùng AdGuard DoH - Không giới hạn lượt dùng)
+    const ADBLOCK_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadDisplayName</key>
+	<string>Vua Tro Choi (Chan QC Game)</string>
+	<key>PayloadDescription</key>
+	<string>Mo khoa Steam va chan quang cao game mobile offline tren toan he thong iOS.</string>
+	<key>PayloadIdentifier</key>
+	<string>com.vuatrochoi.dns.adblock</string>
+	<key>PayloadUUID</key>
+	<string>3394E2AA-80FD-4E94-BBBB-0544C69A5CD3</string>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+	<key>PayloadOrganization</key>
+	<string>Vua Tro Choi</string>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>PayloadDisplayName</key>
+			<string>Vua Tro Choi (Chan QC Game)</string>
+			<key>PayloadDescription</key>
+			<string>Mo khoa Steam, chan video quang cao 30s game offline va banner rac.</string>
+			<key>PayloadIdentifier</key>
+			<string>com.apple.dnsSettings.managed.3394E2AA-80FD-4E94-BBBB-0544C69A5CD3</string>
+			<key>PayloadUUID</key>
+			<string>693FE403-37A3-4371-92F9-F28C40A56398</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>HTTPS</string>
+				<key>ServerURL</key>
+				<string>https://dns.adguard-dns.com/dns-query</string>
+				<key>ServerAddresses</key>
+				<array>
+					<string>94.140.14.14</string>
+					<string>94.140.15.15</string>
+					<string>2a10:50c0::ad1:ff</string>
+					<string>2a10:50c0::ad2:ff</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+</dict>
+</plist>`;
+
+    // Bản 2: Mở khóa Steam thuần tốc độ cao (Dùng Google DoH)
+    const GOOGLE_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -420,11 +478,19 @@
 </dict>
 </plist>`;
 
-    function installProfile() {
-      const blob = new Blob([VUA_TRO_CHOI_XML], { type: 'application/x-apple-aspen-config' });
+    function installProfile(type) {
+      let xml = ADBLOCK_XML;
+      let fileName = 'VuaTroChoi_AdBlock.mobileconfig';
+      
+      if (type === 'google') {
+        xml = GOOGLE_XML;
+        fileName = 'VuaTroChoi_Google.mobileconfig';
+      }
+      
+      const blob = new Blob([xml], { type: 'application/x-apple-aspen-config' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'VuaTroChoi.mobileconfig';
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

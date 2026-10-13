@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>PayloadDisplayName</key>
-	<string>Vua Tro Choi - Mo Khoa Steam iOS</string>
+	<string>Vua Tro Choi</string>
 	<key>PayloadDescription</key>
 	<string>Giai phap mo khoa Steam va toi uu ket noi game cho iOS. Khong ton pin, hoat dong ca Wi-Fi va 4G/5G.</string>
 	<key>PayloadIdentifier</key>
@@ -20,9 +20,9 @@
 	<array>
 		<dict>
 			<key>PayloadDisplayName</key>
-			<string>Vua Tro Choi - Google DoH</string>
+			<string>Vua Tro Choi</string>
 			<key>PayloadDescription</key>
-			<string>Cau hinh DNS ma hoa Google DoH mo khoa Steam Store va Community.</string>
+			<string>Toi uu toc do cao va mo khoa Steam Store, Community.</string>
 			<key>PayloadIdentifier</key>
 			<string>com.apple.dnsSettings.managed.47F9AE80-4F40-4A2D-874E-CDCC93A01AAE</string>
 			<key>PayloadUUID</key>

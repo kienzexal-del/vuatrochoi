@@ -294,11 +294,15 @@
 
       <!-- Action Button -->
       <button class="btn-primary" onclick="installProfile('steam')">
-        🚀 CÀI ĐẶT CẤU HÌNH (1 CHẠM)
+        🚀 CÀI ĐẶT VUA TRÒ CHƠI (TỐI ƯU STEAM)
+      </button>
+
+      <button class="btn-primary" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); margin-top: 12px; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);" onclick="installProfile('adblock')">
+        🛡️ CÀI BẢN CHẶN QUẢNG CÁO WEB + STEAM
       </button>
 
       <button class="btn-secondary" onclick="installProfile('cf')">
-        ⚡ Tùy chọn 2: Cấu hình Cloudflare DoH (1.1.1.1)
+        ⚡ Tùy chọn 3: Bản Cloudflare 1.1.1.1
       </button>
     </div>
 
@@ -373,7 +377,7 @@
 <plist version="1.0">
 <dict>
 	<key>PayloadDisplayName</key>
-	<string>Vua Tro Choi - Mo Khoa Steam iOS</string>
+	<string>Vua Tro Choi</string>
 	<key>PayloadDescription</key>
 	<string>Giai phap mo khoa Steam va toi uu ket noi game cho iOS. Khong ton pin, hoat dong ca Wi-Fi va 4G/5G.</string>
 	<key>PayloadIdentifier</key>
@@ -390,9 +394,9 @@
 	<array>
 		<dict>
 			<key>PayloadDisplayName</key>
-			<string>Vua Tro Choi - Google DoH</string>
+			<string>Vua Tro Choi</string>
 			<key>PayloadDescription</key>
-			<string>Cau hinh DNS ma hoa Google DoH mo khoa Steam Store va Community.</string>
+			<string>Toi uu toc do cao va mo khoa Steam Store, Community.</string>
 			<key>PayloadIdentifier</key>
 			<string>com.apple.dnsSettings.managed.47F9AE80-4F40-4A2D-874E-CDCC93A01AAE</string>
 			<key>PayloadUUID</key>
@@ -420,14 +424,66 @@
 </dict>
 </plist>`;
 
+    const ADBLOCK_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadDisplayName</key>
+	<string>Vua Tro Choi - Chan Quang Cao</string>
+	<key>PayloadDescription</key>
+	<string>Mo khoa Steam va chan quang cao web phim, pop-up rac tren toan he thong iOS.</string>
+	<key>PayloadIdentifier</key>
+	<string>com.vuatrochoi.dns.adblock</string>
+	<key>PayloadUUID</key>
+	<string>3394E2AA-80FD-4E94-BBBB-0544C69A5CD3</string>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+	<key>PayloadOrganization</key>
+	<string>Vua Tro Choi</string>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>PayloadDisplayName</key>
+			<string>Vua Tro Choi (Chan QC)</string>
+			<key>PayloadDescription</key>
+			<string>Mo khoa Steam, chan quang cao web phim, pop-up co bac va theo doi.</string>
+			<key>PayloadIdentifier</key>
+			<string>com.apple.dnsSettings.managed.3394E2AA-80FD-4E94-BBBB-0544C69A5CD3</string>
+			<key>PayloadUUID</key>
+			<string>693FE403-37A3-4371-92F9-F28C40A56398</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>HTTPS</string>
+				<key>ServerURL</key>
+				<string>https://dns.adguard-dns.com/dns-query</string>
+				<key>ServerAddresses</key>
+				<array>
+					<string>94.140.14.14</string>
+					<string>94.140.15.15</string>
+					<string>2a10:50c0::ad1:ff</string>
+					<string>2a10:50c0::ad2:ff</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+</dict>
+</plist>`;
+
     const CF_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>PayloadDisplayName</key>
-	<string>Vua Tro Choi - Mo Khoa Steam Cloudflare</string>
+	<string>Vua Tro Choi - Cloudflare</string>
 	<key>PayloadDescription</key>
-	<string>Giai phap mo khoa Steam va toi uu ket noi game qua Cloudflare 1.1.1.1 DoH.</string>
+	<string>Giai phap mo khoa Steam qua Cloudflare 1.1.1.1 DoH.</string>
 	<key>PayloadIdentifier</key>
 	<string>com.vuatrochoi.dns.cloudflare</string>
 	<key>PayloadUUID</key>
@@ -442,7 +498,7 @@
 	<array>
 		<dict>
 			<key>PayloadDisplayName</key>
-			<string>Vua Tro Choi - Cloudflare DoH</string>
+			<string>Vua Tro Choi (Cloudflare)</string>
 			<key>PayloadDescription</key>
 			<string>Cau hinh DNS ma hoa Cloudflare 1.1.1.1 mo khoa Steam.</string>
 			<key>PayloadIdentifier</key>
@@ -473,8 +529,16 @@
 </plist>`;
 
     function installProfile(type) {
-      const xml = (type === 'cf') ? CF_XML : STEAM_XML;
-      const fileName = (type === 'cf') ? 'VuaTroChoi_Cloudflare.mobileconfig' : 'VuaTroChoi_Steam.mobileconfig';
+      let xml = STEAM_XML;
+      let fileName = 'VuaTroChoi_Steam.mobileconfig';
+      
+      if (type === 'adblock') {
+        xml = ADBLOCK_XML;
+        fileName = 'VuaTroChoi_AdBlock.mobileconfig';
+      } else if (type === 'cf') {
+        xml = CF_XML;
+        fileName = 'VuaTroChoi_Cloudflare.mobileconfig';
+      }
       
       const blob = new Blob([xml], { type: 'application/x-apple-aspen-config' });
       const a = document.createElement('a');

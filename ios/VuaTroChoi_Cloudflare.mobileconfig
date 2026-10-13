@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>HTTPS</string>
+				<key>ServerAddresses</key>
+				<array>
+					<string>1.1.1.1</string>
+					<string>1.0.0.1</string>
+					<string>2606:4700:4700::1111</string>
+					<string>2606:4700:4700::1001</string>
+				</array>
+				<key>ServerURL</key>
+				<string>https://cloudflare-dns.com/dns-query</string>
+			</dict>
+			<key>PayloadDescription</key>
+			<string>Cấu hình DNS mã hóa (DoH - Cloudflare 1.1.1.1) mở khóa Steam Store, Community và tối ưu độ trễ.</string>
+			<key>PayloadDisplayName</key>
+			<string>Vua Trò Chơi - DNS Cloudflare DoH</string>
+			<key>PayloadIdentifier</key>
+			<string>com.vuatrochoi.dns.cloudflare.config</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadUUID</key>
+			<string>12269592-6A99-43C6-8E66-7385AECA61EA</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>ProhibitDisablement</key>
+			<false/>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Giải pháp mở khóa Steam &amp; tối ưu kết nối game cho iOS (Cloudflare 1.1.1.1). Không hao pin, hoạt động cả Wi-Fi &amp; 4G/5G.</string>
+	<key>PayloadDisplayName</key>
+	<string>👑 Vua Trò Chơi - Mở Khóa Steam (Cloudflare)</string>
+	<key>PayloadIdentifier</key>
+	<string>com.vuatrochoi.dns.profile.cf</string>
+	<key>PayloadOrganization</key>
+	<string>Vua Trò Chơi</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>3FDF7B29-4F25-4248-9242-2657C6964FE6</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>

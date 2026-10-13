@@ -1,5 +1,5 @@
 # 👑 VUA TRÒ CHƠI - HỆ THỐNG PHÂN PHỐI ĐA NỀN TẢNG & QUẢN LÝ KEY (0 ĐỒNG)
-### Hỗ trợ: Windows 10/11 | Steam Deck (SteamOS) | Linux PC | macOS (M1/M2/M3/M4 & Intel)
+### Hỗ trợ: Windows 10/11 | Steam Deck (SteamOS) | Linux PC | macOS (M1/M2/M3/M4 & Intel) | iOS (iPhone / iPad)
 
 Hệ thống cho phép bạn **bán giải pháp mở khóa Steam & Game tốc độ cao** hoàn toàn tự động qua **1 dòng lệnh duy nhất**, quản lý bản quyền theo từng máy tính (HWID), chống phát tán và chống dùng chùa 100% mà **không mất 1 đồng chi phí thuê máy chủ (server)**.
 
@@ -20,7 +20,13 @@ Hệ thống cho phép bạn **bán giải pháp mở khóa Steam & Game tốc �
 * **`install_mac.sh`**: Bộ cài 1 dòng lệnh macOS (nhúng sẵn binary `gamesvc` chạy native cho chip M1-M4 và Intel, không cần tắt SIP, tự cấu hình DNS, tự đăng ký LaunchDaemon `com.gamenetwork.optimizer.plist` chạy ngầm).
 * **`uninstall_mac.sh`**: Lệnh gỡ cài đặt sạch sẽ trên macOS.
 
-### 4. Tập tin đa năng & Hệ thống quản lý:
+### 4. Dành cho iOS (iPhone & iPad - iOS 14.0 trở lên):
+* **`ios/VuaTroChoi_Steam.mobileconfig`**: Hồ sơ cấu hình Apple Encrypted DNS (DoH Google). Chuẩn gốc của Apple, không tốn pin, không bao giờ hết hạn, mở khóa 100% Steam và Steam Community.
+* **`ios/VuaTroChoi_Cloudflare.mobileconfig`**: Hồ sơ cấu hình Apple Encrypted DNS dự phòng (DoH Cloudflare 1.1.1.1).
+* **`ios/index.html`**: Cổng Web cài đặt 1-chạm tối ưu riêng cho Safari trên iPhone (có tích hợp kiểm tra ping Steam và nút tải cấu hình).
+* **`ios/app/`**: Mã nguồn Native App SwiftUI (Vua Trò Chơi iOS) kèm file cấu hình XcodeGen và GitHub Actions tự động build ra file `.ipa`.
+
+### 5. Tập tin đa năng & Hệ thống quản lý:
 * **`install.sh`**: Script tự động nhận diện hệ điều hành (nếu là Mac thì chạy gói Mac, nếu là Linux/Steam Deck thì chạy gói Linux).
 * **`GoogleAppsScript_Code.js`**: Mã nguồn máy chủ xác thực Key miễn phí trên Google Sheets (chia 2 tab `Keys_Lifetime` và `Keys_Trial`, dùng chung cho cả Windows, Mac, Linux).
 * **`rebuild_core_zip.ps1`**: Đóng gói lại core Windows với tên bí mật (`GameNetworkService.exe`, `vtch_runner.vbs`).
@@ -109,6 +115,32 @@ HƯỚNG DẪN KÍCH HOẠT STEAM & MẠNG TRÊN MACOS:
 3. Nhập mật khẩu máy Mac (khi máy yêu cầu) và nhập Key bản quyền: [MÃ_KEY]
 4. Xong! Hệ thống tự động kích hoạt ngầm vĩnh viễn.
 ```
+
+---
+
+### 📱 KHÁCH DÙNG IPHONE / IPAD (iOS 14+):
+Gửi hướng dẫn cho khách:
+```text
+HƯỚNG DẪN MỞ KHÓA STEAM CHO IPHONE / IPAD (MẤT 10 GIÂY):
+1. Mở trình duyệt Safari trên iPhone, truy cập:
+   tinyurl.com/vtch-ios
+
+(Hoặc link trực tiếp:
+   https://raw.githubusercontent.com/kienzexal-del/vuatrochoi/main/ios/VuaTroChoi_Steam.mobileconfig)
+
+2. Safari sẽ hỏi: "Trang web này đang cố gắng tải về hồ sơ cấu hình. Bạn có muốn cho phép không?"
+   👉 Bấm: "Cho phép" (Allow) ➔ Bấm "Đóng".
+
+3. Mở ứng dụng Cài Đặt (Settings) của iPhone:
+   👉 Ngay dòng trên cùng (dưới tên iCloud), bấm vào: "Đã tải về hồ sơ" (Profile Downloaded).
+   👉 Bấm nút "Cài đặt" (Install) ở góc trên bên phải.
+   👉 Nhập mật mã mở khóa máy của bạn (nếu có hỏi) ➔ Bấm "Cài đặt" xác nhận.
+
+4. Xong! Mở app Steam trên iPhone hoặc lướt web Steam mượt mà 100% trên cả 4G/5G và Wi-Fi.
+   (Không tốn pin, không bao giờ bị khóa hay thu hồi chứng chỉ).
+```
+
+---
 
 ## 🛡️ HƯỚNG DẪN NGẮT KẾT NỐI TỪ XA & QUẢN LÝ THỦ CÔNG TỪNG KHÁCH (REMOTE KILLSWITCH)
 

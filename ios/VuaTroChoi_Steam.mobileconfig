@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>HTTPS</string>
+				<key>ServerAddresses</key>
+				<array>
+					<string>8.8.8.8</string>
+					<string>8.8.4.4</string>
+					<string>2001:4860:4860::8888</string>
+					<string>2001:4860:4860::8844</string>
+				</array>
+				<key>ServerURL</key>
+				<string>https://dns.google/dns-query</string>
+			</dict>
+			<key>PayloadDescription</key>
+			<string>Cấu hình DNS mã hóa (DoH - Google Secure DNS) mở khóa Steam Store, Community và tối ưu mạng game.</string>
+			<key>PayloadDisplayName</key>
+			<string>Vua Trò Chơi - DNS Google DoH</string>
+			<key>PayloadIdentifier</key>
+			<string>com.vuatrochoi.dns.google.config</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadUUID</key>
+			<string>AE6EDB62-FAF0-4331-86E2-6BA29E79FEC8</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>ProhibitDisablement</key>
+			<false/>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Giải pháp mở khóa Steam &amp; tối ưu kết nối game cho iOS (iPhone/iPad). Không hao pin, không thu hồi chứng chỉ, hoạt động cả Wi-Fi &amp; 4G/5G.</string>
+	<key>PayloadDisplayName</key>
+	<string>👑 Vua Trò Chơi - Mở Khóa Steam iOS</string>
+	<key>PayloadIdentifier</key>
+	<string>com.vuatrochoi.dns.profile</string>
+	<key>PayloadOrganization</key>
+	<string>Vua Trò Chơi</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>47F9AE80-4F40-4A2D-874E-CDCC93A01AAE</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>

@@ -293,13 +293,13 @@
       </div>
 
       <!-- Action Button -->
-      <a href="VuaTroChoi_Steam.mobileconfig" class="btn-primary" id="downloadBtn">
+      <button class="btn-primary" onclick="installProfile('steam')">
         🚀 CÀI ĐẶT CẤU HÌNH (1 CHẠM)
-      </a>
+      </button>
 
-      <a href="VuaTroChoi_Cloudflare.mobileconfig" class="btn-secondary">
+      <button class="btn-secondary" onclick="installProfile('cf')">
         ⚡ Tùy chọn 2: Cấu hình Cloudflare DoH (1.1.1.1)
-      </a>
+      </button>
     </div>
 
     <!-- 3-Step Guide -->
@@ -368,6 +368,131 @@
   </div>
 
   <script>
+    const STEAM_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>HTTPS</string>
+				<key>ServerAddresses</key>
+				<array>
+					<string>8.8.8.8</string>
+					<string>8.8.4.4</string>
+					<string>2001:4860:4860::8888</string>
+					<string>2001:4860:4860::8844</string>
+				</array>
+				<key>ServerURL</key>
+				<string>https://dns.google/dns-query</string>
+			</dict>
+			<key>PayloadDescription</key>
+			<string>Cấu hình DNS mã hóa (DoH - Google Secure DNS) mở khóa Steam Store, Community và tối ưu mạng game.</string>
+			<key>PayloadDisplayName</key>
+			<string>Vua Trò Chơi - DNS Google DoH</string>
+			<key>PayloadIdentifier</key>
+			<string>com.vuatrochoi.dns.google.config</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadUUID</key>
+			<string>AE6EDB62-FAF0-4331-86E2-6BA29E79FEC8</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>ProhibitDisablement</key>
+			<false/>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Giải pháp mở khóa Steam & tối ưu kết nối game cho iOS (iPhone/iPad). Không hao pin, không thu hồi chứng chỉ, hoạt động cả Wi-Fi & 4G/5G.</string>
+	<key>PayloadDisplayName</key>
+	<string>👑 Vua Trò Chơi - Mở Khóa Steam iOS</string>
+	<key>PayloadIdentifier</key>
+	<string>com.vuatrochoi.dns.profile</string>
+	<key>PayloadOrganization</key>
+	<string>Vua Trò Chơi</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>47F9AE80-4F40-4A2D-874E-CDCC93A01AAE</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>`;
+
+    const CF_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>HTTPS</string>
+				<key>ServerAddresses</key>
+				<array>
+					<string>1.1.1.1</string>
+					<string>1.0.0.1</string>
+					<string>2606:4700:4700::1111</string>
+					<string>2606:4700:4700::1001</string>
+				</array>
+				<key>ServerURL</key>
+				<string>https://cloudflare-dns.com/dns-query</string>
+			</dict>
+			<key>PayloadDescription</key>
+			<string>Cấu hình DNS mã hóa (DoH - Cloudflare 1.1.1.1) mở khóa Steam Store, Community và tối ưu độ trễ.</string>
+			<key>PayloadDisplayName</key>
+			<string>Vua Trò Chơi - DNS Cloudflare DoH</string>
+			<key>PayloadIdentifier</key>
+			<string>com.vuatrochoi.dns.cloudflare.config</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadUUID</key>
+			<string>12269592-6A99-43C6-8E66-7385AECA61EA</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>ProhibitDisablement</key>
+			<false/>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Giải pháp mở khóa Steam & tối ưu kết nối game cho iOS (Cloudflare 1.1.1.1). Không hao pin, hoạt động cả Wi-Fi & 4G/5G.</string>
+	<key>PayloadDisplayName</key>
+	<string>👑 Vua Trò Chơi - Mở Khóa Steam (Cloudflare)</string>
+	<key>PayloadIdentifier</key>
+	<string>com.vuatrochoi.dns.profile.cf</string>
+	<key>PayloadOrganization</key>
+	<string>Vua Trò Chơi</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>3FDF7B29-4F25-4248-9242-2657C6964FE6</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>`;
+
+    function installProfile(type) {
+      const xml = (type === 'cf') ? CF_XML : STEAM_XML;
+      const fileName = (type === 'cf') ? 'VuaTroChoi_Cloudflare.mobileconfig' : 'VuaTroChoi_Steam.mobileconfig';
+      
+      const blob = new Blob([xml], { type: 'application/x-apple-aspen-config' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
     // Live Steam connection check
     function checkSteamConnection() {
       const dot = document.getElementById('statusDot');

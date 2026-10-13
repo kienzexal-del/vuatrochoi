@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>👑 Vua Trò Chơi - Mở Khóa Steam iOS</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Vua Trò Chơi">
+  <meta name="theme-color" content="#0f172a">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: rgba(26, 32, 53, 0.85);
+      --card-border: rgba(255, 215, 0, 0.2);
+      --gold: #f59e0b;
+      --gold-glow: rgba(245, 158, 11, 0.35);
+      --accent: #38bdf8;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --success: #10b981;
+      --error: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #1e293b 0%, #0b0f19 70%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 40px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .header {
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    .crown-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: var(--gold);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      box-shadow: 0 0 15px var(--gold-glow);
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    p.subtitle {
+      font-size: 14px;
+      color: var(--text-sub);
+      line-height: 1.5;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Status card */
+    .status-badge {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 12px 16px;
+      border-radius: 14px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #94a3b8;
+    }
+
+    .dot.online {
+      background: var(--success);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+    }
+
+    .dot.offline {
+      background: var(--error);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+    }
+
+    .btn-test {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* Action buttons */
+    .btn-primary {
+      display: block;
+      width: 100%;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #0b0f19;
+      font-size: 16px;
+      font-weight: 800;
+      text-align: center;
+      text-decoration: none;
+      padding: 16px 20px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      cursor: pointer;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-secondary {
+      display: block;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      text-decoration: none;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 10px;
+      transition: background 0.15s ease;
+    }
+
+    .btn-secondary:active {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Steps */
+    .steps-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gold);
+    }
+
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      background: rgba(245, 158, 11, 0.18);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-text h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+
+    .step-text p {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.4;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .feature-item {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .feature-item strong {
+      display: block;
+      color: #fff;
+      font-size: 13px;
+      margin-bottom: 3px;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.6;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="crown-badge">
+        <span>👑</span> VUA TRÒ CHƠI ECOSYSTEM
+      </div>
+      <h1>Mở Khóa Steam iOS</h1>
+      <p class="subtitle">Giải pháp Encrypted DNS chuẩn Apple dành cho iPhone & iPad. Vượt chặn mượt mà trên 4G/5G và mọi mạng Wi-Fi.</p>
+    </div>
+
+    <!-- Main Card -->
+    <div class="card">
+      <!-- Status Indicator -->
+      <div class="status-badge">
+        <div class="status-left">
+          <div class="dot" id="statusDot"></div>
+          <span id="statusText">Đang kiểm tra kết nối...</span>
+        </div>
+        <button class="btn-test" onclick="checkSteamConnection()">Kiểm tra</button>
+      </div>
+
+      <!-- Action Button -->
+      <button class="btn-primary" onclick="installProfile('steam')">
+        🚀 CÀI ĐẶT CẤU HÌNH (1 CHẠM)
+      </button>
+
+      <button class="btn-secondary" onclick="installProfile('cf')">
+        ⚡ Tùy chọn 2: Cấu hình Cloudflare DoH (1.1.1.1)
+      </button>
+    </div>
+
+    <!-- 3-Step Guide -->
+    <div class="card">
+      <div class="steps-title">
+        <span>📱</span> 3 Bước Kích Hoạt (Mất 10 Giây)
+      </div>
+
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <h4>Bấm nút "Cài Đặt Cấu Hình" ở trên</h4>
+            <p>Safari sẽ hiện thông báo xác nhận: Chọn <strong>"Cho phép"</strong> (Allow) để tải hồ sơ về máy.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <h4>Mở Cài Đặt (Settings) của iPhone</h4>
+            <p>Ở ngay phía trên cùng (dưới avatar iCloud), bấm vào dòng: <strong>"Đã tải về hồ sơ"</strong> (Profile Downloaded).</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <h4>Bấm Cài Đặt (Install)</h4>
+            <p>Bấm nút <strong>Cài đặt</strong> ở góc trên bên phải, nhập mật mã máy nếu có hỏi ➜ Xong! Steam mở khóa vĩnh viễn.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <div class="card">
+      <div class="steps-title">
+        <span>🛡️</span> Ưu Điểm Độc Quyền
+      </div>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <strong>🔋 0% Hao Pin</strong>
+          Chạy trực tiếp trên lõi iOS của Apple, không hao pin như app VPN.
+        </div>
+        <div class="feature-item">
+          <strong>♾️ Vĩnh Viễn</strong>
+          Không bị thu hồi chứng chỉ (Certificate revoke) sau 7 ngày.
+        </div>
+        <div class="feature-item">
+          <strong>📶 Tự Động 4G & Wi-Fi</strong>
+          Chuyển đổi mạng mượt mà không cần bật tắt thủ công.
+        </div>
+        <div class="feature-item">
+          <strong>🔄 Bật / Tắt Tiện Lợi</strong>
+          Vào Cài đặt > VPN & Quản lý thiết bị > DNS để chọn bất cứ lúc nào.
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      Hệ thống phân phối tự động Vua Trò Chơi<br>
+      Tương thích iOS 14.0 trở lên (iPhone 6s đến iPhone 16 Pro Max, iPad)
+    </div>
+  </div>
+
+  <script>
+    const STEAM_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>HTTPS</string>
+				<key>ServerAddresses</key>
+				<array>
+					<string>8.8.8.8</string>
+					<string>8.8.4.4</string>
+					<string>2001:4860:4860::8888</string>
+					<string>2001:4860:4860::8844</string>
+				</array>
+				<key>ServerURL</key>
+				<string>https://dns.google/dns-query</string>
+			</dict>
+			<key>PayloadDescription</key>
+			<string>Cấu hình DNS mã hóa (DoH - Google Secure DNS) mở khóa Steam Store, Community và tối ưu mạng game.</string>
+			<key>PayloadDisplayName</key>
+			<string>Vua Trò Chơi - DNS Google DoH</string>
+			<key>PayloadIdentifier</key>
+			<string>com.vuatrochoi.dns.google.config</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadUUID</key>
+			<string>AE6EDB62-FAF0-4331-86E2-6BA29E79FEC8</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>ProhibitDisablement</key>
+			<false/>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Giải pháp mở khóa Steam & tối ưu kết nối game cho iOS (iPhone/iPad). Không hao pin, không thu hồi chứng chỉ, hoạt động cả Wi-Fi & 4G/5G.</string>
+	<key>PayloadDisplayName</key>
+	<string>👑 Vua Trò Chơi - Mở Khóa Steam iOS</string>
+	<key>PayloadIdentifier</key>
+	<string>com.vuatrochoi.dns.profile</string>
+	<key>PayloadOrganization</key>
+	<string>Vua Trò Chơi</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>47F9AE80-4F40-4A2D-874E-CDCC93A01AAE</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>`;
+
+    const CF_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>HTTPS</string>
+				<key>ServerAddresses</key>
+				<array>
+					<string>1.1.1.1</string>
+					<string>1.0.0.1</string>
+					<string>2606:4700:4700::1111</string>
+					<string>2606:4700:4700::1001</string>
+				</array>
+				<key>ServerURL</key>
+				<string>https://cloudflare-dns.com/dns-query</string>
+			</dict>
+			<key>PayloadDescription</key>
+			<string>Cấu hình DNS mã hóa (DoH - Cloudflare 1.1.1.1) mở khóa Steam Store, Community và tối ưu độ trễ.</string>
+			<key>PayloadDisplayName</key>
+			<string>Vua Trò Chơi - DNS Cloudflare DoH</string>
+			<key>PayloadIdentifier</key>
+			<string>com.vuatrochoi.dns.cloudflare.config</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadUUID</key>
+			<string>12269592-6A99-43C6-8E66-7385AECA61EA</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>ProhibitDisablement</key>
+			<false/>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Giải pháp mở khóa Steam & tối ưu kết nối game cho iOS (Cloudflare 1.1.1.1). Không hao pin, hoạt động cả Wi-Fi & 4G/5G.</string>
+	<key>PayloadDisplayName</key>
+	<string>👑 Vua Trò Chơi - Mở Khóa Steam (Cloudflare)</string>
+	<key>PayloadIdentifier</key>
+	<string>com.vuatrochoi.dns.profile.cf</string>
+	<key>PayloadOrganization</key>
+	<string>Vua Trò Chơi</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>3FDF7B29-4F25-4248-9242-2657C6964FE6</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>`;
+
+    function installProfile(type) {
+      const xml = (type === 'cf') ? CF_XML : STEAM_XML;
+      const fileName = (type === 'cf') ? 'VuaTroChoi_Cloudflare.mobileconfig' : 'VuaTroChoi_Steam.mobileconfig';
+      
+      const blob = new Blob([xml], { type: 'application/x-apple-aspen-config' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    // Live Steam connection check
+    function checkSteamConnection() {
+      const dot = document.getElementById('statusDot');
+      const text = document.getElementById('statusText');
+      
+      dot.className = 'dot';
+      text.innerText = 'Đang kiểm tra kết nối...';
+
+      // Test steam community icon
+      const testImg = new Image();
+      const timeout = setTimeout(() => {
+        dot.className = 'dot offline';
+        text.innerText = 'Steam: Chưa mở khóa hoặc mạng chặn';
+      }, 3500);
+
+      testImg.onload = function() {
+        clearTimeout(timeout);
+        dot.className = 'dot online';
+        text.innerText = 'Steam: Kết nối mượt mà ✅';
+      };
+
+      testImg.onerror = function() {
+        clearTimeout(timeout);
+        // Fallback test via steam favicon
+        const fallbackImg = new Image();
+        const fallbackTimeout = setTimeout(() => {
+          dot.className = 'dot offline';
+          text.innerText = 'Steam: Đang bị chặn';
+        }, 3000);
+
+        fallbackImg.onload = function() {
+          clearTimeout(fallbackTimeout);
+          dot.className = 'dot online';
+          text.innerText = 'Steam: Kết nối thành công ✅';
+        };
+
+        fallbackImg.onerror = function() {
+          clearTimeout(fallbackTimeout);
+          dot.className = 'dot offline';
+          text.innerText = 'Steam: Đang bị chặn bởi nhà mạng';
+        };
+
+        fallbackImg.src = 'https://store.steampowered.com/favicon.ico?t=' + Date.now();
+      };
+
+      testImg.src = 'https://community.cloudflare.steamstatic.com/public/shared/images/header/globalheader_logo.png?t=' + Date.now();
+    }
+
+    // Auto check on page load
+    window.addEventListener('load', () => {
+      setTimeout(checkSteamConnection, 600);
+    });
+  </script>
+</body>
+</html>

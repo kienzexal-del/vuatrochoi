@@ -26,14 +26,13 @@ foreach ($adapter in $dnsAdapters) {
     }
 }
 
-# 3. Kiem tra file hosts
-Write-Host "`n [*] 3. Kiem tra file hosts he thong..." -ForegroundColor Cyan
-$hostsPath = "$env:SystemRoot\System32\drivers\etc\hosts"
-$h = Get-Content $hostsPath -Raw -ErrorAction SilentlyContinue
-if ($h -match "Steam Clean IPs") { 
-    Write-Host "  [OK] File hosts: DA CO IP SACH STEAM" -ForegroundColor Green 
+# 3. Kiem tra phan giai DNS Steam
+Write-Host "`n [*] 3. Kiem tra phan giai ten mien Steam..." -ForegroundColor Cyan
+$res = Resolve-DnsName store.steampowered.com -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($res -and $res.IPAddress -notmatch "127\.0\.0\.1|::1") { 
+    Write-Host "  [OK] Phan giai DNS: TOT (Tro den $($res.IPAddress) - CDN Noi Dia)" -ForegroundColor Green 
 } else { 
-    Write-Host "  [!] File hosts: CHUA CO IP SACH STEAM (Nen cai lai ban moi de fix xoay vong)" -ForegroundColor Yellow 
+    Write-Host "  [!] Phan giai DNS: NHA MANG DANG CHAN (Can doi DNS sang 8.8.8.8)" -ForegroundColor Yellow 
 }
 
 # 4. Kiem tra ket noi truc tiep cac may chu Steam

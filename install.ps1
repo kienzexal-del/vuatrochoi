@@ -1,4 +1,4 @@
-﻿# ===========================================================================
+# ===========================================================================
 #  VUA TRO CHOI - BO CAI DAT TU DONG STEAM TOC DO CAO (POWERSHELL 1-LINER)
 #  Phan phoi ban quyen tu dong | Xac thuc qua Google Sheets 0d
 # ===========================================================================
@@ -213,19 +213,20 @@ Get-NetAdapter | Where-Object Status -eq 'Up' | ForEach-Object {
 }
 Clear-DnsClientCache
 
+# Don dep cac IP Hong Kong cu trong file hosts neu co de uu tien CDN noi dia toc do cao
 $hostsPath = "$env:SystemRoot\System32\drivers\etc\hosts"
-$marker = "# Steam Clean IPs"
-$currentHosts = Get-Content -Path $hostsPath -Raw -ErrorAction SilentlyContinue
-if ($currentHosts -notmatch [regex]::Escape($marker)) {
-    $steamEntries = @"
-
-$marker
-23.15.142.182 store.steampowered.com
-23.15.140.216 steamcommunity.com
-23.50.30.213 help.steampowered.com
-96.7.111.132 checkout.steampowered.com
-"@
-    Add-Content -Path $hostsPath -Value $steamEntries -Encoding UTF8 -ErrorAction SilentlyContinue
+if (Test-Path $hostsPath) {
+    $lines = Get-Content -Path $hostsPath -ErrorAction SilentlyContinue
+    if ($lines -match "Steam Clean IPs|23\.15\.142|23\.15\.140|23\.50\.30|96\.7\.111") {
+        $cleanLines = $lines | Where-Object { 
+            $_ -notmatch "Steam Clean IPs" -and 
+            $_ -notmatch "store\.steampowered\.com" -and 
+            $_ -notmatch "steamcommunity\.com" -and 
+            $_ -notmatch "help\.steampowered\.com" -and 
+            $_ -notmatch "checkout\.steampowered\.com" 
+        }
+        [System.IO.File]::WriteAllLines($hostsPath, $cleanLines)
+    }
 }
 ipconfig /flushdns | Out-Null
 

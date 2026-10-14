@@ -723,7 +723,7 @@
         </div>
 
         <div style="font-size: 13px; font-weight: 600; color: #38bdf8; letter-spacing: 0.02em; text-transform: uppercase;">
-          ⚡ Phương Án 1: DNS Riêng Tư (0 Cần Cài App)
+          ⚡ Cấu hình DNS Riêng Tư (Không Cần Cài App)
         </div>
 
         <div class="cta-group">
@@ -811,36 +811,27 @@
         </div>
       </section>
 
-      <!-- Phương án 2: Bản Xé ClientHello (DPI Bypass APK) -->
-      <section class="glass-panel" style="border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.03);">
-        <div style="font-size: 13px; font-weight: 600; color: #38bdf8; letter-spacing: 0.02em; text-transform: uppercase;">
-          🛡️ Phương Án 2: Bản Xé ClientHello (DPI Bypass)
-        </div>
-
-        <div class="step-info">
-          <h4>Vượt chặn sâu SNI (Steam Community, Chợ, Discord)</h4>
-          <p>Dành cho các mạng bị chặn gắt tầng gói tin SNI. Công nghệ chia nhỏ gói tin ClientHello (TLS SNI Splitting) cục bộ ngay trên chip điện thoại mà <strong>KHÔNG CẦN ROOT MÁY</strong>.</p>
-        </div>
-
-        <a id="apkDownloadLink" href="android/VuaTroChoi_ByeDPI.apk" download style="text-decoration: none;">
-          <button class="btn-primary" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
-            <span class="btn-main-text">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              Tải Vua Trò Chơi DPI (.APK)
-            </span>
-            <span class="btn-sub-text">Bản cài đặt trực tiếp Android • Local Loopback 0ms ping</span>
-          </button>
-        </a>
-
-        <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px 14px;">
-          <strong style="color: #ffffff;">💡 Hướng dẫn nhanh:</strong> Cài file APK ➔ Mở ứng dụng ➔ Bấm nút <strong>Connect</strong> (Kết nối). Toàn bộ gói tin kiểm duyệt SNI sẽ tự động được xé nhỏ cục bộ trên máy mà không cần root.
+      <!-- Bento Specifications Android -->
+      <section class="glass-panel">
+        <div class="section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          Ưu Điểm DNS Riêng Tư
         </div>
 
         <div class="bento-grid">
+          <div class="bento-card">
+            <div class="bento-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="16" height="10" rx="2" ry="2"/>
+                <line x1="22" y1="11" x2="22" y2="13"/>
+              </svg>
+              0% Hao Pin
+            </div>
+            <p class="bento-desc">Chạy trực tiếp ở tầng hệ điều hành Android, không cần cài app và không có tiến trình VPN ngầm.</p>
+          </div>
+
           <div class="bento-card">
             <div class="bento-header">
               <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -848,17 +839,31 @@
               </svg>
               Không Cần Root
             </div>
-            <p class="bento-desc">Chạy qua giao thức Local VPN Service nội bộ, an toàn tuyệt đối cho thiết bị.</p>
+            <p class="bento-desc">Tính năng Private DNS chính thức của Android (từ Android 9+), an toàn tuyệt đối 100%.</p>
           </div>
 
           <div class="bento-card">
             <div class="bento-header">
               <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+                <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                <line x1="12" y1="20" x2="12.01" y2="20"/>
               </svg>
-              0ms Ping
+              4G/5G & Wi-Fi
             </div>
-            <p class="bento-desc">Xử lý bẻ gói tin ngay tại máy (127.0.0.1), hoàn toàn không qua máy chủ trung gian.</p>
+            <p class="bento-desc">Tự động kích hoạt thông suốt khi thay đổi giữa mạng Wi-Fi và mạng di động mà không cần bật lại.</p>
+          </div>
+
+          <div class="bento-card">
+            <div class="bento-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              Bảo Mật DoT
+            </div>
+            <p class="bento-desc">Mã hóa toàn bộ tên miền qua giao thức TLS, ngăn chặn nhà mạng can thiệp và bóp băng thông.</p>
           </div>
         </div>
       </section>
@@ -902,12 +907,6 @@
         switchTab('android');
       } else {
         switchTab('ios');
-      }
-
-      // Ensure APK download link works from both root and /ios/ subdirectory
-      const apkLink = document.getElementById('apkDownloadLink');
-      if (apkLink && window.location.pathname.includes('/ios/')) {
-        apkLink.href = '../android/VuaTroChoi_ByeDPI.apk';
       }
     });
 

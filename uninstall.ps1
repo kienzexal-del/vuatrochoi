@@ -38,6 +38,7 @@ schtasks.exe /delete /tn $legacyTask /f 2>$null | Out-Null
 Write-Host " [+] Dang khoi phuc cai dat mang ve mac dinh (DHCP)..." -ForegroundColor Cyan
 Get-NetAdapter | Where-Object Status -eq 'Up' | ForEach-Object {
     Set-DnsClientServerAddress -InterfaceAlias $_.Name -ResetServerAddresses -ErrorAction SilentlyContinue
+    Enable-NetAdapterBinding -Name $_.Name -ComponentID ms_tcpip6 -ErrorAction SilentlyContinue
 }
 Clear-DnsClientCache
 

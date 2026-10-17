@@ -16,7 +16,7 @@ if ($p) {
 
 # 2. Kiem tra DNS
 Write-Host "`n [*] 2. Kiem tra DNS Card mang..." -ForegroundColor Cyan
-$dnsAdapters = Get-DnsClientServerAddress -AddressFamily IPv4 | Where-Object { $_.ServerAddresses.Count -gt 0 }
+$dnsAdapters = Get-DnsClientServerAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue | Where-Object { $_.ServerAddresses.Count -gt 0 }
 foreach ($adapter in $dnsAdapters) {
     $dnsList = $adapter.ServerAddresses -join ', '
     if ($dnsList -match "8.8.8.8|1.1.1.1") {
@@ -47,7 +47,17 @@ $tests = @(
 $hasError = $false
 foreach ($t in $tests) {
     try {
-        $code = curl.exe -s -o NUL -w "%{http_code}" $t.Url --max-time 4
+        $code = ""
+        if (Get-Command curl.exe -ErrorAction SilentlyContinue) {
+            $code = curl.exe -s -o NUL -w "%{http_code}" $t.Url --max-time 4
+        } else {
+            $req = [System.Net.HttpWebRequest]::Create($t.Url)
+            $req.Timeout = 4000
+            $req.UserAgent = "Mozilla/5.0"
+            $resp = $req.GetResponse()
+            $code = [string][int]$resp.StatusCode
+            $resp.Close()
+        }
         if ($code -match "200|302|404") {
             Write-Host "  [OK] $($t.Name): KET NOI TOT (HTTP $code)" -ForegroundColor Green
         } else {

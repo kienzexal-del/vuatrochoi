@@ -3,6 +3,10 @@
 #  Phan phoi ban quyen tu dong | Xac thuc qua Google Sheets 0d
 # ===========================================================================
 
+param(
+    [string]$Key = ""
+)
+
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $Host.UI.RawUI.WindowTitle = "VUA TRO CHOI - Kich Hoat He Thong Steam"
 
@@ -14,7 +18,9 @@ if (-not $isAdmin) {
     Write-Host " [!] Dang yeu cau cap quyen Administrator (UAC)..." -ForegroundColor Yellow
     
     if ($PSCommandPath) {
-        Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+        $argList = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+        if ($Key) { $argList += " -Key `"$Key`"" }
+        Start-Process powershell.exe -ArgumentList $argList -Verb RunAs
     } else {
         $onlineCmd = "irm https://raw.githubusercontent.com/kienzexal-del/vuatrochoi/main/install.ps1 | iex"
         Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$onlineCmd`"" -Verb RunAs
@@ -47,35 +53,39 @@ Write-Host " [i] Ma thiet bi cua ban (HWID): $uuid" -ForegroundColor DarkGray
 Write-Host ""
 
 # 4. Yeu cau nhap Key (An mat khau tuyet doi 100%, khong bao gio lo chu du chi 0.01 giay)
-Write-Host " [?] Vui long nhap Ma Ban Quyen (License Key) hoac Mat Khau Admin: " -NoNewline
-$key = ""
-try {
-    if ([System.Console]::IsInputRedirected) {
-        $key = [System.Console]::ReadLine()
-        Write-Host ""
-    } else {
-        while ($true) {
-            $k = [System.Console]::ReadKey($true) # $true: Chan tuyet doi khong in ky tu goc ra console
-            if ($k.Key -eq [System.ConsoleKey]::Enter) {
-                Write-Host ""
-                break
-            }
-            if ($k.Key -eq [System.ConsoleKey]::Backspace) {
-                if ($key.Length -gt 0) {
-                    $key = $key.Substring(0, $key.Length - 1)
-                    Write-Host "`b `b" -NoNewline
+$key = $Key
+if ([string]::IsNullOrWhiteSpace($key)) {
+    Write-Host " [?] Vui long nhap Ma Ban Quyen (License Key) hoac Mat Khau Admin: " -NoNewline
+    try {
+        if ([System.Console]::IsInputRedirected) {
+            $key = [System.Console]::ReadLine()
+            Write-Host ""
+        } else {
+            while ($true) {
+                $k = [System.Console]::ReadKey($true) # $true: Chan tuyet doi khong in ky tu goc ra console
+                if ($k.Key -eq [System.ConsoleKey]::Enter) {
+                    Write-Host ""
+                    break
                 }
-                continue
-            }
-            if ([int]$k.KeyChar -ge 32) {
-                $key += $k.KeyChar
-                Write-Host "*" -NoNewline
+                if ($k.Key -eq [System.ConsoleKey]::Backspace) {
+                    if ($key.Length -gt 0) {
+                        $key = $key.Substring(0, $key.Length - 1)
+                        Write-Host "`b `b" -NoNewline
+                    }
+                    continue
+                }
+                if ([int]$k.KeyChar -ge 32) {
+                    $key += $k.KeyChar
+                    Write-Host "*" -NoNewline
+                }
             }
         }
+    } catch {
+        $sec = Read-Host -Prompt " " -AsSecureString
+        $key = [System.Net.NetworkCredential]::new("", $sec).Password
     }
-} catch {
-    $sec = Read-Host -Prompt " " -AsSecureString
-    $key = [System.Net.NetworkCredential]::new("", $sec).Password
+} else {
+    Write-Host " [OK] Su dung Ma Ban Quyen tu dong: [DA AN]" -ForegroundColor Green
 }
 $key = $key.Trim()
 

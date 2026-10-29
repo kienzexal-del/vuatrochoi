@@ -11,7 +11,11 @@ if [ "$(id -u)" -ne 0 ]; then
     echo ""
     echo " [!] Chuong trinh can quyen quan tri (root/sudo) de cau hinh he thong mang."
     echo " [!] Vui long nhap mat khau may cua ban (neu duoc hoi):"
-    exec sudo bash "$0" "$@"
+    if [ -f "$0" ]; then
+        exec sudo bash "$0" "$@"
+    else
+        exec curl -sSL "https://raw.githubusercontent.com/kienzexal-del/vuatrochoi/main/install_linux.sh" | sudo bash -s -- "$@"
+    fi
 fi
 
 clear
@@ -36,9 +40,16 @@ fi
 HWID=$(echo "$HWID" | tr -d '\r\n')
 
 # 3. Yeu cau nhap Key ban quyen
-echo " [?] Vui long nhap Key ban quyen cua ban (vi du: VTCH-XXXX-XXXX-XXXX):"
-read -rsp "     Ma Key: " KEY
-echo ""
+KEY="$1"
+if [ -z "$KEY" ]; then
+    echo " [?] Vui long nhap Key ban quyen cua ban (vi du: VTCH-XXXX-XXXX-XXXX):"
+    if [ -e /dev/tty ]; then
+        read -rsp "     Ma Key: " KEY < /dev/tty
+    else
+        read -rsp "     Ma Key: " KEY
+    fi
+    echo ""
+fi
 
 if [ -z "$KEY" ]; then
     echo " [-] Loi: Ban chua nhap ma ban quyen!"

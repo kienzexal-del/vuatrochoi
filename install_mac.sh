@@ -11,7 +11,11 @@ if [ "$(id -u)" -ne 0 ]; then
     echo ""
     echo " [!] Chuong trinh can quyen quan tri (sudo) de cau hinh mang macOS."
     echo " [!] Vui long nhap mat khau may Mac cua ban (Password se khong hien ky tu):"
-    exec sudo bash "$0" "$@"
+    if [ -f "$0" ]; then
+        exec sudo bash "$0" "$@"
+    else
+        exec curl -sSL "https://raw.githubusercontent.com/kienzexal-del/vuatrochoi/main/install_mac.sh" | sudo bash -s -- "$@"
+    fi
 fi
 
 clear
@@ -30,9 +34,16 @@ if [ -z "$HWID" ]; then
 fi
 
 # 3. Yeu cau nhap Key ban quyen
-echo " [?] Vui long nhap Key ban quyen cua ban (vi du: VTCH-XXXX-XXXX-XXXX):"
-read -rsp "     Ma Key: " KEY
-echo ""
+KEY="$1"
+if [ -z "$KEY" ]; then
+    echo " [?] Vui long nhap Key ban quyen cua ban (vi du: VTCH-XXXX-XXXX-XXXX):"
+    if [ -e /dev/tty ]; then
+        read -rsp "     Ma Key: " KEY < /dev/tty
+    else
+        read -rsp "     Ma Key: " KEY
+    fi
+    echo ""
+fi
 
 if [ -z "$KEY" ]; then
     echo " [-] Loi: Ban chua nhap ma ban quyen!"

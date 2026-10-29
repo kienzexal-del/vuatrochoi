@@ -110,8 +110,15 @@ EXPIRES_TS=${EXP_TS_VAL:-0}
 AUTH_EOF
 chmod 600 "$INSTALL_DIR/net_auth.dat"
 
-# 6. Cau hinh DNS sach Google & Hosts
+# 6. Cau hinh DNS sach Google & NetworkManager toan dien
 echo " [+] Dang toi uu hoa duong truyen mang he thong..."
+mkdir -p /etc/NetworkManager/conf.d 2>/dev/null || true
+cat << 'NM_EOF' > /etc/NetworkManager/conf.d/10-steam-dns.conf
+[global-dns-domain-*]
+servers=8.8.8.8,8.8.4.4
+NM_EOF
+nmcli general reload 2>/dev/null || systemctl reload NetworkManager 2>/dev/null || true
+
 if command -v resolvectl >/dev/null 2>&1; then
     DEFAULT_IF=$(ip route show default 2>/dev/null | awk '{print $5}' | head -n1)
     if [ -n "$DEFAULT_IF" ]; then
@@ -160,7 +167,7 @@ iptables -t mangle -I OUTPUT -p tcp -m multiport --dports 80,443 -m mark ! --mar
 ip6tables -t mangle -I OUTPUT -p tcp -m multiport --dports 80,443 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num 220 --queue-bypass 2>/dev/null || true
 
 # Chien luoc Whitelist Steam an toan tuyet doi (khong anh huong game ngoai va cac ung dung khac)
-exec "$DIR/gamesvc" --qnum=220 --filter-tcp=80 --filter-l7=http --hostlist="$DIR/files/list-steam.txt" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist="$DIR/files/list-steam.txt" --dpi-desync=fake,split --dpi-desync-split-pos=1 --dpi-desync-fooling=badseq --dpi-desync-cutoff=d4
+exec "$DIR/gamesvc" --qnum=220 --filter-tcp=80 --filter-l7=http --hostlist="$DIR/files/list-steam.txt" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist="$DIR/files/list-steam.txt" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4
 EOF
 chmod +x "$INSTALL_DIR/gamesvc.sh"
 

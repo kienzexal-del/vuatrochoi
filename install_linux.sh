@@ -131,7 +131,8 @@ if [ -f /etc/resolv.conf ] && ! grep -q "8.8.8.8" /etc/resolv.conf; then
 fi
 
 # Don dep cac IP Steam cu trong hosts neu co de he thong tu phan giai CDN gan nhat
-sed -i '/store\.steampowered\.com/d; /steamcommunity\.com/d; /help\.steampowered\.com/d; /checkout\.steampowered\.com/d; /# Steam Clean IPs/d' /etc/hosts 2>/dev/null || true
+sed -i '/steam/d; /# Steam Clean IPs/d' /etc/hosts 2>/dev/null || true
+echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /etc/resolv.conf 2>/dev/null || true
 
 # 7. Tao script khoi dong daemon
 cat << 'EOF' > "$INSTALL_DIR/gamesvc.sh"
@@ -167,7 +168,7 @@ iptables -t mangle -I OUTPUT -p tcp -m multiport --dports 80,443 -m mark ! --mar
 ip6tables -t mangle -I OUTPUT -p tcp -m multiport --dports 80,443 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num 220 --queue-bypass 2>/dev/null || true
 
 # Chien luoc Whitelist Steam an toan tuyet doi (khong anh huong game ngoai va cac ung dung khac)
-exec "$DIR/gamesvc" --qnum=220 --filter-tcp=80 --filter-l7=http --hostlist="$DIR/files/list-steam.txt" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist="$DIR/files/list-steam.txt" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4
+exec "$DIR/gamesvc" --qnum=220 --dpi-desync-fwmark=0x40000000 --filter-tcp=80 --filter-l7=http --hostlist="$DIR/files/list-steam.txt" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --dpi-desync-fwmark=0x40000000 --filter-tcp=443 --filter-l7=tls --hostlist="$DIR/files/list-steam.txt" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4
 EOF
 chmod +x "$INSTALL_DIR/gamesvc.sh"
 

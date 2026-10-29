@@ -21,7 +21,7 @@ Hệ thống cho phép bạn **bán giải pháp mở khóa Steam & Game tốc �
 * **`uninstall_mac.sh`**: Lệnh gỡ cài đặt sạch sẽ trên macOS.
 
 ### 4. Dành cho iOS (iPhone & iPad - iOS 14.0 trở lên):
-* **`ios/VuaTroChoi_Steam.mobileconfig`**: Hồ sơ cấu hình Apple Encrypted DNS (DoH Google). Chuẩn gốc của Apple, không tốn pin, không bao giờ hết hạn, mở khóa 100% Steam và Steam Community.
+* **`ios/VuaTroChoi_Steam.mobileconfig`**: Hồ sơ cấu hình Apple Encrypted DNS (DoH Cloudflare Ultra Anycast 2ms). Chuẩn gốc của Apple, không tốn pin, không bao giờ hết hạn, mở khóa 100% Steam, khắc phục lỗi vỡ hình CSS Wishlist và lỗi đăng nhập Steam Mobile.
 * **`ios/VuaTroChoi_Cloudflare.mobileconfig`**: Hồ sơ cấu hình Apple Encrypted DNS dự phòng (DoH Cloudflare 1.1.1.1).
 * **`ios/index.html`**: Cổng Web cài đặt 1-chạm tối ưu riêng cho Safari trên iPhone (có tích hợp kiểm tra ping Steam và nút tải cấu hình).
 * **`ios/app/`**: Mã nguồn Native App SwiftUI (Vua Trò Chơi iOS) kèm file cấu hình XcodeGen và GitHub Actions tự động build ra file `.ipa`.

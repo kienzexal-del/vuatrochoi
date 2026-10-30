@@ -13,10 +13,10 @@ struct ContentView: View {
             // Background Ambient Glow
             VStack {
                 Circle()
-                    .fill(vpn.isConnected ? Color.green.opacity(0.12) : Color.orange.opacity(0.08))
-                    .frame(width: 320, height: 320)
-                    .blur(radius: 60)
-                    .offset(y: -50)
+                    .fill(vpn.isConnected ? Color.green.opacity(0.15) : Color.orange.opacity(0.08))
+                    .frame(width: 340, height: 340)
+                    .blur(radius: 70)
+                    .offset(y: -40)
                 Spacer()
             }
             .ignoresSafeArea()
@@ -28,12 +28,12 @@ struct ContentView: View {
                     VStack(spacing: 6) {
                         HStack(spacing: 6) {
                             Text("👑")
-                                .font(.system(size: 12))
+                                .font(.system(size: 13))
                             Text("VUA TRÒ CHƠI MOBILE")
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundColor(Color(red: 0.96, green: 0.65, blue: 0.12))
                         }
-                        .padding(.horizontal, 12)
+                        .padding(.horizontal, 14)
                         .padding(.vertical, 5)
                         .background(Color(red: 0.96, green: 0.65, blue: 0.12).opacity(0.12))
                         .cornerRadius(20)
@@ -48,7 +48,7 @@ struct ContentView: View {
                             .foregroundColor(.gray)
                             .lineSpacing(2)
                     }
-                    .padding(.top, 8)
+                    .padding(.top, 10)
                     
                     // 2. Nut Tron Kich Hoat (Power Toggle)
                     VStack(spacing: 12) {
@@ -57,7 +57,7 @@ struct ContentView: View {
                             Circle()
                                 .stroke(
                                     vpn.isConnected
-                                    ? Color.green.opacity(0.3)
+                                    ? Color.green.opacity(0.35)
                                     : Color(red: 0.96, green: 0.62, blue: 0.04).opacity(0.25),
                                     lineWidth: 3
                                 )
@@ -167,7 +167,7 @@ struct ContentView: View {
                         )
                     }
                     
-                    // 5. Ghi Chu Bao Mat & Quyen Rieng Tu
+                    // 5. Ghi Chu Bao Mat
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 6) {
                             Image(systemName: "checkmark.shield.fill")
@@ -190,9 +190,16 @@ struct ContentView: View {
                     
                 }
                 .padding(.horizontal, 18)
-                .padding(.top, 4)
-                .padding(.bottom, 36)
+                .padding(.top, 6)
+                .padding(.bottom, 40)
             }
+        }
+        .alert(isPresented: $vpn.showAlert) {
+            Alert(
+                title: Text("Thông Báo"),
+                message: Text(vpn.alertMessage),
+                dismissButton: .default(Text("Đã Hiểu"))
+            )
         }
     }
     

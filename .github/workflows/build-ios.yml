@@ -1,0 +1,64 @@
+name: Build iOS IPA (Vua Tro Choi)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'ios/**'
+      - '.github/workflows/**'
+
+jobs:
+  build-ipa:
+    runs-on: macos-14
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: |
+          cd ios/app
+          xcodegen generate
+
+      - name: Build and Package IPA
+        run: |
+          cd ios/app
+          # Archive app without code signing
+          xcodebuild archive \
+            -project VuaTroChoi.xcodeproj \
+            -scheme VuaTroChoi \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -archivePath build/VuaTroChoi.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+          # Package into .ipa
+          mkdir -p build/Payload
+          cp -r build/VuaTroChoi.xcarchive/Products/Applications/VuaTroChoi.app build/Payload/
+          cd build
+          zip -r VuaTroChoi.ipa Payload
+          echo "IPA build completed successfully."
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: VuaTroChoi-iOS-IPA
+          path: ios/app/build/VuaTroChoi.ipa
+          retention-days: 30
+
+      - name: Publish Direct Release (Tải Trực Tiếp Về iPhone Cho ESign)
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          tag_name: ios-release
+          name: "Vua Trò Chơi iOS (Bản Mới Nhất Cho ESign / TrollStore)"
+          body: "Bản build IPA mới nhất của Vua Trò Chơi iOS hỗ trợ Local DPI Desync (split-pos=2). Dùng ESign hoặc TrollStore ký chứng chỉ để cài đặt."
+          files: ios/app/build/VuaTroChoi.ipa
+          draft: false
+          prerelease: false

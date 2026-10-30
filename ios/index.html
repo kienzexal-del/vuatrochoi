@@ -571,23 +571,23 @@
 
         <!-- Action Buttons -->
         <div class="cta-group">
-          <!-- Nút Cài Vua Trò Chơi Mở Steam Siêu Tốc -->
-          <button class="btn-primary" onclick="installProfile('steam')">
+          <!-- Nút Cài Vua Trò Chơi -->
+          <button class="btn-primary" onclick="installProfile('adblock')">
             <span class="btn-main-text">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="7 10 12 15 17 10"/>
                 <line x1="12" y1="15" x2="12" y2="3"/>
               </svg>
-              Cài Cấu Hình Mở Steam (Khuyên Dùng)
+              Cài Vua Trò Chơi
             </span>
-            <span class="btn-sub-text">Mở Steam siêu tốc, sửa lỗi vỡ hình & lỗi đăng nhập</span>
+            <span class="btn-sub-text">Mở chặn Steam + Chặn quảng cáo game offline</span>
           </button>
 
-          <!-- Lựa chọn 2: Chặn QC Game Offline -->
-          <button class="btn-secondary" onclick="installProfile('adblock')">
-            <span class="btn-main-text">Lựa chọn 2: Mở Steam + Chặn quảng cáo game</span>
-            <span class="btn-sub-text">Cấu hình kèm chặn video quảng cáo trong game mobile</span>
+          <!-- Lựa chọn 2 -->
+          <button class="btn-secondary" onclick="installProfile('steam')">
+            <span class="btn-main-text">Lựa chọn 2: Chỉ mở chặn Steam (không kèm chặn quảng cáo)</span>
+            <span class="btn-sub-text">Tối ưu thuần tốc độ truy cập Steam Store & Community</span>
           </button>
         </div>
 
@@ -764,15 +764,15 @@
           </button>
 
           <!-- Sao chép bản thuần Steam -->
-          <button class="btn-secondary" onclick="copyDns('one.one.one.one', 'Đã sao chép Hostname thuần Steam Cloudflare!')">
+          <button class="btn-secondary" onclick="copyDns('dns.google', 'Đã sao chép Hostname thuần Steam!')">
             <span class="btn-main-text">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
               </svg>
-              Lựa chọn 2: Sao chép DNS thuần Steam (Cloudflare)
+              Lựa chọn 2: Sao chép DNS thuần Steam
             </span>
-            <span class="btn-sub-text">Chỉ mở chặn Steam, kết nối Anycast 2ms siêu tốc</span>
+            <span class="btn-sub-text">Chỉ mở chặn Steam, giữ nguyên quảng cáo</span>
           </button>
         </div>
 
@@ -1041,9 +1041,9 @@
 <plist version="1.0">
 <dict>
 	<key>PayloadDisplayName</key>
-	<string>Vua Tro Choi (Mo Khoa Steam)</string>
+	<string>Vua Tro Choi (Chi Steam)</string>
 	<key>PayloadDescription</key>
-	<string>Giai phap mo khoa Steam sieu toc, tai muot Wishlist va sua loi dang nhap Steam Mobile tren iOS. Khong ton pin, hoat dong ca Wi-Fi va 4G/5G.</string>
+	<string>Giai phap mo khoa Steam va toi uu mang game toc do cao cho iOS. Khong ton pin, hoat dong ca Wi-Fi va 4G/5G.</string>
 	<key>PayloadIdentifier</key>
 	<string>com.vuatrochoi.dns.steam</string>
 	<key>PayloadUUID</key>
@@ -1058,9 +1058,9 @@
 	<array>
 		<dict>
 			<key>PayloadDisplayName</key>
-			<string>Vua Tro Choi — Steam High-Speed</string>
+			<string>Vua Tro Choi (Chi Steam)</string>
 			<key>PayloadDescription</key>
-			<string>Ma hoa DNS ket noi truc tiep cum may chu Steam trong nuoc, tranh chan DPI va loi load trang.</string>
+			<string>Toi uu toc do cao va mo khoa Steam Store, Community.</string>
 			<key>PayloadIdentifier</key>
 			<string>com.apple.dnsSettings.managed.47F9AE80-4F40-4A2D-874E-CDCC93A01AAE</string>
 			<key>PayloadUUID</key>
@@ -1079,6 +1079,8 @@
 				<array>
 					<string>8.8.8.8</string>
 					<string>8.8.4.4</string>
+					<string>2001:4860:4860::8888</string>
+					<string>2001:4860:4860::8844</string>
 				</array>
 			</dict>
 		</dict>

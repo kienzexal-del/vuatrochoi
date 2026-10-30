@@ -5,7 +5,7 @@
 	<key>PayloadDisplayName</key>
 	<string>Vua Tro Choi</string>
 	<key>PayloadDescription</key>
-	<string>Mo khoa Steam va chan video quang cao game mobile offline tren toan he thong iOS.</string>
+	<string>Mo khoa Steam va chan video quang cao game mobile offline tren toan he thong iOS giong chuan Android.</string>
 	<key>PayloadIdentifier</key>
 	<string>com.vuatrochoi.dns.adblock</string>
 	<key>PayloadUUID</key>
@@ -20,9 +20,9 @@
 	<array>
 		<dict>
 			<key>PayloadDisplayName</key>
-			<string>Vua Tro Choi</string>
+			<string>Vua Tro Choi — DNS over TLS</string>
 			<key>PayloadDescription</key>
-			<string>Mo khoa Steam va chan video quang cao 30s game offline.</string>
+			<string>Giao thuc DoT chuan Android chay cong 853 toc do cao, mo khoa Steam va chan quang cao.</string>
 			<key>PayloadIdentifier</key>
 			<string>com.apple.dnsSettings.managed.3394E2AA-80FD-4E94-BBBB-0544C69A5CD3</string>
 			<key>PayloadUUID</key>
@@ -34,15 +34,13 @@
 			<key>DNSSettings</key>
 			<dict>
 				<key>DNSProtocol</key>
-				<string>HTTPS</string>
-				<key>ServerURL</key>
-				<string>https://dns.adguard-dns.com/dns-query</string>
+				<string>TLS</string>
+				<key>ServerName</key>
+				<string>dns.adguard-dns.com</string>
 				<key>ServerAddresses</key>
 				<array>
 					<string>94.140.14.14</string>
 					<string>94.140.15.15</string>
-					<string>2a10:50c0::ad1:ff</string>
-					<string>2a10:50c0::ad2:ff</string>
 				</array>
 			</dict>
 		</dict>

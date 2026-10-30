@@ -20,8 +20,7 @@ struct ContentView: View {
                             Text("👑")
                                 .font(.title3)
                             Text("VUA TRÒ CHƠI MOBILE")
-                                .font(.caption)
-                                .fontWeight(.bold)
+                                .font(.system(size: 11, weight: .bold))
                                 .foregroundColor(Color(red: 0.96, green: 0.62, blue: 0.04))
                         }
                         .padding(.horizontal, 14)
@@ -63,8 +62,7 @@ struct ContentView: View {
                                         .foregroundColor(vpn.isConnected ? .green : .white)
                                     
                                     Text(vpn.isConnected ? "ĐANG BẢO VỆ" : "KÍCH HOẠT")
-                                        .font(.caption)
-                                        .fontWeight(.heavy)
+                                        .font(.system(size: 12, weight: .heavy))
                                         .foregroundColor(vpn.isConnected ? .green : .white.opacity(0.9))
                                 }
                                 .frame(width: 120, height: 120)
@@ -88,8 +86,7 @@ struct ContentView: View {
                         }
                         
                         Text(vpn.statusText)
-                            .font(.footnote)
-                            .fontWeight(.semibold)
+                            .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(vpn.isConnected ? .green : .gray)
                     }
                     .padding(.vertical, 10)
@@ -105,9 +102,8 @@ struct ContentView: View {
                                 HStack(spacing: 4) {
                                     Image(systemName: "arrow.clockwise")
                                     Text("Đo lại")
+                                        .font(.system(size: 12, weight: .semibold))
                                 }
-                                .font(.caption)
-                                .fontWeight(.semibold)
                                 .foregroundColor(Color(red: 0.22, green: 0.74, blue: 0.97))
                             }
                         }
@@ -131,7 +127,7 @@ struct ContentView: View {
                             HStack {
                                 Image(systemName: "arrow.up.right.square.fill")
                                 Text("MỞ STEAM APP NGAY")
-                                    .fontWeight(.bold)
+                                    .font(.system(size: 16, weight: .bold))
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
@@ -144,7 +140,7 @@ struct ContentView: View {
                             HStack {
                                 Image(systemName: "gearshape.fill")
                                 Text("Cài Đặt Hệ Thống iOS")
-                                    .fontWeight(.semibold)
+                                    .font(.system(size: 15, weight: .semibold))
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
@@ -160,8 +156,7 @@ struct ContentView: View {
                             Image(systemName: "checkmark.shield.fill")
                                 .foregroundColor(.green)
                             Text("BẢO MẬT & TỐI ƯU TUYỆT ĐỐI")
-                                .font(.caption)
-                                .fontWeight(.bold)
+                                .font(.system(size: 12, weight: .bold))
                                 .foregroundColor(.white)
                         }
                         
@@ -200,16 +195,14 @@ struct ContentView: View {
                 HStack(spacing: 5) {
                     Circle().fill(Color.green).frame(width: 8, height: 8)
                     Text("\(latency) ms")
-                        .font(.subheadline)
-                        .fontWeight(.bold)
+                        .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.green)
                 }
             case .blocked:
                 HStack(spacing: 5) {
                     Circle().fill(Color.red).frame(width: 8, height: 8)
                     Text("Bị Chặn")
-                        .font(.subheadline)
-                        .fontWeight(.bold)
+                        .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.red)
                 }
             }

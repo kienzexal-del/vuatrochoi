@@ -7,6 +7,11 @@ settings:
   SWIFT_VERSION: "5.0"
   ENABLE_BITCODE: "NO"
 
+packages:
+  Tun2SocksKit:
+    url: https://github.com/EbrahimTahernejad/Tun2SocksKit
+    exactVersion: 5.16.0
+
 targets:
   VuaTroChoi:
     type: application
@@ -14,10 +19,45 @@ targets:
     deploymentTarget: "14.0"
     sources:
       - path: VuaTroChoi
-    info:
-      path: VuaTroChoi/Info.plist
+    dependencies:
+      - target: VuaTroChoiTunnel
+        embed: true
+    entitlements:
+      path: VuaTroChoiTunnel/VuaTroChoi.entitlements
+      properties:
+        com.apple.developer.networking.networkextension:
+          - packet-tunnel-provider
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.vuatrochoi.ios
+      INFOPLIST_FILE: VuaTroChoi/Info.plist
+      CODE_SIGNING_REQUIRED: "NO"
+      CODE_SIGN_IDENTITY: ""
+      CODE_SIGNING_ALLOWED: "NO"
+
+  VuaTroChoiTunnel:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: VuaTroChoiTunnel
+        excludes:
+          - "*.md"
+          - "*.entitlements"
+          - Info.plist
+    entitlements:
+      path: VuaTroChoiTunnel/VuaTroChoiTunnel.entitlements
+      properties:
+        com.apple.developer.networking.networkextension:
+          - packet-tunnel-provider
+    dependencies:
+      - sdk: NetworkExtension.framework
+      - sdk: Network.framework
+      - package: Tun2SocksKit
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.vuatrochoi.ios.tunnel
+      INFOPLIST_FILE: VuaTroChoiTunnel/Info.plist
+      APPLICATION_EXTENSION_API_ONLY: "YES"
+      SKIP_INSTALL: "YES"
       CODE_SIGNING_REQUIRED: "NO"
       CODE_SIGN_IDENTITY: ""
       CODE_SIGNING_ALLOWED: "NO"

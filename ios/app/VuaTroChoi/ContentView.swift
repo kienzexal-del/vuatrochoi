@@ -3,52 +3,65 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var vpn = VPNManager()
     @StateObject private var network = NetworkChecker()
-    @State private var showingInfo = false
     
-    // GitHub raw link to the legacy mobileconfig profile as fallback
-    let profileURL = URL(string: "https://raw.githubusercontent.com/kienzexal-del/vuatrochoi/main/ios/VuaTroChoi_AdBlock.mobileconfig")!
-    let webPortalURL = URL(string: "https://kienzexal-del.github.io/vuatrochoi/ios/")!
-
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
+        ZStack {
+            // Background toan man hinh (Dark Luxury OLED)
+            Color(red: 0.04, green: 0.05, blue: 0.09)
+                .ignoresSafeArea()
+            
+            // Background Ambient Glow
+            VStack {
+                Circle()
+                    .fill(vpn.isConnected ? Color.green.opacity(0.12) : Color.orange.opacity(0.08))
+                    .frame(width: 320, height: 320)
+                    .blur(radius: 60)
+                    .offset(y: -50)
+                Spacer()
+            }
+            .ignoresSafeArea()
+
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 16) {
                     
-                    // Crown & Title Header
-                    VStack(spacing: 8) {
+                    // 1. Header Badge & Tieu De
+                    VStack(spacing: 6) {
                         HStack(spacing: 6) {
                             Text("👑")
-                                .font(.title3)
+                                .font(.system(size: 12))
                             Text("VUA TRÒ CHƠI MOBILE")
                                 .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(Color(red: 0.96, green: 0.62, blue: 0.04))
+                                .foregroundColor(Color(red: 0.96, green: 0.65, blue: 0.12))
                         }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 6)
-                        .background(Color(red: 0.96, green: 0.62, blue: 0.04).opacity(0.15))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 5)
+                        .background(Color(red: 0.96, green: 0.65, blue: 0.12).opacity(0.12))
                         .cornerRadius(20)
                         
                         Text("Mở Khóa Steam iOS")
-                            .font(.system(size: 28, weight: .heavy))
+                            .font(.system(size: 26, weight: .heavy))
                             .foregroundColor(.white)
                         
-                        Text("DPI Packet Desync Nội Bộ • Giữ IP Việt Nam\nKhông tốn pin • Hoạt động cả Wi-Fi & 4G/5G")
-                            .font(.subheadline)
+                        Text("DPI Packet Desync Nội Bộ • Giữ 100% IP VN\nKhông tốn pin • Hoạt động cả Wi-Fi & 4G/5G")
+                            .font(.system(size: 12))
                             .multilineTextAlignment(.center)
                             .foregroundColor(.gray)
+                            .lineSpacing(2)
                     }
-                    .padding(.top, 10)
+                    .padding(.top, 8)
                     
-                    // Big 1-Tap Toggle Card
-                    VStack(spacing: 16) {
+                    // 2. Nut Tron Kich Hoat (Power Toggle)
+                    VStack(spacing: 12) {
                         ZStack {
+                            // Vong phat sang ben ngoai
                             Circle()
-                                .fill(
+                                .stroke(
                                     vpn.isConnected
-                                    ? RadialGradient(colors: [Color.green.opacity(0.25), Color.clear], center: .center, startRadius: 10, endRadius: 80)
-                                    : RadialGradient(colors: [Color.orange.opacity(0.15), Color.clear], center: .center, startRadius: 10, endRadius: 80)
+                                    ? Color.green.opacity(0.3)
+                                    : Color(red: 0.96, green: 0.62, blue: 0.04).opacity(0.25),
+                                    lineWidth: 3
                                 )
-                                .frame(width: 150, height: 150)
+                                .frame(width: 140, height: 140)
                             
                             Button(action: {
                                 vpn.toggleVPN()
@@ -56,16 +69,16 @@ struct ContentView: View {
                                     network.checkAll()
                                 }
                             }) {
-                                VStack(spacing: 8) {
+                                VStack(spacing: 6) {
                                     Image(systemName: vpn.isConnected ? "shield.checkered" : "power")
-                                        .font(.system(size: 44, weight: .bold))
+                                        .font(.system(size: 38, weight: .bold))
                                         .foregroundColor(vpn.isConnected ? .green : .white)
                                     
                                     Text(vpn.isConnected ? "ĐANG BẢO VỆ" : "KÍCH HOẠT")
                                         .font(.system(size: 12, weight: .heavy))
                                         .foregroundColor(vpn.isConnected ? .green : .white.opacity(0.9))
                                 }
-                                .frame(width: 120, height: 120)
+                                .frame(width: 118, height: 118)
                                 .background(
                                     LinearGradient(
                                         colors: vpn.isConnected
@@ -77,105 +90,109 @@ struct ContentView: View {
                                 )
                                 .clipShape(Circle())
                                 .shadow(
-                                    color: vpn.isConnected ? Color.green.opacity(0.4) : Color(red: 0.96, green: 0.62, blue: 0.04).opacity(0.4),
-                                    radius: 12,
+                                    color: vpn.isConnected ? Color.green.opacity(0.5) : Color(red: 0.96, green: 0.62, blue: 0.04).opacity(0.4),
+                                    radius: 10,
                                     y: 4
                                 )
                             }
                             .disabled(vpn.isWorking)
                         }
                         
-                        Text(vpn.statusText)
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(vpn.isConnected ? .green : .gray)
+                        // Trang thai text
+                        HStack(spacing: 6) {
+                            if vpn.isWorking {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .orange))
+                                    .scaleEffect(0.7)
+                            }
+                            Text(vpn.statusText)
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(vpn.isConnected ? .green : (vpn.isWorking ? .orange : .gray))
+                        }
                     }
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 6)
                     
-                    // Live Status Card
-                    VStack(spacing: 14) {
+                    // 3. Card Do Ping & Trang Thai Mang
+                    VStack(spacing: 12) {
                         HStack {
                             Text("Trạng Thái Kết Nối")
-                                .font(.headline)
+                                .font(.system(size: 15, weight: .bold))
                                 .foregroundColor(.white)
                             Spacer()
                             Button(action: { network.checkAll() }) {
                                 HStack(spacing: 4) {
                                     Image(systemName: "arrow.clockwise")
                                     Text("Đo lại")
-                                        .font(.system(size: 12, weight: .semibold))
+                                        .font(.system(size: 11, weight: .semibold))
                                 }
                                 .foregroundColor(Color(red: 0.22, green: 0.74, blue: 0.97))
                             }
                         }
                         
-                        Divider().background(Color.gray.opacity(0.3))
+                        Divider().background(Color.white.opacity(0.08))
                         
                         statusRow(name: "Steam Store (Cửa Hàng)", status: network.storeStatus)
                         statusRow(name: "Steam Community (Cộng Đồng)", status: network.communityStatus)
                     }
-                    .padding(18)
-                    .background(Color(red: 0.1, green: 0.13, blue: 0.21))
-                    .cornerRadius(18)
+                    .padding(14)
+                    .background(Color(red: 0.08, green: 0.11, blue: 0.18))
+                    .cornerRadius(14)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 18)
-                            .stroke(Color(red: 0.96, green: 0.62, blue: 0.04).opacity(0.2), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
                     )
                     
-                    // Quick Action Buttons
-                    VStack(spacing: 12) {
-                        Button(action: openSteamApp) {
-                            HStack {
-                                Image(systemName: "arrow.up.right.square.fill")
-                                Text("MỞ STEAM APP NGAY")
-                                    .font(.system(size: 16, weight: .bold))
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(Color(red: 0.15, green: 0.2, blue: 0.3))
-                            .foregroundColor(.white)
-                            .cornerRadius(14)
+                    // 4. Nut Mo Steam Chinh Chu
+                    Button(action: openSteamApp) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "arrow.up.right.square.fill")
+                                .font(.system(size: 16))
+                            Text("MỞ STEAM APP NGAY")
+                                .font(.system(size: 15, weight: .bold))
                         }
-                        
-                        Button(action: openSettings) {
-                            HStack {
-                                Image(systemName: "gearshape.fill")
-                                Text("Cài Đặt Hệ Thống iOS")
-                                    .font(.system(size: 15, weight: .semibold))
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(Color.white.opacity(0.08))
-                            .foregroundColor(.white)
-                            .cornerRadius(14)
-                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                        .background(
+                            LinearGradient(
+                                colors: [Color(red: 0.18, green: 0.28, blue: 0.45), Color(red: 0.12, green: 0.18, blue: 0.32)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color(red: 0.22, green: 0.74, blue: 0.97).opacity(0.3), lineWidth: 1)
+                        )
                     }
                     
-                    // Security / Privacy Note
-                    VStack(alignment: .leading, spacing: 8) {
+                    // 5. Ghi Chu Bao Mat & Quyen Rieng Tu
+                    VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 6) {
                             Image(systemName: "checkmark.shield.fill")
                                 .foregroundColor(.green)
+                                .font(.system(size: 12))
                             Text("BẢO MẬT & TỐI ƯU TUYỆT ĐỐI")
-                                .font(.system(size: 12, weight: .bold))
+                                .font(.system(size: 11, weight: .bold))
                                 .foregroundColor(.white)
                         }
                         
-                        Text("• Không chuyển tiếp qua bất kỳ máy chủ ngoại quốc nào (IP giữ nguyên 100%).\n• Tự động chia nhỏ gói tin ClientHello (Split-pos: 2) để vượt DPI nhà mạng.\n• App ngân hàng, Zalo, Momo chạy bình thường không bị gián đoạn.")
-                            .font(.caption2)
+                        Text("• Không chuyển tiếp server ngoại (IP giữ nguyên 100% tại VN).\n• Phân mảnh TLS ClientHello nội bộ để vượt chặn nhà mạng.\n• App ngân hàng, Zalo, Momo chạy bình thường không gián đoạn.")
+                            .font(.system(size: 11))
                             .foregroundColor(.gray)
-                            .lineSpacing(3)
+                            .lineSpacing(2)
                     }
-                    .padding(14)
+                    .padding(12)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.black.opacity(0.3))
-                    .cornerRadius(12)
+                    .background(Color.white.opacity(0.03))
+                    .cornerRadius(10)
                     
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 30)
+                .padding(.horizontal, 18)
+                .padding(.top, 4)
+                .padding(.bottom, 36)
             }
-            .background(Color(red: 0.05, green: 0.07, blue: 0.12).ignoresSafeArea())
-            .navigationBarHidden(true)
         }
     }
     
@@ -183,26 +200,26 @@ struct ContentView: View {
     private func statusRow(name: String, status: SteamStatus) -> some View {
         HStack {
             Text(name)
-                .font(.subheadline)
-                .foregroundColor(.white.opacity(0.9))
+                .font(.system(size: 13))
+                .foregroundColor(.white.opacity(0.85))
             Spacer()
             switch status {
             case .checking:
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .orange))
-                    .scaleEffect(0.8)
+                    .scaleEffect(0.7)
             case .online(let latency):
-                HStack(spacing: 5) {
-                    Circle().fill(Color.green).frame(width: 8, height: 8)
+                HStack(spacing: 4) {
+                    Circle().fill(Color.green).frame(width: 7, height: 7)
                     Text("\(latency) ms")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: 13, weight: .bold))
                         .foregroundColor(.green)
                 }
             case .blocked:
-                HStack(spacing: 5) {
-                    Circle().fill(Color.red).frame(width: 8, height: 8)
+                HStack(spacing: 4) {
+                    Circle().fill(Color.red).frame(width: 7, height: 7)
                     Text("Bị Chặn")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: 13, weight: .bold))
                         .foregroundColor(.red)
                 }
             }
@@ -216,10 +233,5 @@ struct ContentView: View {
         } else if let storeURL = URL(string: "https://store.steampowered.com") {
             UIApplication.shared.open(storeURL)
         }
-    }
-    
-    private func openSettings() {
-        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-        UIApplication.shared.open(url)
     }
 }

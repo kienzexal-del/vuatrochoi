@@ -15,7 +15,8 @@ final class PacketTunnelProvider: NEPacketTunnelProvider {
 
     private static let hosts = [
         "store.steampowered.com", "steamcommunity.com", "help.steampowered.com",
-        "checkout.steampowered.com", "login.steampowered.com"
+        "checkout.steampowered.com", "login.steampowered.com", "api.steampowered.com",
+        "steam-chat.com"
     ]
 
     override func startTunnel(options: [String: NSObject]?, completionHandler: @escaping (Error?) -> Void) {
@@ -57,12 +58,18 @@ final class PacketTunnelProvider: NEPacketTunnelProvider {
             case .success(let port):
                 let settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress: "127.0.0.1")
                 let ipv4 = NEIPv4Settings(addresses: ["10.8.0.2"], subnetMasks: ["255.255.255.0"])
-                ipv4.includedRoutes = addresses.sorted().map {
+                var routes = addresses.sorted().map {
                     NEIPv4Route(destinationAddress: $0, subnetMask: "255.255.255.255")
                 }
+                // Dai mang may chu Valve Steam toan cau & chau A
+                routes.append(NEIPv4Route(destinationAddress: "155.133.224.0", subnetMask: "255.255.224.0"))
+                routes.append(NEIPv4Route(destinationAddress: "162.254.192.0", subnetMask: "255.255.248.0"))
+                routes.append(NEIPv4Route(destinationAddress: "208.64.200.0", subnetMask: "255.255.252.0"))
+                routes.append(NEIPv4Route(destinationAddress: "208.78.164.0", subnetMask: "255.255.252.0"))
+                ipv4.includedRoutes = routes
                 settings.ipv4Settings = ipv4
                 let dns = NEDNSSettings(servers: ["1.1.1.1", "8.8.8.8"])
-                dns.matchDomains = ["steampowered.com", "steamcommunity.com", "steamstatic.com"]
+                dns.matchDomains = ["steampowered.com", "steamcommunity.com", "steamstatic.com", "steam-chat.com"]
                 dns.matchDomainsNoSearch = true
                 settings.dnsSettings = dns
                 settings.mtu = 1500

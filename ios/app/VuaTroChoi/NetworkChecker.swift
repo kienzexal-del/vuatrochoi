@@ -42,7 +42,7 @@ class NetworkChecker: ObservableObject {
     private func measureLatency(url: URL, completion: @escaping (SteamStatus) -> Void) {
         var request = URLRequest(url: url)
         request.httpMethod = "HEAD"
-        request.timeoutInterval = 4.0
+        request.timeoutInterval = 8.0
         
         let start = DispatchTime.now()
         let task = URLSession.shared.dataTask(with: request) { _, response, error in

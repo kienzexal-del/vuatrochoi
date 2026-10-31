@@ -2,7 +2,10 @@ import Foundation
 
 /// Buffers only the first TLS record, never decrypts or changes TLS bytes.
 struct ClientHelloSplitter {
-    static let steamDomains = ["steampowered.com", "steamcommunity.com", "steamstatic.com"]
+    static let steamDomains = [
+        "steampowered.com", "steamcommunity.com", "steamstatic.com",
+        "steam-chat.com", "steamserver.net", "steamcontent.com", "valvesoftware.com"
+    ]
     private var buffer = Data()
     private(set) var finished = false
 

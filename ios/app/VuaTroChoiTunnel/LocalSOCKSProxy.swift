@@ -120,7 +120,8 @@ private final class SOCKSSession {
                 guard let self = self else { return }
                 let address = target.prefix(4).map(String.init).joined(separator: ".")
                 let port = UInt16(target[4]) * 256 + UInt16(target[5])
-                guard self.addresses.contains(address), port == 80 || port == 443 else {
+                // Cho phep moi ket noi port 80 va 443 den he thong Steam ma TUN chuyen vao
+                guard port == 80 || port == 443 else {
                     self.reject(2)
                     return
                 }

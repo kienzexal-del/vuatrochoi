@@ -1,4 +1,4 @@
-﻿# ===========================================================================
+# ===========================================================================
 #  VUA TRO CHOI - BO CAI DAT TU DONG STEAM TOC DO CAO (POWERSHELL 1-LINER)
 #  Phan phoi ban quyen tu dong | Xac thuc qua Google Sheets 0d
 # ===========================================================================
@@ -268,14 +268,37 @@ if ($LASTEXITCODE -ne 0) {
     Start-Process -FilePath "wscript.exe" -ArgumentList "`"$vbsPath`"" -WorkingDirectory $installDir -WindowStyle Hidden -ErrorAction SilentlyContinue
 }
 
-# Gan tham so -tcp vao Shortcut Steam ngoai Desktop de vuot chan UDP
+# Tu dong do tim vi tri Steam (Registry & Moi o dia C, D, E, F...) va xoa cache ket noi loi
 try {
+    $steamPath = $null
+    $regCu = Get-ItemProperty "HKCU:\Software\Valve\Steam" -ErrorAction SilentlyContinue
+    if ($regCu -and $regCu.SteamPath) { $steamPath = $regCu.SteamPath }
+    if (-not $steamPath) {
+        $regLm = Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Valve\Steam" -ErrorAction SilentlyContinue
+        if ($regLm -and $regLm.InstallPath) { $steamPath = $regLm.InstallPath }
+    }
+    if (-not $steamPath) {
+        $drives = Get-PSDrive -PSProvider FileSystem | Select-Object -ExpandProperty Root
+        foreach ($d in $drives) {
+            foreach ($sub in @("Steam", "Program Files (x86)\Steam", "Games\Steam")) {
+                $t = Join-Path $d $sub
+                if (Test-Path (Join-Path $t "steam.exe")) { $steamPath = $t; break }
+            }
+            if ($steamPath) { break }
+        }
+    }
+    # Xoa htmlcache neu ton tai de Steam khong bi ket Offline
+    if ($steamPath -and (Test-Path "$steamPath\config\htmlcache")) {
+        Remove-Item -Path "$steamPath\config\htmlcache" -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    # Gan tham so -websocket vao Shortcut Steam ngoai Desktop
     $wsh = New-Object -ComObject WScript.Shell
     @("$([Environment]::GetFolderPath('Desktop'))\Steam.lnk", "$([Environment]::GetFolderPath('CommonDesktopDirectory'))\Steam.lnk") | ForEach-Object {
         if (Test-Path $_) {
             $sc = $wsh.CreateShortcut($_)
-            if ($sc.Arguments -notmatch "-tcp") {
-                $sc.Arguments = ($sc.Arguments + " -tcp").Trim()
+            if ($steamPath) { $sc.TargetPath = "$steamPath\steam.exe" }
+            if ($sc.Arguments -notmatch "-websocket") {
+                $sc.Arguments = ($sc.Arguments.Replace("-tcp", "").Trim() + " -websocket").Trim()
                 $sc.Save()
             }
         }

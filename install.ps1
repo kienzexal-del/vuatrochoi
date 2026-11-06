@@ -224,11 +224,11 @@ Set-Content -Path (Join-Path $installDir "net_auth.dat") -Value $authB64 -Force
 # Thiet lap thuoc tinh an he thong (Stealth folder)
 attrib.exe +s +h "$installDir" 2>$null | Out-Null
 
-# 7. Toi uu hoa duong truyen mang he thong (Google DNS & Don dep hosts)
+# 7. Toi uu hoa duong truyen mang he thong (Google DNS IPv4 & IPv6, khong tat IPv6 de COD khong bi loi)
 Write-Host " [+] Dang toi uu hoa duong truyen mang he thong..." -ForegroundColor Cyan
 Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq 'Up' -or $_.HardwareInterface -eq $true } | ForEach-Object {
-    Set-DnsClientServerAddress -InterfaceAlias $_.Name -ServerAddresses ('8.8.8.8','8.8.4.4') -ErrorAction SilentlyContinue
-    Disable-NetAdapterBinding -Name $_.Name -ComponentID ms_tcpip6 -ErrorAction SilentlyContinue
+    Set-DnsClientServerAddress -InterfaceAlias $_.Name -ServerAddresses ('8.8.8.8','8.8.4.4','2001:4860:4860::8888','2001:4860:4860::8844') -ErrorAction SilentlyContinue
+    Enable-NetAdapterBinding -Name $_.Name -ComponentID ms_tcpip6 -ErrorAction SilentlyContinue
 }
 Clear-DnsClientCache
 
@@ -252,64 +252,70 @@ if (Test-Path $hostsPath) {
 }
 ipconfig /flushdns | Out-Null
 
-# 8. Cai dat dich vu giam sat thong minh (Tu dong tam dung khi choi Call of Duty, Valorant...)
-Write-Host " [+] Dang cau hinh che do tu dong tam dung thong minh (Anti-Cheat Safe)..." -ForegroundColor Cyan
-$servicePs1Path = Join-Path $installDir "vtch_service.ps1"
-$servicePs1Content = @'
-$appDir = "C:\ProgramData\VuaTroChoi"
-$coreExe = Join-Path $appDir "GameNetworkService.exe"
-$listSteam = Join-Path $appDir "files\list-steam.txt"
-$args = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=`"$listSteam`" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=`"$listSteam`" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"
+# 8. Cai dat danh sach loai tru COD, Activision, Demonware va cac game truc tuyen
+Write-Host " [+] Dang cau hinh danh sach bo qua Call of Duty & Game Online..." -ForegroundColor Cyan
+$excludePath = Join-Path $installDir "files\exclude-games.txt"
+$excludeContent = @'
+# === CALL OF DUTY & ACTIVISION (Demonware Matchmaking, Auth, Ricochet) ===
+demonware.net
+activision.com
+callofduty.com
+atvi.com
+cod.com
+treyarch.com
+infinityward.com
+ravensoftware.com
+sledgehammergames.com
 
-$antiCheatProcesses = @(
-    "cod", "cod launcher", "bootstrapper", "ModernWarfare", "BlackOpsColdWar", "Vanguard",
-    "VALORANT", "vgc", "faceitclient"
-)
+# === GAME DOWNLOAD CDNs & RIOT (Valorant, LoL, Battle.net, Epic) ===
+steamcontent.com
+steamserver.net
+akamaized.net
+akamaihd.net
+epicgames.com
+unrealengine.com
+ea.com
+origin.com
+electronicarts.com
+battle.net
+blizzard.com
+battlenet.com
+riotgames.com
+leagueoflegends.com
+pvp.net
+valorant.com
+ubisoft.com
+uplay.com
+gog.com
+rockstargames.com
+speedtest.net
+fast.com
+speed.cloudflare.com
 
-function Start-Core {
-    $p = Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue
-    if (-not $p -and (Test-Path $coreExe)) {
-        Start-Process -FilePath $coreExe -ArgumentList $args -WorkingDirectory $appDir -WindowStyle Hidden
-    }
-}
-
-function Stop-Core {
-    Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-    taskkill.exe /f /im GameNetworkService.exe 2>$null | Out-Null
-    sc.exe stop WinDivert 2>$null | Out-Null
-    sc.exe stop WinDivert1.4 2>$null | Out-Null
-}
-
-Start-Core
-
-$isGameActive = $false
-while ($true) {
-    Start-Sleep -Seconds 3
-    $foundGame = Get-Process -Name $antiCheatProcesses -ErrorAction SilentlyContinue | Select-Object -First 1
-
-    if ($foundGame) {
-        if (-not $isGameActive) {
-            # Phat hien game Anti-Cheat -> Tu dong tam dung WinDivert de COD / Valorant ket noi online binh thuong
-            Stop-Core
-            $isGameActive = $true
-        }
-    } else {
-        if ($isGameActive) {
-            # Game da thoat -> Tu dong khoi dong lai de mo khoa Steam
-            Start-Core
-            $isGameActive = $false
-        } else {
-            $p = Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue
-            if (-not $p) {
-                Start-Core
-            }
-        }
-    }
-}
+# === NETFLIX, BANKING & REMOTE SUPPORT ===
+netflix.com
+spotify.com
+apple.com
+icloud.com
+microsoft.com
+live.com
+vcb.com.vn
+vietcombank.com.vn
+techcombank.com.vn
+mbbank.com.vn
+momo.vn
+ultraviewer.net
+anydesk.com
+teamviewer.com
 '@
-Set-Content -Path $servicePs1Path -Value $servicePs1Content -Encoding UTF8 -Force
+if (-not (Test-Path (Join-Path $installDir "files"))) {
+    New-Item -ItemType Directory -Path (Join-Path $installDir "files") -Force | Out-Null
+}
+Set-Content -Path $excludePath -Value $excludeContent -Encoding UTF8 -Force
 
-# Cap nhat vtch_runner.vbs
+# 9. Cai dat tac vu khoi dong ngam Windows Task Scheduler (Chay 24/7, loai tru triet de COD)
+Write-Host " [+] Dang dang ky dich vu toi uu mang (Task Scheduler)..." -ForegroundColor Cyan
+$taskName = "Game_Network_Optimizer"
 $vbsPath = Join-Path $installDir "vtch_runner.vbs"
 $vbsContent = @"
 Set WshShell = CreateObject("WScript.Shell")
@@ -317,34 +323,24 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 WshShell.CurrentDirectory = "C:\ProgramData\VuaTroChoi"
 
 Set objWMIService = GetObject("winmgmts:\\.\root\cimv2")
-Set colProcesses = objWMIService.ExecQuery("Select * from Win32_Process Where CommandLine Like '%vtch_service.ps1%'")
+Set colProcesses = objWMIService.ExecQuery("Select * from Win32_Process Where Name = 'GameNetworkService.exe'")
 
 If colProcesses.Count = 0 Then
-    servicePs1 = "C:\ProgramData\VuaTroChoi\vtch_service.ps1"
-    If fso.FileExists(servicePs1) Then
-        WshShell.Run "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File """ & servicePs1 & """", 0, False
-    Else
-        coreExe = "C:\ProgramData\VuaTroChoi\GameNetworkService.exe"
-        args = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=""files\list-steam.txt"" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=""files\list-steam.txt"" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"
-        WshShell.Run """" & coreExe & """ " & args, 0, False
-    End If
+    coreExe = "C:\ProgramData\VuaTroChoi\GameNetworkService.exe"
+    args = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"
+    WshShell.Run """" & coreExe & """ " & args, 0, False
 End If
 "@
 Set-Content -Path $vbsPath -Value $vbsContent -Encoding ASCII -Force
 
-# 9. Cai dat tac vu khoi dong ngam Windows Task Scheduler
-Write-Host " [+] Dang dang ky dich vu toi uu mang (Task Scheduler)..." -ForegroundColor Cyan
-$taskName = "Game_Network_Optimizer"
 $taskRun = "wscript.exe `"$vbsPath`""
-
 schtasks.exe /create /f /tn "$taskName" /tr "$taskRun" /sc onlogon /rl highest | Out-Null
 
-# 10. Khoi chay dich vu ngam qua Task Scheduler
+# 10. Khoi chay dich vu ngam
 Write-Host " [+] Dang khoi dong tien trinh he thong..." -ForegroundColor Cyan
-$taskResult = schtasks.exe /run /tn "$taskName" 2>&1
-if ($LASTEXITCODE -ne 0) {
-    Start-Process -FilePath "wscript.exe" -ArgumentList "`"$vbsPath`"" -WorkingDirectory $installDir -WindowStyle Hidden -ErrorAction SilentlyContinue
-}
+Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+taskkill.exe /f /im GameNetworkService.exe 2>$null | Out-Null
+Start-Process -FilePath "wscript.exe" -ArgumentList "`"$vbsPath`"" -WorkingDirectory $installDir -WindowStyle Hidden -ErrorAction SilentlyContinue
 
 # Tu dong do tim vi tri Steam (Registry & Moi o dia C, D, E, F...) va xoa cache ket noi loi
 try {

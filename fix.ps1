@@ -211,50 +211,34 @@ if (Test-Path $installDir) {
     }
     [System.IO.File]::WriteAllLines($excludePath, $excludeList, [System.Text.Encoding]::UTF8)
 
-    # 2. Cap nhat vtch_runner.vbs (Tich hop Smart Watchdog tu dong nhuong duong cho Call of Duty / Ricochet)
+    # 2. Cap nhat vtch_runner.vbs (Khoi dong an toan, on dinh 100%)
     $vbsPath = Join-Path $installDir "vtch_runner.vbs"
     $vbsLines = @(
         'Set WshShell = CreateObject("WScript.Shell")',
         'Set fso = CreateObject("Scripting.FileSystemObject")',
         'WshShell.CurrentDirectory = "C:\ProgramData\VuaTroChoi"',
         'Set objWMIService = GetObject("winmgmts:\\.\root\cimv2")',
+        'Set colProcesses = objWMIService.ExecQuery("Select * from Win32_Process Where Name = ''GameNetworkService.exe''")',
         '',
         'coreExe = "C:\ProgramData\VuaTroChoi\GameNetworkService.exe"',
-        'args = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"',
-        '',
-        'Do',
-        '    '' 1. Kiem tra xem co Call of Duty / Ricochet Anti-Cheat dang bat khong',
-        '    Set colCod = objWMIService.ExecQuery("Select ProcessId from Win32_Process Where Name = ''cod.exe'' Or Name = ''bootstrapper.exe'' Or Name = ''ModernWarfare.exe'' Or Name = ''BlackOps6.exe'' Or Name = ''BlackOpsColdWar.exe'' Or Name = ''Vanguard.exe''")',
-        '    ',
-        '    If colCod.Count > 0 Then',
-        '        '' Neu COD dang bat: Dung ngay GameNetworkService va go driver WinDivert de Ricochet khong quet trung',
-        '        Set colGns = objWMIService.ExecQuery("Select ProcessId from Win32_Process Where Name = ''GameNetworkService.exe''")',
-        '        If colGns.Count > 0 Then',
-        '            WshShell.Run "taskkill.exe /f /im GameNetworkService.exe", 0, True',
-        '            WshShell.Run "net.exe stop WinDivert", 0, True',
-        '        End If',
-        '    Else',
-        '        '' Neu COD khong chay: Duy tri GameNetworkService luon hoat dong de Steam full toc do',
-        '        Set colGns = objWMIService.ExecQuery("Select ProcessId from Win32_Process Where Name = ''GameNetworkService.exe''")',
-        '        If colGns.Count = 0 Then',
-        '            If fso.FileExists(coreExe) Then',
-        '                WshShell.Run """" & coreExe & """ " & args, 0, False',
-        '            End If',
-        '        End If',
+        'ownedRunning = False',
+        'For Each candidate In colProcesses',
+        '    If Not IsNull(candidate.ExecutablePath) Then',
+        '        If LCase(candidate.ExecutablePath) = LCase(coreExe) Then ownedRunning = True',
         '    End If',
-        '    ',
-        '    WScript.Sleep 2000',
-        'Loop'
+        'Next',
+        '',
+        'If Not ownedRunning Then',
+        '    args = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"',
+        '    WshShell.Run """" & coreExe & """ " & args, 0, False',
+        'End If'
     )
     [System.IO.File]::WriteAllLines($vbsPath, $vbsLines, [System.Text.Encoding]::ASCII)
 
-    # 3. Khoi dong lai GameNetworkService voi cau hinh Smart Watchdog moi
-    Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -match "vtch_runner\.vbs" } | ForEach-Object {
-        Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
-    }
+    # 3. Khoi dong lai GameNetworkService
     Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
     taskkill.exe /f /im GameNetworkService.exe 2>$null | Out-Null
-    Start-Process "wscript.exe" -ArgumentList "`"$vbsPath`"" -WindowStyle Hidden
+    Start-Process -FilePath "wscript.exe" -ArgumentList "`"$vbsPath`"" -WorkingDirectory $installDir -WindowStyle Hidden -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 1
 }
 

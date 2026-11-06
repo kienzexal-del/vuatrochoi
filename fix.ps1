@@ -150,21 +150,91 @@ Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq 'Up'
 ipconfig /flushdns 2>$null | Out-Null
 Write-Host "  [OK] Đã tối ưu DNS Google (8.8.8.8 / 8.8.4.4) và làm mới DNS Cache." -ForegroundColor Green
 
-# [5/6] Kiểm tra & Đảm bảo GameNetworkService đang chạy ngầm
-Write-Host "`n [*] [5/6] Kiểm tra dịch vụ vượt chặn VUA TRÒ CHƠI..." -ForegroundColor Cyan
-$svc = Get-Process GameNetworkService, winws -ErrorAction SilentlyContinue | Select-Object -First 1
-if (-not $svc) {
-    Write-Host "  [*] Dịch vụ đang tắt, đang khởi động lại ngay..." -ForegroundColor Yellow
-    $vbs = "C:\ProgramData\VuaTroChoi\vtch_runner.vbs"
-    if (Test-Path $vbs) {
-        Start-Process "wscript.exe" -ArgumentList "`"$vbs`"" -WindowStyle Hidden
-        Start-Sleep -Seconds 1
+# [5/6] Cập nhật chế độ tự động tạm dừng khi chơi Call of Duty / Valorant (Anti-Cheat Safe)
+Write-Host "`n [*] [5/6] Cập nhật chế độ tự động tương thích Call of Duty & Anti-Cheat..." -ForegroundColor Cyan
+$installDir = "C:\ProgramData\VuaTroChoi"
+if (Test-Path $installDir) {
+    $servicePs1Path = Join-Path $installDir "vtch_service.ps1"
+    $servicePs1Content = @'
+$appDir = "C:\ProgramData\VuaTroChoi"
+$coreExe = Join-Path $appDir "GameNetworkService.exe"
+$listSteam = Join-Path $appDir "files\list-steam.txt"
+$args = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=`"$listSteam`" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=`"$listSteam`" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"
+
+$antiCheatProcesses = @(
+    "cod", "cod launcher", "bootstrapper", "ModernWarfare", "BlackOpsColdWar", "Vanguard",
+    "VALORANT", "vgc", "faceitclient"
+)
+
+function Start-Core {
+    $p = Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue
+    if (-not $p -and (Test-Path $coreExe)) {
+        Start-Process -FilePath $coreExe -ArgumentList $args -WorkingDirectory $appDir -WindowStyle Hidden
     }
-    $svc = Get-Process GameNetworkService, winws -ErrorAction SilentlyContinue | Select-Object -First 1
 }
 
+function Stop-Core {
+    Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    taskkill.exe /f /im GameNetworkService.exe 2>$null | Out-Null
+    sc.exe stop WinDivert 2>$null | Out-Null
+    sc.exe stop WinDivert1.4 2>$null | Out-Null
+}
+
+Start-Core
+
+$isGameActive = $false
+while ($true) {
+    Start-Sleep -Seconds 3
+    $foundGame = Get-Process -Name $antiCheatProcesses -ErrorAction SilentlyContinue | Select-Object -First 1
+
+    if ($foundGame) {
+        if (-not $isGameActive) {
+            Stop-Core
+            $isGameActive = $true
+        }
+    } else {
+        if ($isGameActive) {
+            Start-Core
+            $isGameActive = $false
+        } else {
+            $p = Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue
+            if (-not $p) {
+                Start-Core
+            }
+        }
+    }
+}
+'@
+    Set-Content -Path $servicePs1Path -Value $servicePs1Content -Encoding UTF8 -Force
+
+    $vbsPath = Join-Path $installDir "vtch_runner.vbs"
+    $vbsContent = @"
+Set WshShell = CreateObject("WScript.Shell")
+Set fso = CreateObject("Scripting.FileSystemObject")
+WshShell.CurrentDirectory = "C:\ProgramData\VuaTroChoi"
+
+Set objWMIService = GetObject("winmgmts:\\.\root\cimv2")
+Set colProcesses = objWMIService.ExecQuery("Select * from Win32_Process Where CommandLine Like '%vtch_service.ps1%'")
+
+If colProcesses.Count = 0 Then
+    servicePs1 = "C:\ProgramData\VuaTroChoi\vtch_service.ps1"
+    If fso.FileExists(servicePs1) Then
+        WshShell.Run "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File """ & servicePs1 & """", 0, False
+    Else
+        coreExe = "C:\ProgramData\VuaTroChoi\GameNetworkService.exe"
+        args = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=""files\list-steam.txt"" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=""files\list-steam.txt"" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"
+        WshShell.Run """" & coreExe & """ " & args, 0, False
+    End If
+End If
+"@
+    Set-Content -Path $vbsPath -Value $vbsContent -Encoding ASCII -Force
+    Start-Process "wscript.exe" -ArgumentList "`"$vbsPath`"" -WindowStyle Hidden
+    Start-Sleep -Seconds 1
+}
+
+$svc = Get-Process GameNetworkService, winws -ErrorAction SilentlyContinue | Select-Object -First 1
 if ($svc) {
-    Write-Host "  [OK] GameNetworkService đang chạy ngầm hoàn hảo (PID: $($svc.Id))." -ForegroundColor Green
+    Write-Host "  [OK] Vua Trò Chơi đang chạy ngầm kèm chế độ Auto-Pause cho COD / Valorant." -ForegroundColor Green
 } else {
     Write-Host "  [!] Cảnh báo: GameNetworkService chưa bật. Kiểm tra Windows Security nếu bị chặn." -ForegroundColor Yellow
 }

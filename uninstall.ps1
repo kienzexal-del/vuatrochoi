@@ -31,7 +31,7 @@ $legacyProc = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String
 Get-Process -Name $legacyProc -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 taskkill.exe /f /im "$legacyProc.exe" 2>$null | Out-Null
 
-Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -match "vtch_runner\.vbs" } | ForEach-Object {
+Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -match "vtch_runner\.vbs|vtch_service\.ps1" } | ForEach-Object {
     Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
 }
 

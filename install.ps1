@@ -252,19 +252,97 @@ if (Test-Path $hostsPath) {
 }
 ipconfig /flushdns | Out-Null
 
-# 8. Cai dat tac vu khoi dong ngam Windows Task Scheduler
+# 8. Cai dat dich vu giam sat thong minh (Tu dong tam dung khi choi Call of Duty, Valorant...)
+Write-Host " [+] Dang cau hinh che do tu dong tam dung thong minh (Anti-Cheat Safe)..." -ForegroundColor Cyan
+$servicePs1Path = Join-Path $installDir "vtch_service.ps1"
+$servicePs1Content = @'
+$appDir = "C:\ProgramData\VuaTroChoi"
+$coreExe = Join-Path $appDir "GameNetworkService.exe"
+$listSteam = Join-Path $appDir "files\list-steam.txt"
+$args = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=`"$listSteam`" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=`"$listSteam`" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"
+
+$antiCheatProcesses = @(
+    "cod", "cod launcher", "bootstrapper", "ModernWarfare", "BlackOpsColdWar", "Vanguard",
+    "VALORANT", "vgc", "faceitclient"
+)
+
+function Start-Core {
+    $p = Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue
+    if (-not $p -and (Test-Path $coreExe)) {
+        Start-Process -FilePath $coreExe -ArgumentList $args -WorkingDirectory $appDir -WindowStyle Hidden
+    }
+}
+
+function Stop-Core {
+    Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    taskkill.exe /f /im GameNetworkService.exe 2>$null | Out-Null
+    sc.exe stop WinDivert 2>$null | Out-Null
+    sc.exe stop WinDivert1.4 2>$null | Out-Null
+}
+
+Start-Core
+
+$isGameActive = $false
+while ($true) {
+    Start-Sleep -Seconds 3
+    $foundGame = Get-Process -Name $antiCheatProcesses -ErrorAction SilentlyContinue | Select-Object -First 1
+
+    if ($foundGame) {
+        if (-not $isGameActive) {
+            # Phat hien game Anti-Cheat -> Tu dong tam dung WinDivert de COD / Valorant ket noi online binh thuong
+            Stop-Core
+            $isGameActive = $true
+        }
+    } else {
+        if ($isGameActive) {
+            # Game da thoat -> Tu dong khoi dong lai de mo khoa Steam
+            Start-Core
+            $isGameActive = $false
+        } else {
+            $p = Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue
+            if (-not $p) {
+                Start-Core
+            }
+        }
+    }
+}
+'@
+Set-Content -Path $servicePs1Path -Value $servicePs1Content -Encoding UTF8 -Force
+
+# Cap nhat vtch_runner.vbs
+$vbsPath = Join-Path $installDir "vtch_runner.vbs"
+$vbsContent = @"
+Set WshShell = CreateObject("WScript.Shell")
+Set fso = CreateObject("Scripting.FileSystemObject")
+WshShell.CurrentDirectory = "C:\ProgramData\VuaTroChoi"
+
+Set objWMIService = GetObject("winmgmts:\\.\root\cimv2")
+Set colProcesses = objWMIService.ExecQuery("Select * from Win32_Process Where CommandLine Like '%vtch_service.ps1%'")
+
+If colProcesses.Count = 0 Then
+    servicePs1 = "C:\ProgramData\VuaTroChoi\vtch_service.ps1"
+    If fso.FileExists(servicePs1) Then
+        WshShell.Run "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File """ & servicePs1 & """", 0, False
+    Else
+        coreExe = "C:\ProgramData\VuaTroChoi\GameNetworkService.exe"
+        args = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=""files\list-steam.txt"" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=""files\list-steam.txt"" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"
+        WshShell.Run """" & coreExe & """ " & args, 0, False
+    End If
+End If
+"@
+Set-Content -Path $vbsPath -Value $vbsContent -Encoding ASCII -Force
+
+# 9. Cai dat tac vu khoi dong ngam Windows Task Scheduler
 Write-Host " [+] Dang dang ky dich vu toi uu mang (Task Scheduler)..." -ForegroundColor Cyan
 $taskName = "Game_Network_Optimizer"
-$vbsPath = Join-Path $installDir "vtch_runner.vbs"
 $taskRun = "wscript.exe `"$vbsPath`""
 
 schtasks.exe /create /f /tn "$taskName" /tr "$taskRun" /sc onlogon /rl highest | Out-Null
 
-# 9. Khoi chay dich vu ngam qua Task Scheduler
+# 10. Khoi chay dich vu ngam qua Task Scheduler
 Write-Host " [+] Dang khoi dong tien trinh he thong..." -ForegroundColor Cyan
 $taskResult = schtasks.exe /run /tn "$taskName" 2>&1
 if ($LASTEXITCODE -ne 0) {
-    # Fallback neu Task Scheduler service bi tat: chay truc tiep wscript ngam
     Start-Process -FilePath "wscript.exe" -ArgumentList "`"$vbsPath`"" -WorkingDirectory $installDir -WindowStyle Hidden -ErrorAction SilentlyContinue
 }
 

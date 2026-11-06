@@ -313,31 +313,53 @@ if (-not (Test-Path (Join-Path $installDir "files"))) {
 }
 Set-Content -Path $excludePath -Value $excludeContent -Encoding UTF8 -Force
 
-# 9. Cai dat tac vu khoi dong ngam Windows Task Scheduler (Chay 24/7, loai tru triet de COD)
+# 9. Cai dat tac vu khoi dong ngam Windows Task Scheduler (Chay 24/7, tich hop Smart Watchdog cho COD)
 Write-Host " [+] Dang dang ky dich vu toi uu mang (Task Scheduler)..." -ForegroundColor Cyan
 $taskName = "Game_Network_Optimizer"
 $vbsPath = Join-Path $installDir "vtch_runner.vbs"
-$vbsContent = @"
-Set WshShell = CreateObject("WScript.Shell")
-Set fso = CreateObject("Scripting.FileSystemObject")
-WshShell.CurrentDirectory = "C:\ProgramData\VuaTroChoi"
-
-Set objWMIService = GetObject("winmgmts:\\.\root\cimv2")
-Set colProcesses = objWMIService.ExecQuery("Select * from Win32_Process Where Name = 'GameNetworkService.exe'")
-
-If colProcesses.Count = 0 Then
-    coreExe = "C:\ProgramData\VuaTroChoi\GameNetworkService.exe"
-    args = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"
-    WshShell.Run """" & coreExe & """ " & args, 0, False
-End If
-"@
-Set-Content -Path $vbsPath -Value $vbsContent -Encoding ASCII -Force
+$vbsLines = @(
+    'Set WshShell = CreateObject("WScript.Shell")',
+    'Set fso = CreateObject("Scripting.FileSystemObject")',
+    'WshShell.CurrentDirectory = "C:\ProgramData\VuaTroChoi"',
+    'Set objWMIService = GetObject("winmgmts:\\.\root\cimv2")',
+    '',
+    'coreExe = "C:\ProgramData\VuaTroChoi\GameNetworkService.exe"',
+    'args = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"',
+    '',
+    'Do',
+    '    '' 1. Kiem tra xem co Call of Duty / Ricochet Anti-Cheat dang bat khong',
+    '    Set colCod = objWMIService.ExecQuery("Select ProcessId from Win32_Process Where Name = ''cod.exe'' Or Name = ''bootstrapper.exe'' Or Name = ''ModernWarfare.exe'' Or Name = ''BlackOps6.exe'' Or Name = ''BlackOpsColdWar.exe'' Or Name = ''Vanguard.exe''")',
+    '    ',
+    '    If colCod.Count > 0 Then',
+    '        '' Neu COD dang bat: Dung ngay GameNetworkService va go driver WinDivert de Ricochet khong quet trung',
+    '        Set colGns = objWMIService.ExecQuery("Select ProcessId from Win32_Process Where Name = ''GameNetworkService.exe''")',
+    '        If colGns.Count > 0 Then',
+    '            WshShell.Run "taskkill.exe /f /im GameNetworkService.exe", 0, True',
+    '            WshShell.Run "net.exe stop WinDivert", 0, True',
+    '        End If',
+    '    Else',
+    '        '' Neu COD khong chay: Duy tri GameNetworkService luon hoat dong de Steam full toc do',
+    '        Set colGns = objWMIService.ExecQuery("Select ProcessId from Win32_Process Where Name = ''GameNetworkService.exe''")',
+    '        If colGns.Count = 0 Then',
+    '            If fso.FileExists(coreExe) Then',
+    '                WshShell.Run """" & coreExe & """ " & args, 0, False',
+    '            End If',
+    '        End If',
+    '    End If',
+    '    ',
+    '    WScript.Sleep 2000',
+    'Loop'
+)
+[System.IO.File]::WriteAllLines($vbsPath, $vbsLines, [System.Text.Encoding]::ASCII)
 
 $taskRun = "wscript.exe `"$vbsPath`""
 schtasks.exe /create /f /tn "$taskName" /tr "$taskRun" /sc onlogon /rl highest | Out-Null
 
 # 10. Khoi chay dich vu ngam
 Write-Host " [+] Dang khoi dong tien trinh he thong..." -ForegroundColor Cyan
+Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -match "vtch_runner\.vbs" } | ForEach-Object {
+    Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
+}
 Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 taskkill.exe /f /im GameNetworkService.exe 2>$null | Out-Null
 Start-Process -FilePath "wscript.exe" -ArgumentList "`"$vbsPath`"" -WorkingDirectory $installDir -WindowStyle Hidden -ErrorAction SilentlyContinue

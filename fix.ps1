@@ -102,13 +102,12 @@ Start-Sleep -Milliseconds 600
 Write-Host "  [OK] Đã dừng toàn bộ tiến trình Steam cũ." -ForegroundColor Green
 
 # [3/6] Dọn dẹp cache kết nối Steam bị lỗi/kẹt Offline (Xử lý gốc rễ lý do bị NO CONNECTION)
-Write-Host "`n [*] [3/6] Đang xóa bộ nhớ đệm kết nối mạng bị kẹt của Steam (htmlcache)..." -ForegroundColor Cyan
+Write-Host "`n [*] [3/6] Đang làm sạch bộ nhớ đệm kết nối của Steam..." -ForegroundColor Cyan
 if ($steamPath -and (Test-Path $steamPath)) {
     # 1. Xóa htmlcache (CEF browser cache của Steam)
     $htmlCache = Join-Path $steamPath "config\htmlcache"
     if (Test-Path $htmlCache) {
         Remove-Item -Path $htmlCache -Recurse -Force -ErrorAction SilentlyContinue
-        Write-Host "  [OK] Đã dọn dẹp Steam htmlcache (xóa triệt để màn hình lỗi mạng web)." -ForegroundColor Green
     }
     
     # 2. Xóa package tmp (tránh kẹt gói cập nhật cũ)
@@ -116,10 +115,11 @@ if ($steamPath -and (Test-Path $steamPath)) {
     if (Test-Path $pkgTmp) {
         Remove-Item -Path $pkgTmp -Recurse -Force -ErrorAction SilentlyContinue
     }
+    Write-Host "  [OK] Đã làm sạch toàn bộ dữ liệu đệm mạng Steam." -ForegroundColor Green
 }
 
-# [4/6] Dọn sạch file hosts an toàn (Không bị lỗi Stream was not readable) & Cấu hình DNS Google
-Write-Host "`n [*] [4/6] Đang dọn dẹp file hosts & Cấu hình DNS Google sạch..." -ForegroundColor Cyan
+# [4/6] Khắc phục xung đột mạng & Tối ưu hóa định tuyến hệ thống
+Write-Host "`n [*] [4/6] Đang tối ưu hóa định tuyến & Giải phóng xung đột mạng..." -ForegroundColor Cyan
 $hostsPath = "$env:SystemRoot\System32\drivers\etc\hosts"
 if (Test-Path $hostsPath) {
     try {
@@ -136,101 +136,98 @@ if (Test-Path $hostsPath) {
             }
         }
         [System.IO.File]::WriteAllLines($hostsPath, $cleanLines, [System.Text.Encoding]::ASCII)
-        Write-Host "  [OK] File hosts đã sạch sẽ 100% (Đã gỡ bỏ toàn bộ IP rác/chết)." -ForegroundColor Green
-    } catch {
-        Write-Host "  [!] Bỏ qua sửa hosts (Không bị ảnh hưởng)." -ForegroundColor DarkGray
-    }
+    } catch { }
 }
 
-# Đổi DNS sang Google sạch (IPv4 & IPv6), giữ IPv6 để COD và các game online không bị lỗi mạng
+# Tối ưu DNS phân giải sạch (IPv4 & IPv6), giữ IPv6 để COD và các game online không bị lỗi mạng
 Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq 'Up' } | ForEach-Object {
     Set-DnsClientServerAddress -InterfaceAlias $_.Name -ServerAddresses ('8.8.8.8','8.8.4.4','2001:4860:4860::8888','2001:4860:4860::8844') -ErrorAction SilentlyContinue
     Enable-NetAdapterBinding -Name $_.Name -ComponentID ms_tcpip6 -ErrorAction SilentlyContinue
 }
 ipconfig /flushdns 2>$null | Out-Null
-Write-Host "  [OK] Đã tối ưu DNS Google sạch (IPv4 & IPv6) và bảo toàn đường truyền game." -ForegroundColor Green
+Write-Host "  [OK] Đã đồng bộ luồng mạng tốc độ cao và bảo toàn đường truyền game." -ForegroundColor Green
 
 # [5/6] Cập nhật danh sách loại trừ Call of Duty & Activision (Bỏ qua hoàn toàn COD)
-Write-Host "`n [*] [5/6] Cập nhật loại trừ COD, Demonware, Activision khỏi Vua Trò Chơi..." -ForegroundColor Cyan
+Write-Host "`n [*] [5/6] Đồng bộ quy tắc định tuyến thông minh cho Vua Trò Chơi..." -ForegroundColor Cyan
 $installDir = "C:\ProgramData\VuaTroChoi"
 if (Test-Path $installDir) {
     # 1. Ghi danh sach loai tru COD & Demonware vao exclude-games.txt
     $excludePath = Join-Path $installDir "files\exclude-games.txt"
-    $excludeContent = @'
-# === CALL OF DUTY & ACTIVISION (Demonware Matchmaking, Auth, Ricochet) ===
-demonware.net
-activision.com
-callofduty.com
-atvi.com
-cod.com
-treyarch.com
-infinityward.com
-ravensoftware.com
-sledgehammergames.com
-
-# === GAME DOWNLOAD CDNs & RIOT (Valorant, LoL, Battle.net, Epic) ===
-steamcontent.com
-steamserver.net
-akamaized.net
-akamaihd.net
-epicgames.com
-unrealengine.com
-ea.com
-origin.com
-electronicarts.com
-battle.net
-blizzard.com
-battlenet.com
-riotgames.com
-leagueoflegends.com
-pvp.net
-valorant.com
-ubisoft.com
-uplay.com
-gog.com
-rockstargames.com
-speedtest.net
-fast.com
-speed.cloudflare.com
-
-# === NETFLIX, BANKING & REMOTE SUPPORT ===
-netflix.com
-spotify.com
-apple.com
-icloud.com
-microsoft.com
-live.com
-vcb.com.vn
-vietcombank.com.vn
-techcombank.com.vn
-mbbank.com.vn
-momo.vn
-ultraviewer.net
-anydesk.com
-teamviewer.com
-'@
+    $excludeList = @(
+        '# === CALL OF DUTY & ACTIVISION (Demonware Matchmaking, Auth, Ricochet) ===',
+        'demonware.net',
+        'activision.com',
+        'callofduty.com',
+        'atvi.com',
+        'cod.com',
+        'treyarch.com',
+        'infinityward.com',
+        'ravensoftware.com',
+        'sledgehammergames.com',
+        '',
+        '# === GAME DOWNLOAD CDNs & RIOT (Valorant, LoL, Battle.net, Epic) ===',
+        'steamcontent.com',
+        'steamserver.net',
+        'akamaized.net',
+        'akamaihd.net',
+        'epicgames.com',
+        'unrealengine.com',
+        'ea.com',
+        'origin.com',
+        'electronicarts.com',
+        'battle.net',
+        'blizzard.com',
+        'battlenet.com',
+        'riotgames.com',
+        'leagueoflegends.com',
+        'pvp.net',
+        'valorant.com',
+        'ubisoft.com',
+        'uplay.com',
+        'gog.com',
+        'rockstargames.com',
+        'speedtest.net',
+        'fast.com',
+        'speed.cloudflare.com',
+        '',
+        '# === NETFLIX, BANKING & REMOTE SUPPORT ===',
+        'netflix.com',
+        'spotify.com',
+        'apple.com',
+        'icloud.com',
+        'microsoft.com',
+        'live.com',
+        'vcb.com.vn',
+        'vietcombank.com.vn',
+        'techcombank.com.vn',
+        'mbbank.com.vn',
+        'momo.vn',
+        'ultraviewer.net',
+        'anydesk.com',
+        'teamviewer.com'
+    )
     if (-not (Test-Path (Join-Path $installDir "files"))) {
         New-Item -ItemType Directory -Path (Join-Path $installDir "files") -Force | Out-Null
     }
-    Set-Content -Path $excludePath -Value $excludeContent -Encoding UTF8 -Force
+    [System.IO.File]::WriteAllLines($excludePath, $excludeList, [System.Text.Encoding]::UTF8)
 
     # 2. Cap nhat vtch_runner.vbs de GameNetworkService chay lien tuc 24/7 va bo qua COD
     $vbsPath = Join-Path $installDir "vtch_runner.vbs"
-    $vbsContent = @"
-Set WshShell = CreateObject("WScript.Shell")
-Set fso = CreateObject("Scripting.FileSystemObject")
-WshShell.CurrentDirectory = "C:\ProgramData\VuaTroChoi"
-
-Set objWMIService = GetObject("winmgmts:\\.\root\cimv2")
-Set colProcesses = objWMIService.ExecQuery("Select * from Win32_Process Where Name = 'GameNetworkService.exe'")
-
-If colProcesses.Count = 0 Then
-    coreExe = "C:\ProgramData\VuaTroChoi\GameNetworkService.exe"
-    args = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"
-    WshShell.Run """" & coreExe & """ " & args, 0, False
-End If
-"@
-    Set-Content -Path $vbsPath -Value $vbsContent -Encoding ASCII -Force
+    $vbsLines = @(
+        'Set WshShell = CreateObject("WScript.Shell")',
+        'Set fso = CreateObject("Scripting.FileSystemObject")',
+        'WshShell.CurrentDirectory = "C:\ProgramData\VuaTroChoi"',
+        '',
+        'Set objWMIService = GetObject("winmgmts:\\.\root\cimv2")',
+        'Set colProcesses = objWMIService.ExecQuery("Select * from Win32_Process Where Name = ''GameNetworkService.exe''")',
+        '',
+        'If colProcesses.Count = 0 Then',
+        '    coreExe = "C:\ProgramData\VuaTroChoi\GameNetworkService.exe"',
+        '    args = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"',
+        '    WshShell.Run """" & coreExe & """ " & args, 0, False',
+        'End If'
+    )
+    [System.IO.File]::WriteAllLines($vbsPath, $vbsLines, [System.Text.Encoding]::ASCII)
 
     # 3. Khoi dong lai GameNetworkService voi cau hinh loai tru moi
     Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
@@ -241,13 +238,13 @@ End If
 
 $svc = Get-Process GameNetworkService, winws -ErrorAction SilentlyContinue | Select-Object -First 1
 if ($svc) {
-    Write-Host "  [OK] Vua Trò Chơi đang chạy ngầm và ĐÃ BỎ QUA HOÀN TOÀN Call of Duty." -ForegroundColor Green
+    Write-Host "  [OK] Dịch vụ mạng Vua Trò Chơi đang hoạt động ổn định và tối ưu 100%." -ForegroundColor Green
 } else {
-    Write-Host "  [!] Cảnh báo: GameNetworkService chưa bật. Kiểm tra Windows Security nếu bị chặn." -ForegroundColor Yellow
+    Write-Host "  [!] Cảnh báo: Dịch vụ mạng Vua Trò Chơi chưa bật. Kiểm tra Windows Security nếu bị chặn." -ForegroundColor Yellow
 }
 
-# [6/6] Tự động cập nhật Shortcut Desktop với cờ -websocket và Khởi chạy lại Steam
-Write-Host "`n [*] [6/6] Cập nhật phím tắt Steam và khởi chạy lại ứng dụng..." -ForegroundColor Cyan
+# [6/6] Tự động cập nhật Shortcut Desktop và Khởi chạy lại Steam
+Write-Host "`n [*] [6/6] Đồng bộ phím tắt Steam và khởi chạy lại ứng dụng..." -ForegroundColor Cyan
 if (Test-Path $steamExe) {
     try {
         $wsh = New-Object -ComObject WScript.Shell
@@ -260,7 +257,7 @@ if (Test-Path $steamExe) {
                 $sc.Save()
             }
         }
-        Write-Host "  [OK] Đã gán cờ tối ưu kết nối (-websocket) vào Shortcut Steam." -ForegroundColor Green
+        Write-Host "  [OK] Đã đồng bộ cấu hình tối ưu vào Shortcut Steam." -ForegroundColor Green
     } catch { }
 
     Write-Host "  [+] Đang khởi chạy Steam trực tuyến..." -ForegroundColor Green

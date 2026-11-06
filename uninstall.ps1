@@ -1,22 +1,25 @@
-﻿# ===========================================================================
-#  VUA TRO CHOI - LENH GO CAI DAT SACH SE (UNINSTALL SCRIPT)
-#  Go bo toan bo dich vu ngam
-# ===========================================================================
-
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $Host.UI.RawUI.WindowTitle = "VUA TRO CHOI - Go Cai Dat He Thong"
 
+# 1. Tu dong kiem tra va xin quyen Administrator (UAC Popup)
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $isAdmin) {
-    Write-Host "Vui long chay script nay voi quyen Administrator!" -ForegroundColor Red
-    pause
+    Write-Host ""
+    Write-Host " [!] Chuong trinh can quyen Administrator de go bo he thong." -ForegroundColor Yellow
+    Write-Host " [!] Dang yeu cau cap quyen Administrator (UAC)..." -ForegroundColor Yellow
+    if ($PSCommandPath) {
+        Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    } else {
+        $onlineCmd = "irm https://raw.githubusercontent.com/kienzexal-del/vuatrochoi/main/uninstall.ps1 | iex"
+        Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$onlineCmd`"" -Verb RunAs
+    }
     exit
 }
 
 Clear-Host
 Write-Host ""
 Write-Host " ===========================================================================" -ForegroundColor Yellow
-Write-Host "    [VUA TRO CHOI] - GO CAI DAT HE THONG                                  " -ForegroundColor Yellow
+Write-Host "    [VUA TRO CHOI] - GỠ CÀI ĐẶT & KHÔI PHỤC MẠNG HỆ THỐNG                   " -ForegroundColor Yellow
 Write-Host " ===========================================================================" -ForegroundColor Yellow
 Write-Host ""
 
@@ -72,14 +75,14 @@ if (Test-Path $hostsPath) {
 }
 ipconfig /flushdns | Out-Null
 
-# 5. Khoi phuc Shortcut Steam Desktop (bo -tcp neu co)
+# 5. Khoi phuc Shortcut Steam Desktop (bo -websocket va -tcp neu co)
 try {
     $wsh = New-Object -ComObject WScript.Shell
     @("$([Environment]::GetFolderPath('Desktop'))\Steam.lnk", "$([Environment]::GetFolderPath('CommonDesktopDirectory'))\Steam.lnk") | ForEach-Object {
         if (Test-Path $_) {
             $sc = $wsh.CreateShortcut($_)
-            if ($sc.Arguments -match "-tcp") {
-                $sc.Arguments = ($sc.Arguments -replace "-tcp", "").Trim()
+            if ($sc.Arguments -match "-tcp|-websocket") {
+                $sc.Arguments = ($sc.Arguments -replace "-tcp", "" -replace "-websocket", "").Trim()
                 $sc.Save()
             }
         }
@@ -96,7 +99,7 @@ if (Test-Path "C:\ProgramData\VuaTroChoi") {
 
 Write-Host ""
 Write-Host " ===========================================================================" -ForegroundColor Green
-Write-Host "    DA GO CAI DAT SACH SE TOAN BO HE THONG THANH CONG!                     " -ForegroundColor Green
+Write-Host "    ĐÃ GỠ CÀI ĐẶT VÀ KHÔI PHỤC MẠNG GỐC HOÀN TOÀN THÀNH CÔNG!              " -ForegroundColor Green
 Write-Host " ===========================================================================" -ForegroundColor Green
 Write-Host ""
-Read-Host " Nhan Enter de dong cua so..."
+Start-Sleep -Seconds 3

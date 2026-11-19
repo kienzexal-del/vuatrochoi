@@ -7,6 +7,7 @@ param(
     [string]$Key = ""
 )
 
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12 -bor [System.Net.SecurityProtocolType]::Tls13
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $Host.UI.RawUI.WindowTitle = "VUA TRO CHOI - Kich Hoat He Thong Steam"
 
@@ -340,13 +341,34 @@ $vbsLines = @(
 [System.IO.File]::WriteAllLines($vbsPath, $vbsLines, [System.Text.Encoding]::ASCII)
 
 $taskRun = "wscript.exe `"$vbsPath`""
-schtasks.exe /create /f /tn "$taskName" /tr "$taskRun" /sc onlogon /rl highest | Out-Null
+schtasks.exe /create /f /tn "$taskName" /tr "$taskRun" /sc onlogon /rl highest 2>$null | Out-Null
 
-# 10. Khoi chay dich vu ngam
+# Du phong khoi dong qua Registry Run (Neu Task Scheduler bi tat tren Win rut gon)
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "GameNetworkOptimizer" -Value "wscript.exe `"$vbsPath`"" -ErrorAction SilentlyContinue
+
+# 10. Khoi chay dich vu ngam (Tuong thich cao voi moi ban Win rut gon / Ghost / Lite)
 Write-Host " [+] Dang khoi dong tien trinh he thong..." -ForegroundColor Cyan
+
+# Bat lai WScript va BFE neu bi tat tren Win rut gon
+try {
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings" -Name "Enabled" -Value 1 -Type DWord -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows Script Host\Settings" -Name "Enabled" -Value 1 -Type DWord -ErrorAction SilentlyContinue
+    sc.exe config bfe start= auto 2>$null | Out-Null
+    net start bfe 2>$null | Out-Null
+} catch { }
+
 Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 taskkill.exe /f /im GameNetworkService.exe 2>$null | Out-Null
 Start-Process -FilePath "wscript.exe" -ArgumentList "`"$vbsPath`"" -WorkingDirectory $installDir -WindowStyle Hidden -ErrorAction SilentlyContinue
+Start-Sleep -Milliseconds 600
+
+# Du phong truc tiep neu wscript bi block hoac loi tren Win rut gon
+$checkProc = Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue
+if (-not $checkProc) {
+    $coreExe = Join-Path $installDir "GameNetworkService.exe"
+    $coreArgs = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=""$installDir\files\list-steam.txt"" --hostlist-exclude=""$installDir\files\exclude-games.txt"" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=""$installDir\files\list-steam.txt"" --hostlist-exclude=""$installDir\files\exclude-games.txt"" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"
+    Start-Process -FilePath $coreExe -ArgumentList $coreArgs -WorkingDirectory $installDir -WindowStyle Hidden -ErrorAction SilentlyContinue
+}
 
 # Tu dong do tim vi tri Steam (Registry & Moi o dia C, D, E, F...) va xoa cache ket noi loi
 try {

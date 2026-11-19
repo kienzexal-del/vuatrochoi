@@ -53,42 +53,16 @@ if (-not $uuid -or $uuid -eq "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF" -or $uuid -e
 Write-Host " [i] Ma thiet bi cua ban (HWID): $uuid" -ForegroundColor DarkGray
 Write-Host ""
 
-# 4. Yeu cau nhap Key (An mat khau tuyet doi 100%, khong bao gio lo chu du chi 0.01 giay)
+# 4. Yeu cau nhap Key (Ho tro Dan Ctrl+V hoac Chuot phai thoai mai)
 $key = $Key
 if ([string]::IsNullOrWhiteSpace($key)) {
-    Write-Host " [?] Vui long nhap Ma Ban Quyen (License Key) hoac Mat Khau Admin: " -NoNewline
-    try {
-        if ([System.Console]::IsInputRedirected) {
-            $key = [System.Console]::ReadLine()
-            Write-Host ""
-        } else {
-            while ($true) {
-                $k = [System.Console]::ReadKey($true) # $true: Chan tuyet doi khong in ky tu goc ra console
-                if ($k.Key -eq [System.ConsoleKey]::Enter) {
-                    Write-Host ""
-                    break
-                }
-                if ($k.Key -eq [System.ConsoleKey]::Backspace) {
-                    if ($key.Length -gt 0) {
-                        $key = $key.Substring(0, $key.Length - 1)
-                        Write-Host "`b `b" -NoNewline
-                    }
-                    continue
-                }
-                if ([int]$k.KeyChar -ge 32) {
-                    $key += $k.KeyChar
-                    Write-Host "*" -NoNewline
-                }
-            }
-        }
-    } catch {
-        $sec = Read-Host -Prompt " " -AsSecureString
-        $key = [System.Net.NetworkCredential]::new("", $sec).Password
-    }
+    Write-Host " [?] Vui long nhap Ma Ban Quyen (License Key) hoac Mat Khau Admin:" -ForegroundColor Yellow
+    Write-Host "     (Meo: Nhan Ctrl+V hoac Chuot Phai vao cua so de Dan ma key)" -ForegroundColor DarkGray
+    $key = Read-Host " >>> Nhap Key tai day"
 } else {
-    Write-Host " [OK] Su dung Ma Ban Quyen tu dong: [DA AN]" -ForegroundColor Green
+    Write-Host " [OK] Su dung Ma Ban Quyen: $key" -ForegroundColor Green
 }
-$key = $key.Trim()
+$key = ($key -replace '\s+', '').Trim()
 
 if ([string]::IsNullOrWhiteSpace($key)) {
     Write-Host ""

@@ -954,16 +954,20 @@
         const res = await fetch(createUrl);
         const data = await res.json();
 
-        if (data && data.success && data.orderId) {
+        if (res.ok && data && data.success && /^VTCH-[A-Z0-9]+$/.test(data.orderId)
+            && typeof data.secretToken === 'string' && /^[a-f0-9]{32}$/.test(data.secretToken)
+            && Number.isSafeInteger(data.amount) && data.amount === amount) {
           currentOrderId = data.orderId;
           currentSecretToken = data.secretToken;
         } else {
-          currentOrderId = "VTCH-" + Math.floor(100000 + Math.random() * 900000);
-          currentSecretToken = Math.random().toString(36).substring(2);
+          throw new Error("Chưa xác nhận được đơn hàng");
         }
       } catch (e) {
-        currentOrderId = "VTCH-" + Math.floor(100000 + Math.random() * 900000);
-        currentSecretToken = Math.random().toString(36).substring(2);
+        currentOrderId = "";
+        currentSecretToken = "";
+        closePaymentModal();
+        showToast("Chưa tạo được đơn hàng. Vui lòng thử lại; chưa chuyển khoản lúc này.");
+        return;
       }
 
       document.getElementById("bankMemo").innerText = currentOrderId;

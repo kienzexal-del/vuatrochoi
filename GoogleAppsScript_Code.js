@@ -357,8 +357,8 @@ function handleCheckOrder(orderId, token) {
       var rowSecretToken = String(data[i][9] || "").trim();
       var status = String(data[i][4]).trim().toUpperCase();
 
-      // BẢO MẬT: Bắt buộc SecretToken phải khớp mới trả Key (Chống kẻ gian dò quét trộm key)
-      if (rowSecretToken && token && rowSecretToken !== token.toLowerCase()) {
+      // BẢO MẬT: Bắt buộc SecretToken phải có và phải khớp mới trả Key (Chống kẻ gian dò quét trộm key)
+      if (!rowSecretToken || !token || rowSecretToken !== String(token).trim().toLowerCase()) {
         return responseJson({
           success: false,
           status: "UNAUTHORIZED",

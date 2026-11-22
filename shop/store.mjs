@@ -6,11 +6,22 @@ function button(text,action,cls='') {const b=el('button',text,cls); b.addEventLi
 function error(message) {$('alert').textContent=message; $('alert').hidden=!message;}
 function toast(message) {$('toast').textContent=message; $('toast').hidden=false; setTimeout(()=>$('toast').hidden=true,3000);}
 let gisReady = false, credential = '';
-function login() {
-  if (!gisReady) {
-    if (!$('demo').hidden) location.assign('/auth/login');
-    else error('Đăng nhập Google chưa sẵn sàng. Vui lòng tải lại trang.');
+let loginOpening = false;
+async function login() {
+  if (!$('demo').hidden) {
+    location.assign('/auth/login');
     return;
+  }
+  if (loginOpening || document.querySelector('.login-dialog[open]')) return;
+  loginOpening = true;
+  try {
+    error('');
+    await startGoogleSignIn();
+  } catch {
+    error('Chưa tải được đăng nhập Google. Hãy thử lại hoặc mở trang bằng Chrome hoặc Safari.');
+    return;
+  } finally {
+    loginOpening = false;
   }
   const dialog = el('dialog', undefined, 'login-dialog');
   dialog.setAttribute('aria-label', 'Đăng nhập bằng Google');
@@ -300,27 +311,28 @@ window.addEventListener('hashchange', () => {
   else window.scrollTo({top: 0, behavior: 'instant'});
 });
 route();
-let connectionError='';
-try {
-  let clientId = GOOGLE_CLIENT_ID;
-  const config = await request('/api/shop-config').catch(() => null);
-  if (config?.demo) {
-    $('demo').hidden = false;
-    user = (await request('/api/me')).user;
-  } else {
-  if (config?.googleClientId) {
-    clientId = config.googleClientId;
+async function startGoogleSignIn() {
+  if (gisReady) return;
+  if (!window.google?.accounts?.id) {
+    await new Promise((resolve, reject) => {
+      const script = el('script');
+      const timeout = setTimeout(() => fail(), 8000);
+      function fail() {
+        clearTimeout(timeout);
+        script.remove();
+        reject(new Error('Google SDK unavailable'));
+      }
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.onload = () => {
+        clearTimeout(timeout);
+        resolve();
+      };
+      script.onerror = fail;
+      document.head.append(script);
+    });
   }
-  await new Promise((resolve, reject) => {
-    if (window.google?.accounts?.id) return resolve();
-    const script = el('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.append(script);
-  });
   google.accounts.id.initialize({
-    client_id: clientId,
+    client_id: GOOGLE_CLIENT_ID,
     callback: async result => {
       try {
         credential = result.credential;
@@ -336,14 +348,19 @@ try {
     }
   });
   gisReady = true;
+}
+
+if (['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) {
+  try {
+    const options = {signal: AbortSignal.timeout(2000)};
+    if ((await request('/api/shop-config', options)).demo) {
+      $('demo').hidden = false;
+      user = (await request('/api/me', options)).user;
+    }
+  } catch {
+    // A local static preview can still display the store.
   }
 }
-catch(e){connectionError='Chưa kết nối được tài khoản. Bạn vẫn có thể xem các gói; hãy tải lại trang để thử kết nối.';}
-finally {
-  loading=false;account();route();
-  if(connectionError) error(connectionError);
-  else if(new URLSearchParams(location.search).get('login')==='failed') {
-    error('Đăng nhập Google chưa hoàn tất. Bạn có thể thử lại.');
-    history.replaceState(null, '', location.pathname + location.hash);
-  }
-}
+loading = false;
+account();
+route();

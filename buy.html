@@ -822,8 +822,12 @@
         </div>
 
         <!-- Dynamic VietQR Image -->
-        <div class="qr-box">
-          <img id="qrImage" src="" alt="Mã VietQR Thanh Toán">
+        <div class="qr-box" style="position: relative;">
+          <div id="qrLoader" style="position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #475569; font-size: 13px; font-weight: 600;">
+            <div class="spinner" style="border-top-color: #38bdf8; border-color: rgba(56, 189, 248, 0.2); width: 34px; height: 34px;"></div>
+            <span>Đang tạo VietQR bảo mật...</span>
+          </div>
+          <img id="qrImage" src="" alt="Mã VietQR Thanh Toán" style="display: none; width: 100%; height: 100%; object-fit: contain;" onload="document.getElementById('qrLoader').style.display='none'; this.style.display='block';">
         </div>
 
         <!-- Banking Information with 1-Click Copy -->
@@ -935,8 +939,11 @@
       document.getElementById("modalPackageName").innerText = tierName;
       document.getElementById("bankAmount").innerText = Number(amount).toLocaleString('vi-VN');
 
-      // Tạm hiện đang khởi tạo mã đơn bảo mật
+      // Khởi tạo trạng thái modal & bộ nạp QR
       document.getElementById("bankMemo").innerText = "Đang tạo mã...";
+      document.getElementById("qrLoader").style.display = "flex";
+      document.getElementById("qrImage").style.display = "none";
+      document.getElementById("qrImage").src = "";
       document.getElementById("paymentContent").style.display = "block";
       document.getElementById("successContent").style.display = "none";
       document.getElementById("paymentModal").classList.add("active");
@@ -1013,18 +1020,6 @@
               confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
             }
 
-            receivedKey = data.key;
-            document.getElementById("dispensedKey").innerText = data.key;
-            document.getElementById("paymentContent").style.display = "none";
-            document.getElementById("successContent").style.display = "block";
-          }
-        } catch (err) {
-          console.log("Polling error:", err);
-        }
-      }, 2500);
-    }
-
-            // HIỂN THỊ MÀN HÌNH THÀNH CÔNG
             receivedKey = data.key;
             document.getElementById("dispensedKey").innerText = data.key;
             document.getElementById("paymentContent").style.display = "none";

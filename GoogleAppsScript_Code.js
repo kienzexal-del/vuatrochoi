@@ -51,41 +51,40 @@ function doGet(e) {
 
     var ss = SpreadsheetApp.getActiveSpreadsheet();
 
-    // 5. TÌM KIẾM KEY TRÊN CẢ 2 TRANG TÍNH (VĨNH VIỄN & DÙNG THỬ)
+    // 5. TÌM KIẾM KEY TRÊN TẤT CẢ CÁC TRANG TÍNH (VĨNH VIỄN, 1 NGÀY, 3 NGÀY, 7 NGÀY, TRIAL CŨ)
     var targetSheet = null;
     var foundRowIndex = -1;
     var rowData = null;
     var isTrialSheet = false;
 
-    var sheetLifetime = ss.getSheetByName("Keys_Lifetime") || ss.getSheetByName("Keys");
-    var sheetTrial = ss.getSheetByName("Keys_Trial") || ss.getSheetByName("Keys_DungThu");
+    var searchSheets = [
+      { names: ["Keys_VinhVien", "Keys_Lifetime", "Keys"], isTrial: false },
+      { names: ["Keys_1Ngay"], isTrial: true },
+      { names: ["Keys_3Ngay"], isTrial: true },
+      { names: ["Keys_7Ngay"], isTrial: true },
+      { names: ["Keys_Trial", "Keys_DungThu"], isTrial: true }
+    ];
 
-    // A. Tìm trong Sheet Vĩnh Viễn trước
-    if (sheetLifetime) {
-      var dataLifetime = sheetLifetime.getDataRange().getValues();
-      for (var i = 1; i < dataLifetime.length; i++) {
-        if (String(dataLifetime[i][0]).trim().toUpperCase() === key) {
-          targetSheet = sheetLifetime;
-          foundRowIndex = i + 1;
-          rowData = dataLifetime[i];
-          isTrialSheet = false;
+    for (var sIdx = 0; sIdx < searchSheets.length; sIdx++) {
+      var sConf = searchSheets[sIdx];
+      var sObj = null;
+      for (var n = 0; n < sConf.names.length; n++) {
+        sObj = ss.getSheetByName(sConf.names[n]);
+        if (sObj) break;
+      }
+      if (!sObj) continue;
+
+      var sData = sObj.getDataRange().getValues();
+      for (var r = 1; r < sData.length; r++) {
+        if (String(sData[r][0]).trim().toUpperCase() === key) {
+          targetSheet = sObj;
+          foundRowIndex = r + 1;
+          rowData = sData[r];
+          isTrialSheet = sConf.isTrial;
           break;
         }
       }
-    }
-
-    // B. Nếu chưa thấy, tìm tiếp trong Sheet Dùng Thử
-    if (!targetSheet && sheetTrial) {
-      var dataTrial = sheetTrial.getDataRange().getValues();
-      for (var j = 1; j < dataTrial.length; j++) {
-        if (String(dataTrial[j][0]).trim().toUpperCase() === key) {
-          targetSheet = sheetTrial;
-          foundRowIndex = j + 1;
-          rowData = dataTrial[j];
-          isTrialSheet = true;
-          break;
-        }
-      }
+      if (targetSheet) break;
     }
 
     // C. Không tìm thấy ở cả 2 trang tính
@@ -270,28 +269,28 @@ function handleCreateOrder(params) {
 
   // Bảng giá quy định: 1 Ngày 10k, 3 Ngày 20k, 7 Ngày 50k, Vĩnh Viễn 100k
   var expectedAmount = 100000;
-  var tierName = "Bản Quyền Vĩnh Viễn";
+  var tierName = "B\u1ea3n Quy\u1ec1n V\u0129nh Vi\u1ec5n";
   var durationDays = 0;
 
   if (tier === "trial_1" || amount === 10000) {
     tier = "trial_1";
     expectedAmount = 10000;
-    tierName = "Dùng Thử 1 Ngày";
+    tierName = "D\u00f9ng Th\u1eed 1 Ng\u00e0y";
     durationDays = 1;
   } else if (tier === "trial_3" || amount === 20000) {
     tier = "trial_3";
     expectedAmount = 20000;
-    tierName = "Dùng Thử 3 Ngày";
+    tierName = "D\u00f9ng Th\u1eed 3 Ng\u00e0y";
     durationDays = 3;
   } else if (tier === "trial_7" || amount === 50000) {
     tier = "trial_7";
     expectedAmount = 50000;
-    tierName = "Dùng Thử 7 Ngày";
+    tierName = "D\u00f9ng Th\u1eed 7 Ng\u00e0y";
     durationDays = 7;
   } else {
     tier = "lifetime";
     expectedAmount = 100000;
-    tierName = "Bản Quyền Vĩnh Viễn";
+    tierName = "B\u1ea3n Quy\u1ec1n V\u0129nh Vi\u1ec5n";
     durationDays = 0;
   }
 
@@ -326,6 +325,9 @@ function handleCreateOrder(params) {
     durationDays     // DurationDays
   ];
   sheetOrders.appendRow(orderRow);
+  if (sheetOrders.getLastRow() > 1) {
+    sheetOrders.getRange("B2:B").setNumberFormat("#,##0 \"đ\"");
+  }
 
   return responseJson({
     success: true,
@@ -481,20 +483,20 @@ function handleSepayWebhook(data) {
     // Phân loại số tiền nếu khách chuyển trực tiếp không qua tạo đơn trước
     if (!targetOrderRow) {
       if (amount >= 100000) {
-        tierName = "Bản Quyền Vĩnh Viễn";
+        tierName = "B\u1ea3n Quy\u1ec1n V\u0129nh Vi\u1ec5n";
         durationDays = 0;
       } else if (amount >= 50000) {
-        tierName = "Dùng Thử 7 Ngày";
+        tierName = "D\u00f9ng Th\u1eed 7 Ng\u00e0y";
         durationDays = 7;
       } else if (amount >= 20000) {
-        tierName = "Dùng Thử 3 Ngày";
+        tierName = "D\u00f9ng Th\u1eed 3 Ng\u00e0y";
         durationDays = 3;
       } else if (amount >= 10000) {
-        tierName = "Dùng Thử 1 Ngày";
+        tierName = "D\u00f9ng Th\u1eed 1 Ng\u00e0y";
         durationDays = 1;
       } else {
-        sheetOrders.appendRow([orderId, amount, "Dưới 10k", "", "UNDERPAID", txDate, gateway, refCode, content, "", 0]);
-        return responseJson({ success: false, message: "Số tiền không đủ tối thiểu 10.000đ" });
+        sheetOrders.appendRow([orderId, amount, "D\u01b0\u1edbi 10k", "", "UNDERPAID", txDate, gateway, refCode, content, "", 0]);
+        return responseJson({ success: false, message: "S\u1ed1 ti\u1ec1n kh\u00f4ng \u0111\u1ee7 t\u1ed1i thi\u1ec3u 10.000\u0111" });
       }
     } else {
       // Đơn đã tạo trước: Kiểm tra chuyển đủ tiền không (Chống chuyển thiếu tiền)
@@ -511,11 +513,9 @@ function handleSepayWebhook(data) {
     var dispensedKey = "";
     var isLifetime = (durationDays === 0);
 
-    var sheetLifetime = ss.getSheetByName("Keys_Lifetime") || ss.getSheetByName("Keys");
-    var sheetTrial = ss.getSheetByName("Keys_Trial") || ss.getSheetByName("Keys_DungThu");
-
     if (isLifetime) {
-      if (!sheetLifetime) sheetLifetime = ss.insertSheet("Keys_Lifetime");
+      var sheetLifetime = ss.getSheetByName("Keys_VinhVien") || ss.getSheetByName("Keys_Lifetime") || ss.getSheetByName("Keys");
+      if (!sheetLifetime) sheetLifetime = ss.insertSheet("Keys_VinhVien");
       var dataL = sheetLifetime.getDataRange().getValues();
       var foundIndex = -1;
       for (var rowL = 1; rowL < dataL.length; rowL++) {
@@ -530,16 +530,25 @@ function handleSepayWebhook(data) {
 
       if (dispensedKey && foundIndex !== -1) {
         sheetLifetime.getRange(foundIndex, 2).setValue("Sold");
-        sheetLifetime.getRange(foundIndex, 5).setValue("SePay: " + orderId + " (" + amount + "đ)");
+        sheetLifetime.getRange(foundIndex, 5).setValue("SePay: " + orderId + " (" + amount + "\u0111)");
       } else {
         // Tự động sinh key mới nếu kho hết
         var charsL = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
         dispensedKey = "VTCH-" + getRandomString(4, charsL) + "-" + getRandomString(4, charsL) + "-" + getRandomString(4, charsL);
-        sheetLifetime.appendRow([dispensedKey, "Sold", "", "", "SePay Tự Động: " + orderId]);
+        sheetLifetime.appendRow([dispensedKey, "Sold", "", "", "SePay T\u1ef1 \u0110\u1ed9ng: " + orderId]);
       }
     } else {
-      if (!sheetTrial) sheetTrial = ss.insertSheet("Keys_Trial");
-      var dataT = sheetTrial.getDataRange().getValues();
+      // Dùng thử: chọn đúng sheet theo gói (Keys_1Ngay, Keys_3Ngay, Keys_7Ngay)
+      var targetSheetName = (durationDays === 3) ? "Keys_3Ngay" : (durationDays === 7 ? "Keys_7Ngay" : "Keys_1Ngay");
+      var sheetTrialTarget = ss.getSheetByName(targetSheetName) || ss.getSheetByName("Keys_Trial") || ss.getSheetByName("Keys_DungThu");
+      if (!sheetTrialTarget) {
+        sheetTrialTarget = ss.insertSheet(targetSheetName);
+        var tHeaders = ["Key", "Status", "HWID", "ActivatedAt", "CustomerNote", "DurationDays", "ExpiresAt", "Countdown"];
+        sheetTrialTarget.getRange(1, 1, 1, tHeaders.length).setValues([tHeaders]);
+        sheetTrialTarget.getRange(1, 1, 1, tHeaders.length).setFontWeight("bold").setBackground("#CFE2F3");
+      }
+
+      var dataT = sheetTrialTarget.getDataRange().getValues();
       var foundTIndex = -1;
       for (var rowT = 1; rowT < dataT.length; rowT++) {
         var tStatus = String(dataT[rowT][1] || "").trim().toLowerCase();
@@ -553,13 +562,13 @@ function handleSepayWebhook(data) {
       }
 
       if (dispensedKey && foundTIndex !== -1) {
-        sheetTrial.getRange(foundTIndex, 2).setValue("Sold");
-        sheetTrial.getRange(foundTIndex, 5).setValue("SePay: " + orderId + " (" + amount + "đ)");
+        sheetTrialTarget.getRange(foundTIndex, 2).setValue("Sold");
+        sheetTrialTarget.getRange(foundTIndex, 5).setValue("SePay: " + orderId + " (" + amount + "\u0111)");
       } else {
         // Tự động sinh key dùng thử mới nếu kho hết
         var charsT = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
         dispensedKey = "VTCH-T" + durationDays + "-" + getRandomString(4, charsT) + "-" + getRandomString(4, charsT);
-        sheetTrial.appendRow([dispensedKey, "Sold", "", "", "SePay Tự Động: " + orderId, durationDays, "", ""]);
+        sheetTrialTarget.appendRow([dispensedKey, "Sold", "", "", "SePay T\u1ef1 \u0110\u1ed9ng: " + orderId, durationDays, "", ""]);
       }
     }
 
@@ -573,6 +582,9 @@ function handleSepayWebhook(data) {
     } else {
       var newOrderRow = [orderId, amount, tierName, dispensedKey, "PAID", txDate, gateway, refCode, content, Utilities.getUuid().replace(/-/g,""), durationDays];
       sheetOrders.appendRow(newOrderRow);
+    }
+    if (sheetOrders.getLastRow() > 1) {
+      sheetOrders.getRange("B2:B").setNumberFormat("#,##0 \"đ\"");
     }
 
     return responseJson({
@@ -595,21 +607,160 @@ function handleSepayWebhook(data) {
 function onOpen() {
   var ui = SpreadsheetApp.getUi();
   ui.createMenu("👑 VUA TRÒ CHƠI")
-    .addItem("🔐 Cài Đặt Mật Khẩu Admin & SePay API Key (Bảo Mật)", "configureSecuritySecrets")
+    .addItem("📁 TỰ ĐỘNG PHÂN CHIA KHO KEY (1 Ngày, 3 Ngày, 7 Ngày)", "organizeKeySheets")
+    .addItem("💲 Định Dạng Dấu Chấm Tiền Tệ (10.000 đ) Trang Orders", "formatOrdersCurrency")
     .addSeparator()
-    .addItem("♾️ Tạo 10 Key VĨNH VIỄN (vào trang Keys_Lifetime)", "generate10LifetimeKeys")
-    .addItem("♾️ Tạo 30 Key VĨNH VIỄN (vào trang Keys_Lifetime)", "generate30LifetimeKeys")
+    .addItem("♾️ Tạo 10 Key VĨNH VIỄN (vào trang Keys_VinhVien)", "generate10LifetimeKeys")
+    .addItem("♾️ Tạo 30 Key VĨNH VIỄN (vào trang Keys_VinhVien)", "generate30LifetimeKeys")
     .addSeparator()
-    .addItem("⏱️ Tạo 10 Key DÙNG THỬ 1 Ngày (vào trang Keys_Trial)", "generate10Trial1Day")
-    .addItem("⏱️ Tạo 10 Key DÙNG THỬ 3 Ngày (vào trang Keys_Trial)", "generate10Trial3Days")
-    .addItem("⏱️ Tạo 10 Key DÙNG THỬ 7 Ngày (vào trang Keys_Trial)", "generate10Trial7Days")
+    .addItem("⏱️ Tạo 10 Key 1 NGÀY (vào trang Keys_1Ngay)", "generate10Trial1Day")
+    .addItem("⏱️ Tạo 10 Key 3 NGÀY (vào trang Keys_3Ngay)", "generate10Trial3Days")
+    .addItem("⏱️ Tạo 10 Key 7 NGÀY (vào trang Keys_7Ngay)", "generate10Trial7Days")
     .addSeparator()
-    .addItem("⏳ Cập nhật Bộ Đếm Ngược (Countdown) Keys_Trial", "updateTrialCountdowns")
+    .addItem("⏳ Cập nhật Bộ Đếm Ngược (Countdown) Tất Cả Key Dùng Thử", "updateTrialCountdowns")
     .addItem("🗑️ Quét & Tự Động XÓA BỎ Key Hết Hạn (Vô Hiệu Hóa Ngay)", "manualDeleteExpiredKeys")
     .addItem("⏰ Cài Đặt Tự Động Quét & Xóa 24/7 trên Mây", "installAutoCleanTrigger")
     .addSeparator()
-    .addItem("📊 Thống Kê Tổng Hợp Cả 3 Trang Tính (Keys & Orders)", "showDualSheetStats")
+    .addItem("📊 Thống Kê Tổng Hợp Tất Cả Kho Key & Doanh Thu", "showDualSheetStats")
+    .addSeparator()
+    .addItem("✨ Sửa Lỗi Phông Chữ Tiếng Việt (Orders)", "fixOrdersEncoding")
+    .addItem("🔐 Cài Đặt Mật Khẩu Admin & SePay API Key (Bảo Mật)", "configureSecuritySecrets")
     .addToUi();
+}
+
+function formatOrdersCurrency() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetOrders = ss.getSheetByName("Orders") || ss.getSheetByName("DonHang");
+  if (!sheetOrders) return;
+  var lastRow = sheetOrders.getLastRow();
+  if (lastRow > 1) {
+    sheetOrders.getRange(2, 2, lastRow - 1, 1).setNumberFormat("#,##0 \"đ\"");
+  }
+}
+
+function organizeKeySheets() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var headers = ["Key", "Status", "HWID", "ActivatedAt", "CustomerNote", "DurationDays", "ExpiresAt", "Countdown"];
+  
+  // 1. Đảm bảo có các trang tính riêng biệt cho từng gói
+  var config = [
+    { name: "Keys_1Ngay", color: "#CFE2F3", days: 1, title: "1 Ngày" },
+    { name: "Keys_3Ngay", color: "#FFF2CC", days: 3, title: "3 Ngày" },
+    { name: "Keys_7Ngay", color: "#D9EAD3", days: 7, title: "7 Ngày" }
+  ];
+
+  config.forEach(function(item) {
+    var sheet = ss.getSheetByName(item.name);
+    if (!sheet) {
+      sheet = ss.insertSheet(item.name);
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold").setBackground(item.color);
+    }
+  });
+
+  // Đảm bảo có sheet Keys_VinhVien (hoặc giữ Keys_Lifetime / Keys)
+  var sheetVinhVien = ss.getSheetByName("Keys_VinhVien") || ss.getSheetByName("Keys_Lifetime") || ss.getSheetByName("Keys");
+  if (!sheetVinhVien) {
+    sheetVinhVien = ss.insertSheet("Keys_VinhVien");
+    var vHeaders = ["Key", "Status", "HWID", "ActivatedAt", "CustomerNote"];
+    sheetVinhVien.getRange(1, 1, 1, vHeaders.length).setValues([vHeaders]);
+    sheetVinhVien.getRange(1, 1, 1, vHeaders.length).setFontWeight("bold").setBackground("#D9D2E9");
+  }
+
+  // 2. Chuyển key từ Keys_Trial cũ sang các trang riêng biệt tương ứng
+  var sheetTrial = ss.getSheetByName("Keys_Trial") || ss.getSheetByName("Keys_DungThu");
+  var movedCount = 0;
+  if (sheetTrial) {
+    var data = sheetTrial.getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var keyStr = String(row[0] || "").trim();
+      if (!keyStr) continue;
+      var dur = parseFloat(row[5]) || 0;
+      if (dur === 0) {
+        if (keyStr.indexOf("VTCH-T1") !== -1) dur = 1;
+        else if (keyStr.indexOf("VTCH-T3") !== -1) dur = 3;
+        else if (keyStr.indexOf("VTCH-T7") !== -1) dur = 7;
+      }
+
+      var targetName = (dur === 3) ? "Keys_3Ngay" : (dur === 7 ? "Keys_7Ngay" : "Keys_1Ngay");
+      var tSheet = ss.getSheetByName(targetName);
+      if (tSheet) {
+        var tData = tSheet.getDataRange().getValues();
+        var exists = false;
+        for (var t = 1; t < tData.length; t++) {
+          if (String(tData[t][0]).trim().toUpperCase() === keyStr.toUpperCase()) {
+            exists = true;
+            break;
+          }
+        }
+        if (!exists) {
+          tSheet.appendRow(row);
+          movedCount++;
+        }
+      }
+    }
+  }
+
+  // 3. Định dạng dấu chấm tiền tệ (10.000 đ) cho trang Orders
+  formatOrdersCurrency();
+
+  SpreadsheetApp.getUi().alert("🎉 ĐÃ PHÂN CHIA KHO KEY THÀNH CÔNG!\n\n" +
+    "📁 Keys_1Ngay: Quản lý Key 1 Ngày (10.000 đ)\n" +
+    "📁 Keys_3Ngay: Quản lý Key 3 Ngày (20.000 đ)\n" +
+    "📁 Keys_7Ngay: Quản lý Key 7 Ngày (50.000 đ)\n" +
+    "📁 Keys_VinhVien: Quản lý Key Vĩnh Viễn (100.000 đ)\n" +
+    "💳 Orders: Đã định dạng dấu chấm tiền tệ (10.000 đ)\n\n" +
+    "✅ Đã đồng bộ " + movedCount + " key dùng thử vào từng trang riêng biệt!");
+}
+
+function fixOrdersEncoding() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Orders") || ss.getSheetByName("DonHang");
+  if (!sheet) {
+    SpreadsheetApp.getUi().alert("Không tìm thấy trang tính Orders!");
+    return;
+  }
+  var range = sheet.getDataRange();
+  var values = range.getValues();
+  var count = 0;
+
+  for (var i = 1; i < values.length; i++) {
+    var tier = String(values[i][2] || "");
+    var amount = parseFloat(values[i][1]) || 0;
+    
+    // Tự động chuẩn hóa phông chữ tiếng Việt chuẩn UTF-8
+    if (amount === 10000 || tier.indexOf("1") !== -1 || tier.indexOf("D") !== -1) {
+      if (values[i][2] !== "Dùng Thử 1 Ngày") {
+        values[i][2] = "Dùng Thử 1 Ngày";
+        count++;
+      }
+    } else if (amount === 20000 || tier.indexOf("3") !== -1) {
+      if (values[i][2] !== "Dùng Thử 3 Ngày") {
+        values[i][2] = "Dùng Thử 3 Ngày";
+        count++;
+      }
+    } else if (amount === 50000 || tier.indexOf("7") !== -1) {
+      if (values[i][2] !== "Dùng Thử 7 Ngày") {
+        values[i][2] = "Dùng Thử 7 Ngày";
+        count++;
+      }
+    } else if (amount >= 100000 || tier.indexOf("B") !== -1 || tier.indexOf("V") !== -1) {
+      if (values[i][2] !== "Bản Quyền Vĩnh Viễn") {
+        values[i][2] = "Bản Quyền Vĩnh Viễn";
+        count++;
+      }
+    }
+  }
+
+  formatOrdersCurrency();
+
+  if (count > 0) {
+    range.setValues(values);
+    SpreadsheetApp.getUi().alert("Thành công: Đã sửa lại phông chữ tiếng Việt chuẩn đẹp cho " + count + " dòng đơn hàng!");
+  } else {
+    SpreadsheetApp.getUi().alert("Dữ liệu phông chữ tiếng Việt đã chuẩn đẹp 100%!");
+  }
 }
 
 function configureSecuritySecrets() {
@@ -638,22 +789,25 @@ function configureSecuritySecrets() {
   ui.alert("✅ ĐÃ LƯU THÀNH CÔNG!\nCác khóa bảo mật đã được lưu an toàn trong ScriptProperties phía máy chủ Google.");
 }
 
-// --- Tạo Key Vĩnh Viễn vào Sheet 'Keys_Lifetime' (hoặc 'Keys') ---
+// =========================================================================
+// 🗝️ TỰ ĐỘNG SINH KEY BẢN QUYỀN THEO TỪNG TRANG TÍNH
+// =========================================================================
+
 function generate10LifetimeKeys() { generateLifetime(10); }
 function generate30LifetimeKeys() { generateLifetime(30); }
 
 function generateLifetime(count) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("Keys_Lifetime") || ss.getSheetByName("Keys");
+  var sheet = ss.getSheetByName("Keys_VinhVien") || ss.getSheetByName("Keys_Lifetime") || ss.getSheetByName("Keys");
   
   if (!sheet) {
-    sheet = ss.insertSheet("Keys_Lifetime");
+    sheet = ss.insertSheet("Keys_VinhVien");
   }
 
   var headers = ["Key", "Status", "HWID", "ActivatedAt", "CustomerNote"];
   if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, 5).setValues([headers]);
-    sheet.getRange(1, 1, 1, 5).setFontWeight("bold").setBackground("#D9EAD3");
+    sheet.getRange(1, 1, 1, 5).setFontWeight("bold").setBackground("#D9D2E9");
   }
 
   var chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -671,23 +825,24 @@ function generateLifetime(count) {
   SpreadsheetApp.getUi().alert("🎉 Đã tạo thành công " + count + " mã Key Vĩnh Viễn vào trang '" + sheet.getName() + "'!");
 }
 
-// --- Tạo Key Dùng Thử vào Sheet 'Keys_Trial' (hoặc 'Keys_DungThu') ---
-function generate10Trial1Day() { generateTrial(10, 1); }
-function generate10Trial3Days() { generateTrial(10, 3); }
-function generate10Trial7Days() { generateTrial(10, 7); }
+// --- Tạo Key Dùng Thử vào đúng từng Sheet riêng biệt ---
+function generate10Trial1Day() { generateTrial(10, 1, "Keys_1Ngay", "#CFE2F3"); }
+function generate10Trial3Days() { generateTrial(10, 3, "Keys_3Ngay", "#FFF2CC"); }
+function generate10Trial7Days() { generateTrial(10, 7, "Keys_7Ngay", "#D9EAD3"); }
 
-function generateTrial(count, days) {
+function generateTrial(count, days, preferredSheetName, headerColor) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("Keys_Trial") || ss.getSheetByName("Keys_DungThu");
+  var sheetName = preferredSheetName || ("Keys_" + days + "Ngay");
+  var sheet = ss.getSheetByName(sheetName) || ss.getSheetByName("Keys_Trial") || ss.getSheetByName("Keys_DungThu");
   
   if (!sheet) {
-    sheet = ss.insertSheet("Keys_Trial");
+    sheet = ss.insertSheet(sheetName);
   }
 
   var headers = ["Key", "Status", "HWID", "ActivatedAt", "CustomerNote", "DurationDays", "ExpiresAt", "Countdown"];
   if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, 8).setValues([headers]);
-    sheet.getRange(1, 1, 1, 8).setFontWeight("bold").setBackground("#FFF2CC");
+    sheet.getRange(1, 1, 1, 8).setFontWeight("bold").setBackground(headerColor || "#CFE2F3");
   }
 
   var chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -712,44 +867,47 @@ function getRandomString(len, chars) {
   return res;
 }
 
-// ⏳ 1. Cập nhật Bộ Đếm Ngược Countdown cho Keys_Trial
+// ⏳ 1. Cập nhật Bộ Đếm Ngược Countdown cho TẤT CẢ các Sheet Dùng Thử
 function updateTrialCountdowns() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("Keys_Trial") || ss.getSheetByName("Keys_DungThu");
-  if (!sheet) return;
-
-  var data = sheet.getDataRange().getValues();
+  var trialSheetNames = ["Keys_1Ngay", "Keys_3Ngay", "Keys_7Ngay", "Keys_Trial", "Keys_DungThu"];
   var now = new Date();
   var updatedCount = 0;
 
-  for (var i = 1; i < data.length; i++) {
-    var status = String(data[i][1] || "").toLowerCase();
-    var expRaw = data[i][6];
-    
-    if (status === "trial" && expRaw) {
-      var expDate = new Date(expRaw);
-      if (!isNaN(expDate.getTime())) {
-        var diffMs = expDate.getTime() - now.getTime();
-        if (diffMs > 0) {
-          var hours = Math.floor(diffMs / (1000 * 60 * 60));
-          var mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-          var text = hours >= 24 
-            ? ("⏳ Còn " + Math.floor(hours / 24) + " ngày " + (hours % 24) + " giờ")
-            : ("⏳ Còn " + hours + " giờ " + mins + " phút");
-          sheet.getRange(i + 1, 8).setValue(text);
-          updatedCount++;
-        } else {
-          sheet.getRange(i + 1, 2).setValue("Expired");
-          sheet.getRange(i + 1, 8).setValue("⛔ HẾT HẠN");
+  trialSheetNames.forEach(function(sName) {
+    var sheet = ss.getSheetByName(sName);
+    if (!sheet) return;
+
+    var data = sheet.getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+      var status = String(data[i][1] || "").toLowerCase();
+      var expRaw = data[i][6];
+      
+      if (status === "trial" && expRaw) {
+        var expDate = new Date(expRaw);
+        if (!isNaN(expDate.getTime())) {
+          var diffMs = expDate.getTime() - now.getTime();
+          if (diffMs > 0) {
+            var hours = Math.floor(diffMs / (1000 * 60 * 60));
+            var mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            var text = hours >= 24 
+              ? ("⏳ Còn " + Math.floor(hours / 24) + " ngày " + (hours % 24) + " giờ")
+              : ("⏳ Còn " + hours + " giờ " + mins + " phút");
+            sheet.getRange(i + 1, 8).setValue(text);
+            updatedCount++;
+          } else {
+            sheet.getRange(i + 1, 2).setValue("Expired");
+            sheet.getRange(i + 1, 8).setValue("⛔ HẾT HẠN");
+          }
         }
       }
     }
-  }
+  });
 
-  SpreadsheetApp.getUi().alert("✅ Đã cập nhật lại bộ đếm ngược cho " + updatedCount + " key đang thử nghiệm!");
+  SpreadsheetApp.getUi().alert("✅ Đã cập nhật lại bộ đếm ngược cho " + updatedCount + " key đang thử nghiệm trên tất cả các kho!");
 }
 
-// 🗑️ 2. Quét & Xóa thủ công các Key Hết Hạn
+// 🗑️ 2. Quét & Xóa thủ công các Key Hết Hạn trên tất cả các trang
 function manualDeleteExpiredKeys() {
   var deleted = purgeExpiredKeys();
   SpreadsheetApp.getUi().alert("🗑️ ĐÃ DỌN DẸP XONG!\nĐã xóa bỏ hoàn toàn " + deleted + " mã Key dùng thử đã hết hạn quá 24h.");
@@ -757,22 +915,25 @@ function manualDeleteExpiredKeys() {
 
 function purgeExpiredKeys() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("Keys_Trial") || ss.getSheetByName("Keys_DungThu");
-  if (!sheet) return 0;
-
-  var data = sheet.getDataRange().getValues();
+  var trialSheetNames = ["Keys_1Ngay", "Keys_3Ngay", "Keys_7Ngay", "Keys_Trial", "Keys_DungThu"];
   var now = new Date();
   var deletedCount = 0;
 
-  for (var i = data.length - 1; i >= 1; i--) {
-    var status = String(data[i][1] || "").toLowerCase();
-    var expRaw = data[i][6];
+  trialSheetNames.forEach(function(sName) {
+    var sheet = ss.getSheetByName(sName);
+    if (!sheet) return;
 
-    if (status === "expired" || (expRaw && new Date(expRaw).getTime() + (24 * 60 * 60 * 1000) < now.getTime())) {
-      sheet.deleteRow(i + 1);
-      deletedCount++;
+    var data = sheet.getDataRange().getValues();
+    for (var i = data.length - 1; i >= 1; i--) {
+      var status = String(data[i][1] || "").toLowerCase();
+      var expRaw = data[i][6];
+
+      if (status === "expired" || (expRaw && new Date(expRaw).getTime() + (24 * 60 * 60 * 1000) < now.getTime())) {
+        sheet.deleteRow(i + 1);
+        deletedCount++;
+      }
     }
-  }
+  });
 
   return deletedCount;
 }
@@ -798,52 +959,51 @@ function autoCleanJob24h() {
   purgeExpiredKeys();
 }
 
-// 📊 4. Thống kê tổng hợp cho cả 3 trang tính
+// 📊 4. Thống kê tổng hợp cho tất cả các trang tính & Doanh thu
 function showDualSheetStats() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheetL = ss.getSheetByName("Keys_Lifetime") || ss.getSheetByName("Keys");
-  var sheetT = ss.getSheetByName("Keys_Trial") || ss.getSheetByName("Keys_DungThu");
+  var sheetVinhVien = ss.getSheetByName("Keys_VinhVien") || ss.getSheetByName("Keys_Lifetime") || ss.getSheetByName("Keys");
+  var sheet1 = ss.getSheetByName("Keys_1Ngay");
+  var sheet3 = ss.getSheetByName("Keys_3Ngay");
+  var sheet7 = ss.getSheetByName("Keys_7Ngay");
+  var sheetTrialOld = ss.getSheetByName("Keys_Trial") || ss.getSheetByName("Keys_DungThu");
   var sheetO = ss.getSheetByName("Orders") || ss.getSheetByName("DonHang");
 
   var msg = "📊 THỐNG KÊ TỔNG HỢP VUA TRÒ CHƠI:\n\n";
 
-  if (sheetL) {
-    var dataL = sheetL.getDataRange().getValues();
-    var totalL = Math.max(0, dataL.length - 1);
-    var actL = 0, usedL = 0, soldL = 0;
-    for (var i = 1; i < dataL.length; i++) {
-      var s = String(dataL[i][1]).toLowerCase();
-      if (s === "active") actL++;
-      else if (s === "used") usedL++;
-      else if (s === "sold") soldL++;
+  function countSheet(s, title) {
+    if (!s) return "";
+    var d = s.getDataRange().getValues();
+    var total = Math.max(0, d.length - 1);
+    var act = 0, used = 0;
+    for (var i = 1; i < d.length; i++) {
+      var st = String(d[i][1]).toLowerCase();
+      if (st === "active") act++;
+      else if (st === "used" || st === "trial" || st === "sold") used++;
     }
-    msg += "♾️ TRANG VĨNH VIỄN (" + sheetL.getName() + "):\n" +
-           "- Tổng Key: " + totalL + " | Chưa bán: " + actL + " | Đã bán/Đang dùng: " + (usedL + soldL) + "\n\n";
+    return title + " (" + s.getName() + "):\n- Tổng: " + total + " | Chưa phát: " + act + " | Đã phát: " + used + "\n\n";
   }
 
-  if (sheetT) {
-    var dataT = sheetT.getDataRange().getValues();
-    var totalT = Math.max(0, dataT.length - 1);
-    var actT = 0, trialT = 0, soldT = 0;
-    for (var j = 1; j < dataT.length; j++) {
-      var st = String(dataT[j][1]).toLowerCase();
-      if (st === "active") actT++;
-      else if (st === "trial") trialT++;
-      else if (st === "sold") soldT++;
-    }
-    msg += "⏱️ TRANG DÙNG THỬ (" + sheetT.getName() + "):\n" +
-           "- Tổng Key: " + totalT + " | Chưa phát: " + actT + " | Đã phát: " + (trialT + soldT) + "\n\n";
-  }
+  if (sheetVinhVien) msg += countSheet(sheetVinhVien, "♾️ GÓI VĨNH VIỄN (100.000 đ)");
+  if (sheet1) msg += countSheet(sheet1, "⏱️ GÓI 1 NGÀY (10.000 đ)");
+  if (sheet3) msg += countSheet(sheet3, "⏱️ GÓI 3 NGÀY (20.000 đ)");
+  if (sheet7) msg += countSheet(sheet7, "⏱️ GÓI 7 NGÀY (50.000 đ)");
+  if (sheetTrialOld && (!sheet1 || !sheet3 || !sheet7)) msg += countSheet(sheetTrialOld, "📁 Kho Trial Cũ");
 
   if (sheetO) {
     var dataO = sheetO.getDataRange().getValues();
     var totalOrders = Math.max(0, dataO.length - 1);
     var paidOrders = 0;
+    var totalRevenue = 0;
     for (var k = 1; k < dataO.length; k++) {
-      if (String(dataO[k][4]).toUpperCase() === "PAID") paidOrders++;
+      if (String(dataO[k][4]).toUpperCase() === "PAID") {
+        paidOrders++;
+        totalRevenue += parseFloat(dataO[k][1]) || 0;
+      }
     }
-    msg += "💳 TRANG ĐƠN HÀNG (Orders):\n" +
-           "- Tổng Đơn: " + totalOrders + " | Thành công (PAID): " + paidOrders + "\n";
+    msg += "💳 LỊCH SỬ ĐƠN HÀNG (Orders):\n" +
+           "- Tổng số đơn: " + totalOrders + " | Đã thanh toán: " + paidOrders + "\n" +
+           "- 💰 TỔNG DOANH THU: " + Number(totalRevenue).toLocaleString('vi-VN') + " đ\n";
   }
 
   SpreadsheetApp.getUi().alert(msg);
@@ -852,13 +1012,19 @@ function showDualSheetStats() {
 // Hàm dọn sạch key dùng thử cũ khi khách nâng cấp lên Vĩnh Viễn
 function cleanTrialKeysForHwid(sheetTrial, hwid) {
   try {
-    if (!sheetTrial || !hwid) return;
-    var data = sheetTrial.getDataRange().getValues();
-    for (var i = data.length - 1; i >= 1; i--) {
-      var rowHwid = String(data[i][2] || "").trim().toLowerCase();
-      if (rowHwid && rowHwid === hwid.trim().toLowerCase()) {
-        sheetTrial.deleteRow(i + 1);
+    if (!hwid) return;
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var trialSheetNames = ["Keys_1Ngay", "Keys_3Ngay", "Keys_7Ngay", "Keys_Trial", "Keys_DungThu"];
+    trialSheetNames.forEach(function(sName) {
+      var s = ss.getSheetByName(sName);
+      if (!s) return;
+      var data = s.getDataRange().getValues();
+      for (var i = data.length - 1; i >= 1; i--) {
+        var rowHwid = String(data[i][2] || "").trim().toLowerCase();
+        if (rowHwid && rowHwid === hwid.trim().toLowerCase()) {
+          s.deleteRow(i + 1);
+        }
       }
-    }
+    });
   } catch (e) {}
 }

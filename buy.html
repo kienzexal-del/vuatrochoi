@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Vua Trò Chơi — Cổng Mua Key Bản Quyền Tự Động 24/7 (VietQR)</title>
+  <meta name="description" content="Mua Key bản quyền Vua Trò Chơi mở khóa Steam và Game tốc độ cao tự động 24/7 qua VietQR MBBank. Nhận key tức thì sau 3 giây.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* =========================================================================
+       TITANIUM CYBER STUDIO DESIGN SYSTEM (RTX PROJECT SPEC)
+       Obsidian Void: #0d1117 / #11161c | Titanium Header: #161c24
+       Cyber Accent: #38bdf8 / #6da9ff | Emerald: #10b981 | Amber: #f59e0b
+       ========================================================================= */
+    :root {
+      --bg-void: #0a0d12;
+      --bg-canvas: #0f141c;
+      --bg-surface: #151b26;
+      --bg-surface-elevated: #1b2332;
+      --bg-surface-card: #18202d;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-specular: rgba(255, 255, 255, 0.16);
+      --border-hover: rgba(56, 189, 248, 0.45);
+      --cyber-blue: #38bdf8;
+      --cyber-blue-glow: rgba(56, 189, 248, 0.25);
+      --cyber-emerald: #10b981;
+      --cyber-emerald-glow: rgba(16, 185, 129, 0.25);
+      --cyber-amber: #f59e0b;
+      --cyber-purple: #a855f7;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Cascadia Mono', Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-void);
+      background-image: 
+        radial-gradient(ellipse 90% 40% at 50% -10%, rgba(56, 189, 248, 0.12), transparent 70%),
+        radial-gradient(ellipse 70% 30% at 50% 110%, rgba(16, 185, 129, 0.08), transparent 70%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.6;
+      padding: 0 16px 60px;
+    }
+
+    /* Container */
+    .container {
+      width: 100%;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    /* Top Nav */
+    nav.top-nav {
+      width: 100%;
+      max-width: 980px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #38bdf8 0%, #1d4ed8 100%);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(180deg, #ffffff 30%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 600;
+      color: #34d399;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulse 1.8s infinite cubic-bezier(0.66, 0, 0, 1);
+    }
+
+    @keyframes pulse {
+      to {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+      }
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 24px 10px 40px;
+    }
+
+    .chip-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--cyber-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 16px;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.12);
+    }
+
+    h1.hero-title {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+      margin-bottom: 14px;
+    }
+
+    h1.hero-title span.glow {
+      background: linear-gradient(135deg, #38bdf8 20%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.hero-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    /* Pricing Grid */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .price-card {
+      background: var(--bg-surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .price-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(56, 189, 248, 0.15);
+    }
+
+    .price-card.featured {
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.08) 0%, rgba(24, 32, 45, 0.95) 100%);
+      border: 1.5px solid #38bdf8;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 25px rgba(56, 189, 248, 0.25);
+    }
+
+    .badge-featured {
+      position: absolute;
+      top: -12px;
+      right: 16px;
+      background: linear-gradient(135deg, #38bdf8, #2563eb);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+
+    .card-duration {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .card-price {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .card-price span.currency {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--cyber-blue);
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      min-height: 38px;
+    }
+
+    .card-features {
+      list-style: none;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-grow: 1;
+    }
+
+    .card-features li {
+      font-size: 13px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-features li svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--cyber-emerald);
+      flex-shrink: 0;
+    }
+
+    .btn-buy {
+      width: 100%;
+      background: var(--bg-surface-elevated);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px 0;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-buy:hover {
+      background: var(--cyber-blue);
+      color: #0f172a;
+      border-color: var(--cyber-blue);
+      box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35);
+    }
+
+    .price-card.featured .btn-buy {
+      background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+      border: none;
+      color: #ffffff;
+    }
+
+    .price-card.featured .btn-buy:hover {
+      filter: brightness(1.15);
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(4, 6, 10, 0.85);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-specular);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 480px;
+      padding: 28px 24px;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(56, 189, 248, 0.15);
+      animation: modalSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlide {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+    }
+
+    .modal-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .modal-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* QR Container */
+    .qr-box {
+      background: #ffffff;
+      border-radius: var(--radius-md);
+      padding: 12px;
+      width: 220px;
+      height: 220px;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .qr-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* Bank Info Table */
+    .bank-info {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .bank-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .bank-label {
+      color: var(--text-secondary);
+    }
+
+    .bank-val {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bank-val.highlight {
+      color: #fbbf24;
+      font-size: 15px;
+    }
+
+    .btn-copy-sm {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-subtle);
+      color: var(--cyber-blue);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-copy-sm:hover {
+      background: var(--cyber-blue);
+      color: #0f172a;
+    }
+
+    /* Waiting Pulse Bar */
+    .waiting-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px;
+      background: rgba(56, 189, 248, 0.06);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--cyber-blue);
+      margin-bottom: 14px;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(56, 189, 248, 0.2);
+      border-top-color: var(--cyber-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Timer Countdown */
+    .timer-text {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Success Box (Hidden by default) */
+    .success-box {
+      display: none;
+      text-align: center;
+    }
+
+    .success-icon {
+      width: 56px;
+      height: 56px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 2px solid #10b981;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      color: #10b981;
+      font-size: 28px;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.35);
+    }
+
+    .key-display {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1.5px dashed var(--cyber-blue);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin: 16px 0;
+    }
+
+    .key-value {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 800;
+      color: #38bdf8;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+      user-select: all;
+    }
+
+    .cmd-display {
+      background: #0b0f17;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #a5f3fc;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      text-align: left;
+    }
+
+    .btn-action-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      font-weight: 700;
+      padding: 12px 0;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+      margin-bottom: 8px;
+    }
+
+    .btn-action-primary:hover {
+      filter: brightness(1.1);
+    }
+
+    /* FAQ & Features */
+    .faq-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      margin-top: 20px;
+    }
+
+    .faq-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+    }
+
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .faq-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-md);
+      padding: 16px;
+    }
+
+    .faq-q {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--cyber-blue);
+      margin-bottom: 6px;
+    }
+
+    .faq-a {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(16, 185, 129, 0.95);
+      color: #ffffff;
+      padding: 10px 20px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 2000;
+      opacity: 0;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="top-nav">
+    <a href="#" class="brand">
+      <div class="brand-logo">👑</div>
+      <div class="brand-title">VUA TRÒ CHƠI</div>
+    </a>
+    <div class="nav-status">
+      <div class="pulse-dot"></div>
+      <span>Hệ Thống Tự Động 24/7</span>
+    </div>
+  </nav>
+
+  <main class="container">
+    <!-- Hero -->
+    <header class="hero">
+      <div class="chip-badge">⚡ Kích Hoạt Tự Động Qua VietQR MBBank • Nhận Key Sau 3 Giây</div>
+      <h1 class="hero-title">Mở Khóa Steam & Game <span class="glow">Tốc Độ Cao</span></h1>
+      <p class="hero-subtitle">
+        Khắc phục hoàn toàn lỗi tải chậm, nghẽn mạng Store/Community Steam và tối ưu đường truyền Call of Duty, CS2, Valorant.
+      </p>
+    </header>
+
+    <!-- Pricing Cards Grid -->
+    <div class="pricing-grid">
+      <!-- 1 Ngày -->
+      <div class="price-card">
+        <div class="card-duration">DÙNG THỬ 1 NGÀY</div>
+        <div class="card-price">10.000 <span class="currency">VNĐ</span></div>
+        <div class="card-desc">Thích hợp để test thử tốc độ mạng Steam và tương thích game.</div>
+        <ul class="card-features">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Full tốc độ Steam
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Tự động kích hoạt 24h
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Hỗ trợ 1 thiết bị
+          </li>
+        </ul>
+        <button class="btn-buy" onclick="openPaymentModal('trial_1', 10000, 'Dùng Thử 1 Ngày')">
+          Mua Ngay 10k
+        </button>
+      </div>
+
+      <!-- 3 Ngày -->
+      <div class="price-card">
+        <div class="card-duration">DÙNG THỬ 3 NGÀY</div>
+        <div class="card-price">20.000 <span class="currency">VNĐ</span></div>
+        <div class="card-desc">Gói tiện lợi để cày game cuối tuần cùng bạn bè.</div>
+        <ul class="card-features">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Full tốc độ Steam 72h
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Bảo vệ ổn định đường truyền
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Hỗ trợ 1 thiết bị
+          </li>
+        </ul>
+        <button class="btn-buy" onclick="openPaymentModal('trial_3', 20000, 'Dùng Thử 3 Ngày')">
+          Mua Ngay 20k
+        </button>
+      </div>
+
+      <!-- 7 Ngày -->
+      <div class="price-card">
+        <div class="card-duration">DÙNG THỬ 7 NGÀY</div>
+        <div class="card-price">50.000 <span class="currency">VNĐ</span></div>
+        <div class="card-desc">Trải nghiệm 1 tuần mượt mà không lo đứt gãy kết nối.</div>
+        <ul class="card-features">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Full tốc độ 168 giờ
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Tự động gia hạn khi cần
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Hỗ trợ 1 thiết bị
+          </li>
+        </ul>
+        <button class="btn-buy" onclick="openPaymentModal('trial_7', 50000, 'Dùng Thử 7 Ngày')">
+          Mua Ngay 50k
+        </button>
+      </div>
+
+      <!-- Vĩnh Viễn -->
+      <div class="price-card featured">
+        <div class="badge-featured">⭐ KHUYÊN DÙNG</div>
+        <div class="card-duration" style="color: #38bdf8;">BẢN QUYỀN VĨNH VIỄN</div>
+        <div class="card-price">100.000 <span class="currency">VNĐ</span></div>
+        <div class="card-desc">Thanh toán 1 lần duy nhất — Dùng trọn đời không lo hết hạn.</div>
+        <ul class="card-features">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Bản quyền Vĩnh Viễn trọn đời
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Cập nhật tính năng mới miễn phí
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Ưu tiên hỗ trợ kỹ thuật 24/7
+          </li>
+        </ul>
+        <button class="btn-buy" onclick="openPaymentModal('lifetime', 100000, 'Bản Quyền Vĩnh Viễn')">
+          Mua Vĩnh Viễn 100k
+        </button>
+      </div>
+    </div>
+
+    <!-- FAQ & Info -->
+    <section class="faq-section">
+      <div class="faq-title">
+        <span>🛡️</span> Vì sao nên chọn Vua Trò Chơi?
+      </div>
+      <div class="faq-grid">
+        <div class="faq-item">
+          <div class="faq-q">Tự động nhận Key thế nào?</div>
+          <div class="faq-a">Bạn chỉ cần quét mã VietQR MBBank bằng app ngân hàng bất kỳ. Sau khi chuyển tiền 1–3 giây, màn hình web sẽ tự nhảy mã Key bản quyền ngay lập tức.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Có bị ban nick Steam / Game không?</div>
+          <div class="faq-a">Tuyệt đối không! Phần mềm tối ưu ở tầng mạng DNS và Routing, hoàn toàn không chỉnh sửa hay can thiệp vào file game, 100% an toàn với VAC & Anti-Cheat.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Cách cài đặt sau khi có Key?</div>
+          <div class="faq-a">Chỉ cần mở PowerShell trên Windows, dán 1 dòng lệnh duy nhất: <code>irm tinyurl.com/vtch-win | iex</code> rồi nhập Key vừa nhận là xong.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Hỗ trợ các nền tảng nào?</div>
+          <div class="faq-a">Hỗ trợ đầy đủ Windows 10/11 (kể cả Win Lite / Ghost), Steam Deck (SteamOS), macOS (M1-M4 & Intel) và Linux.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Payment Modal -->
+  <div class="modal-overlay" id="paymentModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closePaymentModal()">&times;</button>
+      
+      <!-- State 1: Paying -->
+      <div id="paymentContent">
+        <div class="modal-header">
+          <div class="modal-title">Quét Mã VietQR Thanh Toán</div>
+          <div class="modal-subtitle">Gói: <strong id="modalPackageName" style="color: #38bdf8;">Vĩnh Viễn</strong> • Hệ thống tự động nhả key</div>
+        </div>
+
+        <!-- Dynamic VietQR Image -->
+        <div class="qr-box">
+          <img id="qrImage" src="" alt="Mã VietQR Thanh Toán">
+        </div>
+
+        <!-- Banking Information with 1-Click Copy -->
+        <div class="bank-info">
+          <div class="bank-row">
+            <span class="bank-label">Ngân hàng:</span>
+            <span class="bank-val">MBBank (Quân Đội)</span>
+          </div>
+          <div class="bank-row">
+            <span class="bank-label">Chủ tài khoản:</span>
+            <span class="bank-val">NGUYEN VAN KIEN</span>
+          </div>
+          <div class="bank-row">
+            <span class="bank-label">Số tài khoản:</span>
+            <span class="bank-val">
+              <span id="bankAccNo">0000125042003</span>
+              <button class="btn-copy-sm" onclick="copyText('0000125042003')">Copy</button>
+            </span>
+          </div>
+          <div class="bank-row">
+            <span class="bank-label">Số tiền:</span>
+            <span class="bank-val highlight">
+              <span id="bankAmount">100.000</span> đ
+              <button class="btn-copy-sm" onclick="copyText(currentAmount)">Copy</button>
+            </span>
+          </div>
+          <div class="bank-row">
+            <span class="bank-label">Nội dung CK:</span>
+            <span class="bank-val highlight" style="color: #38bdf8;">
+              <span id="bankMemo">VTCH8492</span>
+              <button class="btn-copy-sm" onclick="copyText(currentOrderId)">Copy</button>
+            </span>
+          </div>
+        </div>
+
+        <!-- Waiting Pulse -->
+        <div class="waiting-bar">
+          <div class="spinner"></div>
+          <span>Đang đợi nhận tiền từ ngân hàng...</span>
+        </div>
+
+        <div class="timer-text">
+          ⚠️ <em>Vui lòng giữ đúng nội dung chuyển khoản để hệ thống tự động giao key!</em><br>
+          Mã đơn hết hạn sau: <strong id="countdownTimer" style="color: #fbbf24;">05:00</strong>
+        </div>
+      </div>
+
+      <!-- State 2: Success & Key Dispensed -->
+      <div id="successContent" class="success-box">
+        <div class="success-icon">✓</div>
+        <h2 style="font-size: 22px; font-weight: 800; color: #10b981; margin-bottom: 6px;">
+          THANH TOÁN THÀNH CÔNG!
+        </h2>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+          Cảm ơn bạn đã ủng hộ Vua Trò Chơi. Mã bản quyền của bạn đã được kích hoạt:
+        </p>
+
+        <!-- Key Box -->
+        <div class="key-display">
+          <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">
+            MÃ BẢN QUYỀN (LICENSE KEY)
+          </div>
+          <div class="key-value" id="dispensedKey">VTCH-XXXX-XXXX-XXXX</div>
+          <button class="btn-buy" style="background: #38bdf8; color: #0b1120;" onclick="copyText(receivedKey, 'Đã sao chép mã Key!')">
+            📋 Sao Chép Mã Key
+          </button>
+        </div>
+
+        <!-- Command Box -->
+        <div style="text-align: left; margin-bottom: 16px;">
+          <div style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">
+            LỆNH CÀI ĐẶT WINDOWS (POWERSHELL):
+          </div>
+          <div class="cmd-display">
+            <span id="cmdText">irm tinyurl.com/vtch-win | iex</span>
+            <button class="btn-copy-sm" onclick="copyText('irm tinyurl.com/vtch-win | iex', 'Đã sao chép lệnh cài!')">Copy</button>
+          </div>
+        </div>
+
+        <button class="btn-action-primary" onclick="closePaymentModal()">
+          Hoàn Tất
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">Đã sao chép vào bộ nhớ tạm!</div>
+
+  <script>
+    // =========================================================================
+    // CẤU HÌNH HỆ THỐNG THANH TOÁN TỰ ĐỘNG
+    // =========================================================================
+    const API_URL = "https://script.google.com/macros/s/AKfycbzsJ4SvFtnCRROeB3SZHNcq65oReT-wlBQJlwF9eG4WUsDI9cJT4JuXLLuH9Y6TYZdRJg/exec";
+    const BANK_ID = "MB";
+    const ACCOUNT_NO = "0000125042003";
+    const ACCOUNT_NAME = "NGUYEN VAN KIEN";
+
+    let currentOrderId = "";
+    let currentAmount = 0;
+    let pollInterval = null;
+    let countdownInterval = null;
+    let receivedKey = "";
+
+    function openPaymentModal(tier, amount, tierName) {
+      currentAmount = amount;
+      // Sinh mã đơn ngẫu nhiên dạng: VTCH + 4 chữ số (Ví dụ: VTCH8492)
+      currentOrderId = "VTCH" + Math.floor(1000 + Math.random() * 9000);
+
+      document.getElementById("modalPackageName").innerText = tierName;
+      document.getElementById("bankAmount").innerText = Number(amount).toLocaleString('vi-VN');
+      document.getElementById("bankMemo").innerText = currentOrderId;
+
+      // Sinh mã VietQR động chuẩn Napas 24/7
+      const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact2.png?amount=${amount}&addInfo=${currentOrderId}&accountName=${encodeURIComponent(ACCOUNT_NAME)}`;
+      document.getElementById("qrImage").src = qrUrl;
+
+      // Reset giao diện
+      document.getElementById("paymentContent").style.display = "block";
+      document.getElementById("successContent").style.display = "none";
+      document.getElementById("paymentModal").classList.add("active");
+
+      // Bắt đầu đếm ngược 5 phút
+      startCountdown(300);
+
+      // Bắt đầu Polling kiểm tra trạng thái đơn hàng mỗi 2.5 giây
+      startPolling(currentOrderId);
+    }
+
+    function closePaymentModal() {
+      document.getElementById("paymentModal").classList.remove("active");
+      clearInterval(pollInterval);
+      clearInterval(countdownInterval);
+    }
+
+    function startCountdown(seconds) {
+      clearInterval(countdownInterval);
+      let rem = seconds;
+      const el = document.getElementById("countdownTimer");
+      
+      countdownInterval = setInterval(() => {
+        rem--;
+        if (rem <= 0) {
+          clearInterval(countdownInterval);
+          el.innerText = "Hết hạn";
+          return;
+        }
+        const m = Math.floor(rem / 60).toString().padStart(2, '0');
+        const s = (rem % 60).toString().padStart(2, '0');
+        el.innerText = `${m}:${s}`;
+      }, 1000);
+    }
+
+    function startPolling(orderId) {
+      clearInterval(pollInterval);
+
+      // Gọi kiểm tra ngay sau 1.5 giây
+      pollInterval = setInterval(async () => {
+        try {
+          const checkUrl = `${API_URL}?action=check_order&orderId=${encodeURIComponent(orderId)}`;
+          const res = await fetch(checkUrl);
+          const data = await res.json();
+
+          if (data && data.status === "PAID" && data.key) {
+            // DỪNG POLLING
+            clearInterval(pollInterval);
+            clearInterval(countdownInterval);
+
+            // BẮN PHÁO HOA ĂN MỪNG
+            if (typeof confetti === 'function') {
+              confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
+
+            // HIỂN THỊ MÀN HÌNH THÀNH CÔNG
+            receivedKey = data.key;
+            document.getElementById("dispensedKey").innerText = data.key;
+            document.getElementById("paymentContent").style.display = "none";
+            document.getElementById("successContent").style.display = "block";
+          }
+        } catch (err) {
+          console.log("Polling error:", err);
+        }
+      }, 2500);
+    }
+
+    function copyText(text, msg = "Đã sao chép!") {
+      navigator.clipboard.writeText(String(text)).then(() => {
+        showToast(msg);
+      }).catch(() => {
+        showToast("Lỗi sao chép! Vui lòng chọn và copy thủ công.");
+      });
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.innerText = msg;
+      t.classList.add("show");
+      setTimeout(() => {
+        t.classList.remove("show");
+      }, 2500);
+    }
+  </script>
+</body>
+</html>

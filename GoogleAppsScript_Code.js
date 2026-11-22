@@ -13,6 +13,12 @@ function doGet(e) {
     var params = e.parameter || {};
     var action = params.action || "verify";
 
+    // 0. LẤY DANH SÁCH ĐƠN HÀNG CỦA TÀI KHOẢN GOOGLE (BẢO MẬT BẰNG GOOGLE ID TOKEN)
+    if (action === "my_orders" || action === "myOrders") {
+      var idToken = (params.id_token || params.idToken || "").trim();
+      return handleMyOrders(idToken);
+    }
+
     // 1. TẠO ĐƠN HÀNG MỚI (CHỐNG GIAN LẬN: LƯU TRƯỚC SỐ TIỀN & TOKEN BÍ MẬT)
     if (action === "create_order" || action === "createOrder") {
       return handleCreateOrder(params);
@@ -218,11 +224,183 @@ function responseJson(obj) {
 }
 
 // =========================================================================
+// 🔐 GOOGLE IDENTITY SERVICES (GIS) - XÁC THỰC TOKEN VÀ LỊCH SỬ ĐƠN HÀNG
+// =========================================================================
+var GOOGLE_CLIENT_ID = "934644417883-72iujt055o25snvt6i1cr9egomvvgm2l.apps.googleusercontent.com";
+
+function verifyGoogleIdToken(idToken) {
+  if (!idToken || typeof idToken !== "string" || idToken.length > 4096) return null;
+  try {
+    var url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + encodeURIComponent(idToken);
+    var res = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    if (res.getResponseCode() !== 200) return null;
+    var info = JSON.parse(res.getContentText());
+    if (info.aud !== GOOGLE_CLIENT_ID && info.azp !== GOOGLE_CLIENT_ID) return null;
+    if (info.email_verified !== "true" && info.email_verified !== true) return null;
+    if (Number(info.exp) < Math.floor(Date.now() / 1000)) return null;
+    return {
+      sub: String(info.sub || ""),
+      email: String(info.email || "").toLowerCase(),
+      name: info.name || "Khách Hàng Google",
+      picture: info.picture || ""
+    };
+  } catch (err) {
+    return null;
+  }
+}
+
+function handleMyOrders(idToken) {
+  var user = verifyGoogleIdToken(idToken);
+  if (!user) {
+    return responseJson({
+      success: false,
+      status: "UNAUTHORIZED",
+      message: "Lỗi bảo mật: Yêu cầu đăng nhập tài khoản Google hợp lệ!"
+    });
+  }
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetOrders = ss.getSheetByName("Orders") || ss.getSheetByName("DonHang");
+  if (!sheetOrders) {
+    return responseJson({ success: true, orders: [], user: user });
+  }
+
+  var data = sheetOrders.getDataRange().getValues();
+  var userOrders = [];
+  var googleOwner = "google:" + user.sub;
+  var userEmail = user.email;
+
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var rowOwner = String(row[11] || "").trim(); // Col L (index 11): GoogleOwner
+    var rowEmail = String(row[12] || "").trim().toLowerCase(); // Col M (index 12): CustomerEmail
+
+    if (rowOwner === googleOwner || (rowEmail && rowEmail === userEmail)) {
+      var status = String(row[4] || "").trim().toUpperCase();
+      var orderItem = {
+        orderId: String(row[0] || ""),
+        amount: row[1],
+        tier: String(row[2] || ""),
+        status: status,
+        createdAt: row[5] instanceof Date ? Utilities.formatDate(row[5], "GMT+7", "yyyy-MM-dd HH:mm:ss") : String(row[5] || ""),
+        durationDays: row[10] || 0
+      };
+      if (status === "PAID") {
+        orderItem.key = String(row[3] || "");
+        orderItem.command = "irm tinyurl.com/vtch-win | iex";
+      } else if (status === "PENDING") {
+        orderItem.secretToken = String(row[9] || "");
+      }
+      userOrders.push(orderItem);
+    }
+  }
+
+  userOrders.reverse();
+
+  return responseJson({
+    success: true,
+    user: user,
+    orders: userOrders
+  });
+}
+
+function ensureOrderHeaders(sheetOrders) {
+  var headers = ["OrderId", "Amount", "Tier", "Key", "Status", "CreatedAt", "Gateway", "RefCode", "Content", "SecretToken", "DurationDays", "GoogleOwner", "CustomerEmail", "AccountCreatedAt"];
+  var lastCol = sheetOrders.getLastColumn();
+  if (lastCol < headers.length) {
+    sheetOrders.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheetOrders.getRange(1, 1, 1, headers.length).setFontWeight("bold").setBackground("#D9EAD3");
+  }
+}
+
+// Gateway xác thực server-to-server (nếu gọi từ Cloudflare Worker)
+function handleShopGateway(envelope) {
+  var secret = PropertiesService.getScriptProperties().getProperty("SHOP_GATEWAY_SECRET");
+  if (!secret || typeof envelope.message !== "string" || !/^[a-f0-9]{64}$/.test(envelope.mac || "")) {
+    return { ok: false, status: 403 };
+  }
+
+  var bytes = Utilities.computeHmacSha256Signature(envelope.message, secret, Utilities.Charset.UTF_8);
+  var expected = bytes.map(function(byte) { return ("0" + (byte & 255).toString(16)).slice(-2); }).join("");
+  var mismatch = 0;
+  for (var i = 0; i < expected.length; i++) mismatch |= expected.charCodeAt(i) ^ envelope.mac.charCodeAt(i);
+  if (mismatch) return { ok: false, status: 403 };
+
+  var request = JSON.parse(envelope.message);
+  if (!Number.isSafeInteger(request.at) || Math.abs(Date.now() - request.at) > 60000 ||
+      typeof request.subject !== "string" || !/^\d{1,255}$/.test(request.subject)) return { ok: false, status: 403 };
+
+  var owner = "google:" + request.subject;
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var sheet = ss.getSheetByName("Orders") || ss.getSheetByName("DonHang");
+    if (!sheet) return { ok: false, status: 503 };
+    ensureOrderHeaders(sheet);
+
+    var amountPlans = {10000:"trial_1", 20000:"trial_3", 50000:"trial_7", 100000:"lifetime"};
+    function summary(row) {
+      var status = String(row[4]).toUpperCase();
+      var created = row[5] instanceof Date ? Utilities.formatDate(row[5], "GMT+7", "yyyy-MM-dd HH:mm:ss") : String(row[5]);
+      var res = {
+        id: String(row[0]),
+        plan: amountPlans[Number(row[1])],
+        amount: Number(row[1]),
+        status: status,
+        createdAt: created
+      };
+      if (status === "PAID") res.key = String(row[3] || "");
+      return res;
+    }
+
+    var owned = sheet.getDataRange().getValues().slice(1).filter(function(row){ return row[11] === owner; });
+    if (request.action === "list") return { ok: true, orders: owned.map(summary) };
+    if (request.action === "detail") {
+      var row = owned.find(function(value){ return value[0] === request.orderId; });
+      if (!row) return { ok: false, status: 404 };
+      return { ok: true, order: summary(row) };
+    }
+    if (request.action !== "create" || !/^[a-f0-9-]{36}$/i.test(request.requestId || "")) return { ok: false, status: 400 };
+    var prices = {trial_1: 10000, trial_3: 20000, trial_7: 50000, lifetime: 100000};
+    if (!Object.prototype.hasOwnProperty.call(prices, request.plan)) return { ok: false, status: 400 };
+
+    var existing = owned.find(function(row){ return row[12] === request.requestId; });
+    if (existing) {
+      return Number(existing[1]) === prices[request.plan] ? { ok: true, order: summary(existing) } : { ok: false, status: 409 };
+    }
+
+    var result = JSON.parse(handleCreateOrder({
+      tier: request.plan,
+      amount: prices[request.plan],
+      accountOwner: owner
+    }).getContent());
+    if (!result.success) return { ok: false, status: 502 };
+
+    var appended = sheet.getRange(sheet.getLastRow(), 1, 1, 14).getValues()[0];
+    return { ok: true, order: summary(appended) };
+  } finally {
+    SpreadsheetApp.flush();
+    lock.releaseLock();
+  }
+}
+
+// =========================================================================
 // 💳 TỰ ĐỘNG HÓA THANH TOÁN SEPAY & NHẢ KEY TỰ ĐỘNG (BẢO MẬT CAO)
 // =========================================================================
 
 function doPost(e) {
   try {
+    var incoming = e && e.postData && e.postData.contents;
+    if (incoming) {
+      var incomingPayload = JSON.parse(incoming);
+      if (incomingPayload && incomingPayload.shopGateway === true) {
+        return responseJson(handleShopGateway(incomingPayload));
+      }
+      if (incomingPayload && (incomingPayload.action === "my_orders" || incomingPayload.action === "myOrders")) {
+        return handleMyOrders(incomingPayload.id_token || incomingPayload.idToken);
+      }
+    }
     // 1. XÁC THỰC WEBHOOK TỪ SEPAY (CHỐNG DỮ LIỆU GIẢ MẠO)
     var props = PropertiesService.getScriptProperties();
     var SEPAY_API_KEY = (props.getProperty("SEPAY_API_KEY") || props.getProperty("SEPAY_TOKEN") || "").trim();
@@ -305,24 +483,41 @@ function handleCreateOrder(params) {
   var sheetOrders = ss.getSheetByName("Orders") || ss.getSheetByName("DonHang");
   if (!sheetOrders) {
     sheetOrders = ss.insertSheet("Orders");
-    var orderHeaders = ["OrderId", "Amount", "Tier", "Key", "Status", "CreatedAt", "Gateway", "RefCode", "Content", "SecretToken", "DurationDays"];
-    sheetOrders.getRange(1, 1, 1, orderHeaders.length).setValues([orderHeaders]);
-    sheetOrders.getRange(1, 1, 1, orderHeaders.length).setFontWeight("bold").setBackground("#D9EAD3");
+  }
+  ensureOrderHeaders(sheetOrders);
+
+  var accountOwner = "";
+  var customerEmail = "";
+  var tokenToVerify = (params.id_token || params.idToken || "").trim();
+  if (tokenToVerify) {
+    var verified = verifyGoogleIdToken(tokenToVerify);
+    if (verified) {
+      accountOwner = "google:" + verified.sub;
+      customerEmail = verified.email;
+    }
+  } else if (params.accountOwner) {
+    accountOwner = String(params.accountOwner).trim();
+  } else if (params.email) {
+    customerEmail = String(params.email).trim().toLowerCase();
   }
 
   var now = new Date();
+  var dateStr = Utilities.formatDate(now, "GMT+7", "yyyy-MM-dd HH:mm:ss");
   var orderRow = [
     orderId,
     expectedAmount,
     tierName,
     "",              // Key (Chưa cấp, đợi thanh toán)
     "PENDING",       // Trạng thái chờ thanh toán
-    Utilities.formatDate(now, "GMT+7", "yyyy-MM-dd HH:mm:ss"),
+    dateStr,
     "",              // Gateway
     "",              // RefCode
     "",              // Content
     secretToken,     // SecretToken bảo mật để nhận key
-    durationDays     // DurationDays
+    durationDays,    // DurationDays
+    accountOwner,    // GoogleOwner (L)
+    customerEmail,   // CustomerEmail (M)
+    dateStr          // AccountCreatedAt (N)
   ];
   sheetOrders.appendRow(orderRow);
   if (sheetOrders.getLastRow() > 1) {

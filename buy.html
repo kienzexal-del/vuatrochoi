@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
     /* =========================================================================
@@ -657,6 +658,331 @@
       transform: translateX(-50%) translateY(0);
       opacity: 1;
     }
+
+    /* Google Auth & User Chip Styles */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .user-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-specular);
+      border-radius: var(--radius-full);
+      padding: 4px 6px 4px 10px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .user-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid var(--cyber-blue);
+    }
+
+    .user-avatar-placeholder {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #38bdf8 0%, #1d4ed8 100%);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .user-name-text {
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-primary);
+    }
+
+    .btn-user-history {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: var(--cyber-blue);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .btn-user-history:hover {
+      background: var(--cyber-blue);
+      color: #0b0f17;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    }
+
+    .btn-user-logout {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      cursor: pointer;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+
+    .btn-user-logout:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #ef4444;
+    }
+
+    /* Account Sync Banner */
+    .account-bar {
+      max-width: 720px;
+      margin: 18px auto 0;
+      background: linear-gradient(90deg, rgba(56, 189, 248, 0.08) 0%, rgba(16, 185, 129, 0.06) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .account-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-align: left;
+    }
+
+    .account-bar-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .btn-account-pill {
+      background: var(--cyber-blue);
+      color: #0a0d12;
+      border: none;
+      border-radius: var(--radius-full);
+      padding: 7px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .btn-account-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+    }
+
+    /* History Modal */
+    .history-modal-card {
+      max-width: 640px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .history-header {
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 16px;
+      margin-bottom: 18px;
+    }
+
+    .history-title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .history-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .history-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .history-subtitle {
+      font-size: 12px;
+      color: var(--cyber-blue);
+      font-family: var(--font-mono);
+      margin-top: 2px;
+    }
+
+    .history-body {
+      overflow-y: auto;
+      padding-right: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .order-card-item {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color 0.2s;
+    }
+
+    .order-card-item:hover {
+      border-color: var(--border-hover);
+    }
+
+    .order-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .order-card-tier {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .order-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .order-badge.paid {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .order-badge.pending {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .order-card-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .order-key-section {
+      background: #080c12;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .order-key-code {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--cyber-blue);
+      letter-spacing: 0.05em;
+      word-break: break-all;
+    }
+
+    .order-cmd-section {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+    }
+
+    .saved-google-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: var(--radius-full);
+      padding: 5px 14px;
+    }
+
+    .history-loading {
+      text-align: center;
+      padding: 40px 10px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .history-empty {
+      text-align: center;
+      padding: 40px 16px;
+    }
+
+    .empty-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+
+    .history-empty h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+
+    .history-empty p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      max-width: 380px;
+      margin: 0 auto 18px;
+    }
   </style>
 </head>
 <body>
@@ -667,9 +993,36 @@
       <div class="brand-logo">👑</div>
       <div class="brand-title">VUA TRÒ CHƠI</div>
     </a>
-    <div class="nav-status">
-      <div class="pulse-dot"></div>
-      <span>Hệ Thống Tự Động 24/7</span>
+    <div class="nav-actions">
+      <div id="authContainer">
+        <div id="g_id_onload"
+             data-client_id="934644417883-72iujt055o25snvt6i1cr9egomvvgm2l.apps.googleusercontent.com"
+             data-callback="handleGoogleCredentialResponse"
+             data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin"
+             data-type="standard"
+             data-size="medium"
+             data-theme="outline"
+             data-text="signin_with"
+             data-shape="pill"
+             data-logo_alignment="left"
+             id="googleSignInWrapper">
+        </div>
+        <div id="userProfileChip" class="user-chip" style="display: none;">
+          <img id="userAvatar" src="" class="user-avatar" alt="Avatar" style="display: none;">
+          <div id="userAvatarPlaceholder" class="user-avatar-placeholder">U</div>
+          <span id="userNameText" class="user-name-text">Khách Hàng</span>
+          <button class="btn-user-history" onclick="openHistoryModal()">
+            📦 Key Của Tôi
+          </button>
+          <button class="btn-user-logout" onclick="signOutGoogle()" title="Đăng xuất">✕</button>
+        </div>
+      </div>
+      <div class="nav-status">
+        <div class="pulse-dot"></div>
+        <span>Hệ Thống 24/7</span>
+      </div>
     </div>
   </nav>
 
@@ -681,6 +1034,16 @@
       <p class="hero-subtitle">
         Khắc phục hoàn toàn lỗi tải chậm, nghẽn mạng Store/Community Steam và tối ưu đường truyền Call of Duty, CS2, Valorant.
       </p>
+
+      <div class="account-bar" id="accountBar">
+        <div class="account-bar-content">
+          <div class="account-bar-left">
+            <span class="account-bar-icon">🔑</span>
+            <span id="accountBarText">Bạn đã từng mua Key? Đăng nhập Google để đồng bộ & xem lại key trên mọi thiết bị!</span>
+          </div>
+          <button class="btn-account-pill" id="accountBarBtn" onclick="handleAccountBarClick()">Xem Key Đã Mua</button>
+        </div>
+      </div>
     </header>
 
     <!-- Pricing Cards Grid -->
@@ -907,6 +1270,10 @@
           </div>
         </div>
 
+        <div id="savedAccountNotice" class="saved-google-badge" style="display: none; margin-bottom: 16px;">
+          ✓ Đã lưu vĩnh viễn vào Google: <strong id="savedAccountEmail" style="color: #38bdf8; margin-left: 4px;"></strong>
+        </div>
+
         <button class="btn-action-primary" onclick="closePaymentModal()">
           Hoàn Tất
         </button>
@@ -915,24 +1282,263 @@
     </div>
   </div>
 
+  <!-- History Modal: Đơn Hàng & Key Đã Mua -->
+  <div class="modal-overlay" id="historyModal">
+    <div class="modal-card history-modal-card">
+      <button class="modal-close" onclick="closeHistoryModal()">&times;</button>
+      
+      <div class="history-header">
+        <div class="history-title-row">
+          <div class="history-icon">📦</div>
+          <div>
+            <div class="history-title">Kho Key & Đơn Hàng Của Bạn</div>
+            <div class="history-subtitle" id="historyUserEmail">Đang kết nối tài khoản Google...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="history-body" id="historyBody">
+        <div class="history-loading" id="historyLoading">
+          <div class="spinner" style="border-top-color: #38bdf8; border-color: rgba(56, 189, 248, 0.2); width: 32px; height: 32px;"></div>
+          <span>Đang tải danh sách bản quyền...</span>
+        </div>
+        <div class="history-empty" id="historyEmpty" style="display: none;">
+          <div class="empty-icon">🎮</div>
+          <h3>Chưa Có Đơn Hàng Nào</h3>
+          <p>Tài khoản Google này chưa có đơn hàng nào. Hãy chọn một gói bản quyền bên dưới để bắt đầu trải nghiệm!</p>
+          <button class="btn-account-pill" onclick="closeHistoryModal()">Mua Gói Ngay</button>
+        </div>
+        <div id="historyList" style="display: flex; flex-direction: column; gap: 12px;"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div class="toast" id="toast">Đã sao chép vào bộ nhớ tạm!</div>
 
   <script>
     // =========================================================================
-    // CẤU HÌNH HỆ THỐNG THANH TOÁN TỰ ĐỘNG
+    // CẤU HÌNH HỆ THỐNG THANH TOÁN TỰ ĐỘNG & GOOGLE IDENTITY SERVICES
     // =========================================================================
     const API_URL = "https://script.google.com/macros/s/AKfycbzsJ4SvFtnCRROeB3SZHNcq65oReT-wlBQJlwF9eG4WUsDI9cJT4JuXLLuH9Y6TYZdRJg/exec";
     const BANK_ID = "MB";
     const ACCOUNT_NO = "0000125042003";
     const ACCOUNT_NAME = "NGUYEN VAN KIEN";
+    const GOOGLE_CLIENT_ID = "934644417883-72iujt055o25snvt6i1cr9egomvvgm2l.apps.googleusercontent.com";
 
+    let currentGoogleUser = null;
     let currentOrderId = "";
     let currentSecretToken = "";
     let currentAmount = 0;
     let pollInterval = null;
     let countdownInterval = null;
     let receivedKey = "";
+
+    // Phục hồi phiên đăng nhập Google từ LocalStorage
+    try {
+      const savedUser = localStorage.getItem('vtch_google_user');
+      if (savedUser) {
+        currentGoogleUser = JSON.parse(savedUser);
+      }
+    } catch(e) {}
+
+    // Giải mã Google JWT Token an toàn phía Client
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch(e) {
+        return null;
+      }
+    }
+
+    // Callback khi người dùng đăng nhập Google thành công
+    function handleGoogleCredentialResponse(response) {
+      if (!response || !response.credential) return;
+      const payload = parseJwt(response.credential);
+      if (!payload || !payload.email) return;
+
+      currentGoogleUser = {
+        sub: payload.sub,
+        email: payload.email,
+        name: payload.name || payload.email.split('@')[0],
+        picture: payload.picture || '',
+        idToken: response.credential
+      };
+
+      try {
+        localStorage.setItem('vtch_google_user', JSON.stringify(currentGoogleUser));
+      } catch(e) {}
+
+      updateUserUI();
+      showToast("Đăng nhập thành công: " + currentGoogleUser.email);
+    }
+
+    // Đăng xuất Google
+    function signOutGoogle() {
+      currentGoogleUser = null;
+      try {
+        localStorage.removeItem('vtch_google_user');
+      } catch(e) {}
+      if (window.google && google.accounts && google.accounts.id) {
+        google.accounts.id.disableAutoSelect();
+      }
+      updateUserUI();
+      showToast("Đã đăng xuất tài khoản.");
+    }
+
+    // Cập nhật giao diện theo trạng thái đăng nhập
+    function updateUserUI() {
+      const btnWrapper = document.getElementById("googleSignInWrapper");
+      const userChip = document.getElementById("userProfileChip");
+      const avatarImg = document.getElementById("userAvatar");
+      const placeholder = document.getElementById("userAvatarPlaceholder");
+      const nameText = document.getElementById("userNameText");
+      const barText = document.getElementById("accountBarText");
+      const barBtn = document.getElementById("accountBarBtn");
+
+      if (currentGoogleUser && currentGoogleUser.email) {
+        if (btnWrapper) btnWrapper.style.display = "none";
+        if (userChip) userChip.style.display = "inline-flex";
+        if (nameText) nameText.innerText = currentGoogleUser.name || currentGoogleUser.email.split('@')[0];
+
+        if (currentGoogleUser.picture && avatarImg) {
+          avatarImg.src = currentGoogleUser.picture;
+          avatarImg.style.display = "block";
+          if (placeholder) placeholder.style.display = "none";
+        } else if (placeholder) {
+          placeholder.innerText = (currentGoogleUser.name || currentGoogleUser.email || "U").charAt(0).toUpperCase();
+          placeholder.style.display = "flex";
+          if (avatarImg) avatarImg.style.display = "none";
+        }
+
+        if (barText) {
+          barText.innerHTML = `Tài khoản: <strong style="color: #38bdf8;">${currentGoogleUser.email}</strong> • Tự động đồng bộ Key khi mua hàng.`;
+        }
+        if (barBtn) barBtn.innerText = "Kho Key Của Tôi";
+      } else {
+        if (btnWrapper) btnWrapper.style.display = "block";
+        if (userChip) userChip.style.display = "none";
+        if (barText) {
+          barText.innerText = "Bạn đã từng mua Key? Đăng nhập Google để đồng bộ & xem lại key trên mọi thiết bị!";
+        }
+        if (barBtn) barBtn.innerText = "Đăng Nhập Ngay";
+      }
+    }
+
+    function handleAccountBarClick() {
+      if (currentGoogleUser) {
+        openHistoryModal();
+      } else {
+        const btn = document.querySelector("#googleSignInWrapper div[role='button']");
+        if (btn) {
+          btn.click();
+        } else if (window.google && google.accounts && google.accounts.id) {
+          google.accounts.id.prompt();
+        } else {
+          showToast("Vui lòng bấm nút Đăng nhập Google ở góc phải trên!");
+        }
+      }
+    }
+
+    // Modal Lịch sử đơn hàng & Key đã mua
+    async function openHistoryModal() {
+      if (!currentGoogleUser) {
+        showToast("Vui lòng đăng nhập Google để xem đơn hàng!");
+        return;
+      }
+
+      const modal = document.getElementById("historyModal");
+      const userEmailEl = document.getElementById("historyUserEmail");
+      const loadingEl = document.getElementById("historyLoading");
+      const emptyEl = document.getElementById("historyEmpty");
+      const listEl = document.getElementById("historyList");
+
+      userEmailEl.innerText = "Tài khoản: " + currentGoogleUser.email;
+      modal.classList.add("active");
+      loadingEl.style.display = "flex";
+      emptyEl.style.display = "none";
+      listEl.innerHTML = "";
+
+      try {
+        const fetchUrl = `${API_URL}?action=my_orders&id_token=${encodeURIComponent(currentGoogleUser.idToken)}`;
+        const res = await fetch(fetchUrl);
+        const data = await res.json();
+
+        loadingEl.style.display = "none";
+
+        if (data && data.success && Array.isArray(data.orders) && data.orders.length > 0) {
+          listEl.innerHTML = "";
+          data.orders.forEach(order => {
+            const isPaid = order.status === "PAID";
+            const badgeClass = isPaid ? "paid" : "pending";
+            const badgeText = isPaid ? "Đã Thanh Toán" : "Chờ Thanh Toán";
+
+            let keyHtml = "";
+            if (isPaid && order.key) {
+              keyHtml = `
+                <div class="order-key-section">
+                  <div>
+                    <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 2px;">MÃ BẢN QUYỀN</div>
+                    <div class="order-key-code">${order.key}</div>
+                  </div>
+                  <button class="btn-copy-sm" onclick="copyText('${order.key}', 'Đã sao chép License Key!')">Copy Key</button>
+                </div>
+                <div class="order-cmd-section">
+                  <span>${order.command || "irm tinyurl.com/vtch-win | iex"}</span>
+                  <button class="btn-copy-sm" onclick="copyText('${order.command || "irm tinyurl.com/vtch-win | iex"}', 'Đã sao chép lệnh!')">Copy Lệnh</button>
+                </div>
+              `;
+            } else if (!isPaid) {
+              keyHtml = `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(245, 158, 11, 0.06); border: 1px dashed rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 10px 14px;">
+                  <span style="font-size: 13px; color: #fbbf24;">Đơn hàng chưa thanh toán</span>
+                  <button class="btn-copy-sm" style="background: #fbbf24; color: #0f172a;" onclick="continuePayment('${order.tier}', ${order.amount}, '${order.tier}')">Thanh Toán Ngay</button>
+                </div>
+              `;
+            }
+
+            const item = document.createElement("div");
+            item.className = "order-card-item";
+            item.innerHTML = `
+              <div class="order-card-top">
+                <div class="order-card-tier">
+                  <span>🎮</span>
+                  <span>${order.tier}</span>
+                </div>
+                <span class="order-badge ${badgeClass}">${badgeText}</span>
+              </div>
+              <div class="order-card-meta">
+                <span>Mã đơn: <strong>${order.orderId}</strong></span>
+                <span>Số tiền: <strong>${Number(order.amount).toLocaleString('vi-VN')} đ</strong></span>
+                <span>Ngày tạo: ${order.createdAt || "Vừa xong"}</span>
+              </div>
+              ${keyHtml}
+            `;
+            listEl.appendChild(item);
+          });
+        } else {
+          emptyEl.style.display = "block";
+        }
+      } catch (err) {
+        loadingEl.style.display = "none";
+        emptyEl.style.display = "block";
+        emptyEl.querySelector("p").innerText = "Chưa thể kết nối đến máy chủ lấy danh sách đơn. Vui lòng thử lại sau ít phút.";
+      }
+    }
+
+    function closeHistoryModal() {
+      document.getElementById("historyModal").classList.remove("active");
+    }
+
+    function continuePayment(tier, amount, tierName) {
+      closeHistoryModal();
+      openPaymentModal(tier, amount, tierName);
+    }
 
     async function openPaymentModal(tier, amount, tierName) {
       currentAmount = amount;
@@ -949,8 +1555,11 @@
       document.getElementById("paymentModal").classList.add("active");
 
       try {
-        // 1. GỌI BACKEND TẠO ĐƠN HÀNG BẢO MẬT (LƯU TRƯỚC SỐ TIỀN & TOKEN RIÊNG)
-        const createUrl = `${API_URL}?action=create_order&tier=${encodeURIComponent(tier)}&amount=${amount}`;
+        // 1. GỌI BACKEND TẠO ĐƠN HÀNG BẢO MẬT (KÈM GOOGLE ID TOKEN NẾU ĐÃ ĐĂNG NHẬP)
+        let createUrl = `${API_URL}?action=create_order&tier=${encodeURIComponent(tier)}&amount=${amount}`;
+        if (currentGoogleUser && currentGoogleUser.idToken) {
+          createUrl += `&id_token=${encodeURIComponent(currentGoogleUser.idToken)}`;
+        }
         const res = await fetch(createUrl);
         const data = await res.json();
 
@@ -1026,6 +1635,17 @@
 
             receivedKey = data.key;
             document.getElementById("dispensedKey").innerText = data.key;
+            
+            // Hiển thị thông báo đã lưu vào tài khoản Google
+            const noticeEl = document.getElementById("savedAccountNotice");
+            const emailEl = document.getElementById("savedAccountEmail");
+            if (currentGoogleUser && currentGoogleUser.email && noticeEl && emailEl) {
+              emailEl.innerText = currentGoogleUser.email;
+              noticeEl.style.display = "inline-flex";
+            } else if (noticeEl) {
+              noticeEl.style.display = "none";
+            }
+
             document.getElementById("paymentContent").style.display = "none";
             document.getElementById("successContent").style.display = "block";
           }
@@ -1051,6 +1671,12 @@
         t.classList.remove("show");
       }, 2500);
     }
+
+    // Khởi động UI ngay khi tải trang
+    window.addEventListener("DOMContentLoaded", () => {
+      updateUserUI();
+    });
+  </script>
   </script>
 </body>
 </html>

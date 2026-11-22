@@ -12,8 +12,22 @@ function login() {
     else error('Đăng nhập Google chưa sẵn sàng. Vui lòng tải lại trang.');
     return;
   }
-  $('account').scrollIntoView({block:'center'});
-  $('account').querySelector('[role="button"], iframe')?.focus();
+  const dialog = el('dialog', undefined, 'login-dialog');
+  dialog.setAttribute('aria-label', 'Đăng nhập bằng Google');
+  const slot = el('div', undefined, 'google-button');
+  dialog.append(
+    el('h2', 'Đăng nhập bằng Google'),
+    slot,
+    el('p', 'Nếu mở từ Telegram hoặc ứng dụng khác, hãy mở trang bằng Safari hoặc Chrome rồi thử lại.', 'fine'),
+    button('Đóng', () => dialog.close(), 'wide')
+  );
+  dialog.addEventListener('close', () => dialog.remove(), {once:true});
+  document.body.append(dialog);
+  dialog.showModal();
+  google.accounts.id.renderButton(slot, {
+    theme:'outline', size:'large', text:'signin_with', locale:'vi',
+    width:Math.min(360, Math.floor(slot.getBoundingClientRect().width))
+  });
 }
 const GOOGLE_CLIENT_ID = '934644417883-72iujt055o25snvt6i1cr9egomvvgm2l.apps.googleusercontent.com';
 const API_URL = 'https://script.google.com/macros/s/AKfycbzsJ4SvFtnCRROeB3SZHNcq65oReT-wlBQJlwF9eG4WUsDI9cJT4JuXLLuH9Y6TYZdRJg/exec';
@@ -134,19 +148,55 @@ async function accountRequest(action, fields = {}) {
   }
 }
 async function copy(value) {try {await navigator.clipboard.writeText(value); toast('Đã sao chép.');} catch {toast('Chưa sao chép được. Bạn có thể chọn và sao chép nội dung trực tiếp.');}}
-const loginLabel = () => $('demo').hidden ? 'Đăng nhập bằng Google' : 'Đăng nhập thử';
+function userIcon() {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('aria-hidden', 'true');
+  const path = document.createElementNS(svg.namespaceURI, 'path');
+  path.setAttribute('d', 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m12-13a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z');
+  svg.append(path);
+  return svg;
+}
+function googleAvatar(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && /^lh\d+\.googleusercontent\.com$/.test(url.hostname) ? url.href : '';
+  } catch { return ''; }
+}
 function account() {
   $('account').replaceChildren();
-  if(user) $('account').append(el('span',user.name || 'Tài khoản'),button('Đăng xuất',async()=>{
+  if(user) {
+    const menu = el('details', undefined, 'profile-menu');
+    const trigger = el('summary', undefined, 'profile-trigger');
+    trigger.setAttribute('aria-label', 'Menu tài khoản');
+    trigger.append(userIcon());
+    const avatar = googleAvatar(user.picture);
+    if(avatar) {
+      const photo = el('img');
+      photo.alt = '';
+      photo.referrerPolicy = 'no-referrer';
+      photo.addEventListener('load', () => trigger.replaceChildren(photo), {once:true});
+      photo.src = avatar;
+    }
+    const panel = el('div', undefined, 'profile-panel');
+    const historyLink = el('a','Đơn hàng của tôi');
+    historyLink.href = '#orders';
+    historyLink.addEventListener('click', () => {menu.open=false;});
+    panel.append(historyLink,button('Đăng xuất',async()=>{
     try {
       if(gisReady) {credential=''; google.accounts.id.disableAutoSelect();}
       else await request('/api/logout',{method:'POST'});
-      user=null;orders=[];clearTimeout(timer);revision++;account();route();
+      user=null;orders=[];clearTimeout(timer);revision++;account();location.hash='shop';route();
     }
     catch(e){error(e.message);}
-  }));
-  else if(gisReady) google.accounts.id.renderButton($('account'), {theme:'outline', size:'medium', text:'signin_with', locale:'vi'});
-  else $('account').append(button(loginLabel(),login));
+    }));
+    menu.append(trigger,panel);
+    $('account').append(menu);
+  } else {
+    const signIn = button('Đăng nhập',login,'profile-login');
+    signIn.prepend(userIcon());
+    $('account').append(signIn);
+  }
   $('buy').textContent=creating?'Đang tạo đơn…':user?'Tiếp tục thanh toán':'Đăng nhập để mua';
   $('buy').disabled=loading||creating;
   $('buy-note').textContent=user?'Đơn hàng được lưu trong tài khoản này. Bạn có thể quay lại bất cứ lúc nào.':'Đăng nhập để giữ đơn hàng và xem lại key trên các thiết bị của bạn.';
@@ -224,7 +274,7 @@ function route() {
   const hash=location.hash.slice(1)||'shop';const detail=/^order\/[A-Z0-9-]{6,64}$/.test(hash);
   const view=hash==='orders'?'orders':detail?'detail':'shop';
   for(const name of ['shop','orders','detail'])$(`${name}-view`).hidden=name!==view;
-  for(const name of ['shop','orders'])$(`nav-${name}`).setAttribute('aria-current',(view==='shop'?name==='shop':name==='orders')?'page':'false');
+  $('nav-shop').setAttribute('aria-current', hash === 'shop' ? 'page' : 'false');
   if(view==='shop')return;
   if(loading){$(view==='orders'?'orders':'detail').replaceChildren(el('p','Đang kiểm tra phiên đăng nhập…','loading'));return;}
   if(!user){$(view==='orders'?'orders':'detail').replaceChildren(empty('Đơn hàng đi cùng tài khoản','Đăng nhập bằng tài khoản đã dùng để mua. Bạn có thể xem lại đơn và key trên thiết bị này.',login,'Đăng nhập'));return;}
@@ -246,13 +296,18 @@ $('refresh').addEventListener('click',loadOrders);
 $('back').addEventListener('click',()=>location.hash='orders');
 window.addEventListener('hashchange', () => {
   route();
-  window.scrollTo({top: 0, behavior: 'instant'});
+  if (location.hash === '#mobile-install') $('mobile-install').scrollIntoView();
+  else window.scrollTo({top: 0, behavior: 'instant'});
 });
 route();
 let connectionError='';
 try {
   let clientId = GOOGLE_CLIENT_ID;
   const config = await request('/api/shop-config').catch(() => null);
+  if (config?.demo) {
+    $('demo').hidden = false;
+    user = (await request('/api/me')).user;
+  } else {
   if (config?.googleClientId) {
     clientId = config.googleClientId;
   }
@@ -269,7 +324,9 @@ try {
     callback: async result => {
       try {
         credential = result.credential;
-        user = (await accountRequest('me')).user;
+        const profile = (await accountRequest('me')).user;
+        user = {...profile, picture: profile?.picture || parseJwt(credential)?.picture};
+        document.querySelector('.login-dialog[open]')?.close();
         account();
         route();
       } catch {
@@ -279,6 +336,7 @@ try {
     }
   });
   gisReady = true;
+  }
 }
 catch(e){connectionError='Chưa kết nối được tài khoản. Bạn vẫn có thể xem các gói; hãy tải lại trang để thử kết nối.';}
 finally {

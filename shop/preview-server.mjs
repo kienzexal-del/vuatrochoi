@@ -11,6 +11,7 @@ const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,'http://127.0.0.1');const path=url.pathname;
   const json=(value,status=200)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
   if(path==='/auth/login'){signedIn=true;res.writeHead(302,{Location:'/buy#orders'});res.end();return;}
+  if(path==='/api/shop-config'){json({demo:true});return;}
   if(path==='/api/me'){json({user:signedIn?{name:'Khách dùng thử'}:null,demo:true});return;}
   if(path.startsWith('/api/')){
     if(!signedIn){json({},401);return;}
@@ -24,9 +25,9 @@ const server=http.createServer(async(req,res)=>{
     if(path==='/api/orders'){json({orders:rows});return;}
     const order=rows.find(o=>path===`/api/orders/${o.id}`);if(order){json({order});return;}json({},404);return;
   }
-  const allowed={'/':'index.html','/buy':'index.html','/shop/paper-background-landscape.jpg':'paper-background-landscape.jpg','/shop/paper-background-portrait.jpg':'paper-background-portrait.jpg','/shop/store.css':'store.css','/shop/store.mjs':'store.mjs','/shop/shop-model.mjs':'shop-model.mjs'};
+  const allowed={'/index.mobile.html':'../index.mobile.html','/ios/':'../ios/index.html','/android/VuaTroChoi_ByeDPI.apk':'../android/VuaTroChoi_ByeDPI.apk','/':'index.html','/buy':'index.html','/shop/paper-background-landscape.jpg':'paper-background-landscape.jpg','/shop/paper-background-portrait.jpg':'paper-background-portrait.jpg','/shop/game-gia-re.png':'game-gia-re.png','/shop/store.css':'store.css','/shop/store.mjs':'store.mjs','/shop/shop-model.mjs':'shop-model.mjs'};
   const file=allowed[path];if(!file){res.writeHead(404);res.end();return;}
-  const types={html:'text/html',css:'text/css',mjs:'text/javascript',jpg:'image/jpeg'};
+  const types={html:'text/html',css:'text/css',mjs:'text/javascript',jpg:'image/jpeg',png:'image/png',apk:'application/vnd.android.package-archive'};
   res.writeHead(200,{'Content-Type':`${types[file.split('.').at(-1)]}`,'Cache-Control':'no-store'});res.end(await readFile(root+file));
 });
-server.listen(4177,'127.0.0.1',()=>console.log('Local demo: http://127.0.0.1:4177/buy (no real payments)'));
+server.listen(Number(process.env.VTCH_PREVIEW_PORT || 4177),'127.0.0.1',()=>console.log('Local demo: http://127.0.0.1:4177/buy (no real payments)'));

@@ -924,34 +924,52 @@
     const ACCOUNT_NAME = "NGUYEN VAN KIEN";
 
     let currentOrderId = "";
+    let currentSecretToken = "";
     let currentAmount = 0;
     let pollInterval = null;
     let countdownInterval = null;
     let receivedKey = "";
 
-    function openPaymentModal(tier, amount, tierName) {
+    async function openPaymentModal(tier, amount, tierName) {
       currentAmount = amount;
-      // Sinh mã đơn ngẫu nhiên dạng: VTCH + 4 chữ số (Ví dụ: VTCH8492)
-      currentOrderId = "VTCH" + Math.floor(1000 + Math.random() * 9000);
-
       document.getElementById("modalPackageName").innerText = tierName;
       document.getElementById("bankAmount").innerText = Number(amount).toLocaleString('vi-VN');
-      document.getElementById("bankMemo").innerText = currentOrderId;
 
-      // Sinh mã VietQR động chuẩn Napas 24/7
-      const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact2.png?amount=${amount}&addInfo=${currentOrderId}&accountName=${encodeURIComponent(ACCOUNT_NAME)}`;
-      document.getElementById("qrImage").src = qrUrl;
-
-      // Reset giao diện
+      // Tạm hiện đang khởi tạo mã đơn bảo mật
+      document.getElementById("bankMemo").innerText = "Đang tạo mã...";
       document.getElementById("paymentContent").style.display = "block";
       document.getElementById("successContent").style.display = "none";
       document.getElementById("paymentModal").classList.add("active");
 
-      // Bắt đầu đếm ngược 5 phút
+      try {
+        // 1. GỌI BACKEND TẠO ĐƠN HÀNG BẢO MẬT (LƯU TRƯỚC SỐ TIỀN & TOKEN RIÊNG)
+        const createUrl = `${API_URL}?action=create_order&tier=${encodeURIComponent(tier)}&amount=${amount}`;
+        const res = await fetch(createUrl);
+        const data = await res.json();
+
+        if (data && data.success && data.orderId) {
+          currentOrderId = data.orderId;
+          currentSecretToken = data.secretToken;
+        } else {
+          currentOrderId = "VTCH-" + Math.floor(100000 + Math.random() * 900000);
+          currentSecretToken = Math.random().toString(36).substring(2);
+        }
+      } catch (e) {
+        currentOrderId = "VTCH-" + Math.floor(100000 + Math.random() * 900000);
+        currentSecretToken = Math.random().toString(36).substring(2);
+      }
+
+      document.getElementById("bankMemo").innerText = currentOrderId;
+
+      // 2. SINH MÃ VIETQR ĐỘNG CHUẨN NAPAS (ĐÃ CÓ SỐ TIỀN & MÃ ĐƠN HÀNG)
+      const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(currentOrderId)}&accountName=${encodeURIComponent(ACCOUNT_NAME)}`;
+      document.getElementById("qrImage").src = qrUrl;
+
+      // 3. ĐẾM NGƯỢC 5 PHÚT
       startCountdown(300);
 
-      // Bắt đầu Polling kiểm tra trạng thái đơn hàng mỗi 2.5 giây
-      startPolling(currentOrderId);
+      // 4. BẮT ĐẦU POLLING BẢO MẬT (KÈM TOKEN XÁC THỰC BÍ MẬT)
+      startPolling(currentOrderId, currentSecretToken);
     }
 
     function closePaymentModal() {
@@ -978,25 +996,33 @@
       }, 1000);
     }
 
-    function startPolling(orderId) {
+    function startPolling(orderId, token) {
       clearInterval(pollInterval);
 
-      // Gọi kiểm tra ngay sau 1.5 giây
       pollInterval = setInterval(async () => {
         try {
-          const checkUrl = `${API_URL}?action=check_order&orderId=${encodeURIComponent(orderId)}`;
+          const checkUrl = `${API_URL}?action=check_order&orderId=${encodeURIComponent(orderId)}&token=${encodeURIComponent(token)}`;
           const res = await fetch(checkUrl);
           const data = await res.json();
 
           if (data && data.status === "PAID" && data.key) {
-            // DỪNG POLLING
             clearInterval(pollInterval);
             clearInterval(countdownInterval);
 
-            // BẮN PHÁO HOA ĂN MỪNG
             if (typeof confetti === 'function') {
               confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
             }
+
+            receivedKey = data.key;
+            document.getElementById("dispensedKey").innerText = data.key;
+            document.getElementById("paymentContent").style.display = "none";
+            document.getElementById("successContent").style.display = "block";
+          }
+        } catch (err) {
+          console.log("Polling error:", err);
+        }
+      }, 2500);
+    }
 
             // HIỂN THỊ MÀN HÌNH THÀNH CÔNG
             receivedKey = data.key;

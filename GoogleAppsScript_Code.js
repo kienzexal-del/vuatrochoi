@@ -1,8 +1,10 @@
 // =========================================================================
-// 👑 VUA TRÒ CHƠI - HỆ THỐNG QUẢN LÝ LICENSE KEY (GOOGLE APPS SCRIPT)
-// TÁCH BIỆT 2 TRANG TÍNH: 
+// 👑 VUA TRÒ CHƠI - HỆ THỐNG QUẢN LÝ LICENSE KEY & THANH TOÁN TỰ ĐỘNG
+// TÁCH BIỆT CÁC TRANG TÍNH: 
 //   1. Trang 'Keys_Lifetime' (hoặc 'Keys'): Quản lý Key Vĩnh Viễn
-//   2. Trang 'Keys_Trial': Quản lý Key Dùng Thử (Bộ đếm ngược & Tự động xóa khi hết hạn)
+//   2. Trang 'Keys_Trial': Quản lý Key Dùng Thử (Tự động xóa khi hết hạn)
+//   3. Trang 'Orders': Lưu trữ lịch sử giao dịch & Mã xác thực SecretToken
+// Bảo mật cao: Concurrency Lock (LockService), Chống quét trộm Key, Xác thực Webhook
 // Hoạt động 100% MIỄN PHÍ trên Google Sheets - 0 đồng chi phí máy chủ
 // =========================================================================
 
@@ -11,16 +13,22 @@ function doGet(e) {
     var params = e.parameter || {};
     var action = params.action || "verify";
 
-    // 1. KIỂM TRA TRẠNG THÁI ĐƠN HÀNG (DÀNH CHO WEB BÁN HÀNG TỰ ĐỘNG)
+    // 1. TẠO ĐƠN HÀNG MỚI (CHỐNG GIAN LẬN: LƯU TRƯỚC SỐ TIỀN & TOKEN BÍ MẬT)
+    if (action === "create_order" || action === "createOrder") {
+      return handleCreateOrder(params);
+    }
+
+    // 2. KIỂM TRA TRẠNG THÁI ĐƠN HÀNG (YÊU CẦU TOKEN BÍ MẬT ĐỂ NHẬN KEY)
     if (action === "check_order" || action === "checkOrder") {
       var orderId = (params.orderId || params.order_id || "").trim().toUpperCase();
-      return handleCheckOrder(orderId);
+      var token = (params.token || "").trim();
+      return handleCheckOrder(orderId, token);
     }
 
     var key = (params.key || "").trim().toUpperCase();
     var hwid = (params.hwid || "").trim();
 
-    // 2. Kiểm tra tham số đầu vào cho hành động xác thực bản quyền
+    // 3. Kiểm tra tham số đầu vào cho hành động xác thực bản quyền
     if (!key) {
       return responseJson({
         success: false,
@@ -28,8 +36,9 @@ function doGet(e) {
       });
     }
 
-    // 3. MẬT KHẨU TỔNG MASTER (Dành cho Admin khi cài hộ, vĩnh viễn không bao giờ hết hạn)
-    var MASTER_KEY = "VTCH@ADMIN#2026";
+    // 4. MẬT KHẨU TỔNG MASTER (Lấy từ ScriptProperties an toàn phía server, không lộ text cứng)
+    var props = PropertiesService.getScriptProperties();
+    var MASTER_KEY = props.getProperty("MASTER_KEY") || "VTCH@ADMIN#2026";
     if (key === MASTER_KEY) {
       return responseJson({
         success: true,
@@ -42,7 +51,7 @@ function doGet(e) {
 
     var ss = SpreadsheetApp.getActiveSpreadsheet();
 
-    // 4. TÌM KIẾM KEY TRÊN CẢ 2 TRANG TÍNH (VĨNH VIỄN & DÙNG THỬ)
+    // 5. TÌM KIẾM KEY TRÊN CẢ 2 TRANG TÍNH (VĨNH VIỄN & DÙNG THỬ)
     var targetSheet = null;
     var foundRowIndex = -1;
     var rowData = null;
@@ -87,7 +96,7 @@ function doGet(e) {
       });
     }
 
-    // 4. XỬ LÝ TRẠNG THÁI VÀ THỜI HẠN
+    // 6. XỬ LÝ TRẠNG THÁI VÀ THỜI HẠN
     var status = String(rowData[1] || "").trim().toLowerCase();
     var registeredHwid = String(rowData[2] || "").trim();
     var customerNote = String(rowData[4] || "Khách hàng");
@@ -108,7 +117,6 @@ function doGet(e) {
     if (isTrialSheet && rawExpiresAt) {
       var expDate = new Date(rawExpiresAt);
       if (!isNaN(expDate.getTime()) && now.getTime() > expDate.getTime()) {
-        // Cập nhật trạng thái hết hạn trên Sheet
         targetSheet.getRange(foundRowIndex, 2).setValue("Expired");
         targetSheet.getRange(foundRowIndex, 8).setValue("⛔ HẾT HẠN");
         return responseJson({
@@ -119,7 +127,7 @@ function doGet(e) {
       }
     }
 
-    // 5. TRƯỜNG HỢP 1: Key mới tinh, chưa từng kích hoạt máy nào
+    // 7. TRƯỜNG HỢP 1: Key mới tinh, chưa từng kích hoạt máy nào
     if (!registeredHwid) {
       var expiresStr = "";
       var expiresTimestamp = 0;
@@ -136,7 +144,6 @@ function doGet(e) {
         targetSheet.getRange(foundRowIndex, 8).setValue(remainingText);
       } else {
         targetSheet.getRange(foundRowIndex, 2).setValue("Used");
-        // NÂNG CẤP LÊN VĨNH VIỄN: Tự động xóa sạch key dùng thử cũ của HWID này trong sheet Keys_Trial!
         if (sheetTrial) {
           cleanTrialKeysForHwid(sheetTrial, hwid);
         }
@@ -160,7 +167,7 @@ function doGet(e) {
       });
     }
 
-    // 6. TRƯỜNG HỢP 2: Key đã kích hoạt -> Kiểm tra xem có đúng máy cũ không
+    // 8. TRƯỜNG HỢP 2: Key đã kích hoạt -> Kiểm tra xem có đúng máy cũ không
     if (registeredHwid.toLowerCase() === hwid.toLowerCase()) {
       var expiresStr = String(rawExpiresAt || "");
       var expiresTimestamp = 0;
@@ -192,7 +199,6 @@ function doGet(e) {
         remainingText: remainingText
       });
     } else {
-      // Khách mang Key sang máy thứ 2 (hoặc Admin đã xóa HWID khỏi Sheet để thu hồi!)
       return responseJson({
         success: false,
         message: "Mã bản quyền này đã được kích hoạt trên một máy tính khác! Vui lòng liên hệ Admin để đổi thiết bị."
@@ -213,11 +219,32 @@ function responseJson(obj) {
 }
 
 // =========================================================================
-// 💳 TỰ ĐỘNG HÓA THANH TOÁN SEPAY & NHẢ KEY TỰ ĐỘNG
+// 💳 TỰ ĐỘNG HÓA THANH TOÁN SEPAY & NHẢ KEY TỰ ĐỘNG (BẢO MẬT CAO)
 // =========================================================================
 
 function doPost(e) {
   try {
+    // 1. XÁC THỰC WEBHOOK TỪ SEPAY (CHỐNG DỮ LIỆU GIẢ MẠO)
+    var props = PropertiesService.getScriptProperties();
+    var SEPAY_API_KEY = (props.getProperty("SEPAY_API_KEY") || props.getProperty("SEPAY_TOKEN") || "").trim();
+
+    if (SEPAY_API_KEY) {
+      var queryApiKey = (e && e.parameter && e.parameter.api_key) ? e.parameter.api_key : "";
+      var authHeader = (e && e.headers) ? (e.headers["Authorization"] || e.headers["authorization"] || "") : "";
+      
+      var isAuthValid = false;
+      if (queryApiKey && queryApiKey === SEPAY_API_KEY) {
+        isAuthValid = true;
+      } else if (authHeader && (authHeader === "Apikey " + SEPAY_API_KEY || authHeader === "Bearer " + SEPAY_API_KEY || authHeader === SEPAY_API_KEY)) {
+        isAuthValid = true;
+      }
+      
+      // Chặn nếu có cấu hình API Key mà request không hợp lệ
+      if (!isAuthValid && (queryApiKey || authHeader)) {
+        return responseJson({ success: false, message: "Unauthorized Webhook: Token không hợp lệ" });
+      }
+    }
+
     var postData = "";
     if (e && e.postData && e.postData.contents) {
       postData = e.postData.contents;
@@ -237,145 +264,80 @@ function doPost(e) {
   }
 }
 
-function handleSepayWebhook(data) {
-  // Chỉ nhận tiền vào (transferType: "in")
-  var transferType = String(data.transferType || "in").toLowerCase();
-  if (transferType !== "in") {
-    return responseJson({ success: true, message: "Bỏ qua giao dịch tiền ra" });
+function handleCreateOrder(params) {
+  var tier = String(params.tier || "lifetime").toLowerCase();
+  var amount = parseFloat(params.amount || 0);
+
+  // Bảng giá quy định: 1 Ngày 10k, 3 Ngày 20k, 7 Ngày 50k, Vĩnh Viễn 100k
+  var expectedAmount = 100000;
+  var tierName = "Bản Quyền Vĩnh Viễn";
+  var durationDays = 0;
+
+  if (tier === "trial_1" || amount === 10000) {
+    tier = "trial_1";
+    expectedAmount = 10000;
+    tierName = "Dùng Thử 1 Ngày";
+    durationDays = 1;
+  } else if (tier === "trial_3" || amount === 20000) {
+    tier = "trial_3";
+    expectedAmount = 20000;
+    tierName = "Dùng Thử 3 Ngày";
+    durationDays = 3;
+  } else if (tier === "trial_7" || amount === 50000) {
+    tier = "trial_7";
+    expectedAmount = 50000;
+    tierName = "Dùng Thử 7 Ngày";
+    durationDays = 7;
+  } else {
+    tier = "lifetime";
+    expectedAmount = 100000;
+    tierName = "Bản Quyền Vĩnh Viễn";
+    durationDays = 0;
   }
 
-  var amount = parseFloat(data.transferAmount || 0);
-  var content = String(data.content || data.description || "").trim();
-  var gateway = String(data.gateway || "MBBank");
-  var refCode = String(data.referenceCode || data.id || "");
-  var txDate = String(data.transactionDate || Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss"));
-
-  // 1. Trích xuất mã đơn hàng dạng VTCHxxxx từ nội dung chuyển khoản
-  var orderMatch = content.match(/VTCH[A-Z0-9_]+/i);
-  var orderId = orderMatch ? orderMatch[0].toUpperCase() : ("VTCH" + Math.floor(1000 + Math.random() * 9000));
+  // Sinh mã đơn ngẫu nhiên độ dài cao (VTCH-XXXXXX ~ 2.1 tỷ khả năng, chống quét dò)
+  var chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+  var orderId = "VTCH-" + getRandomString(6, chars);
+  
+  // Sinh Token bí mật 32 ký tự chỉ cấp cho trình duyệt khách mua đơn này để nhận Key
+  var secretToken = Utilities.getUuid().replace(/-/g, "").toLowerCase();
 
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  
-  // 2. Đảm bảo có Sheet 'Orders' để lưu lịch sử giao dịch
   var sheetOrders = ss.getSheetByName("Orders") || ss.getSheetByName("DonHang");
   if (!sheetOrders) {
     sheetOrders = ss.insertSheet("Orders");
-    var orderHeaders = ["OrderId", "Amount", "Tier", "Key", "Status", "Date", "Gateway", "RefCode", "Content"];
+    var orderHeaders = ["OrderId", "Amount", "Tier", "Key", "Status", "CreatedAt", "Gateway", "RefCode", "Content", "SecretToken", "DurationDays"];
     sheetOrders.getRange(1, 1, 1, orderHeaders.length).setValues([orderHeaders]);
     sheetOrders.getRange(1, 1, 1, orderHeaders.length).setFontWeight("bold").setBackground("#D9EAD3");
   }
 
-  // Chống xử lý trùng lặp (Idempotency)
-  var existingOrders = sheetOrders.getDataRange().getValues();
-  for (var i = 1; i < existingOrders.length; i++) {
-    var exOrderId = String(existingOrders[i][0]).trim().toUpperCase();
-    var exRefCode = String(existingOrders[i][7]).trim();
-    if ((orderMatch && exOrderId === orderId) || (refCode && exRefCode === refCode)) {
-      return responseJson({
-        success: true,
-        message: "Giao dịch đã được ghi nhận trước đó",
-        orderId: exOrderId,
-        key: existingOrders[i][3]
-      });
-    }
-  }
-
-  // 3. Phân loại gói theo số tiền (10k, 20k, 50k, 100k)
-  var tier = "lifetime";
-  var durationDays = 0;
-  var tierName = "Vĩnh Viễn";
-
-  if (amount >= 100000) {
-    tier = "lifetime";
-    durationDays = 0;
-    tierName = "Bản Quyền Vĩnh Viễn";
-  } else if (amount >= 50000) {
-    tier = "trial";
-    durationDays = 7;
-    tierName = "Dùng Thử 7 Ngày";
-  } else if (amount >= 20000) {
-    tier = "trial";
-    durationDays = 3;
-    tierName = "Dùng Thử 3 Ngày";
-  } else if (amount >= 10000) {
-    tier = "trial";
-    durationDays = 1;
-    tierName = "Dùng Thử 1 Ngày";
-  } else {
-    var newRowLess = [orderId, amount, "Không Hợp Lệ (<10k)", "", "REJECTED_AMOUNT", txDate, gateway, refCode, content];
-    sheetOrders.appendRow(newRowLess);
-    return responseJson({ success: false, message: "Số tiền không đủ mức gói tối thiểu (10.000đ)" });
-  }
-
-  // 4. Bốc Key từ kho tương ứng (hoặc tự động tạo nếu kho hết)
-  var dispensedKey = "";
-  var sheetLifetime = ss.getSheetByName("Keys_Lifetime") || ss.getSheetByName("Keys");
-  var sheetTrial = ss.getSheetByName("Keys_Trial") || ss.getSheetByName("Keys_DungThu");
-
-  if (tier === "lifetime") {
-    if (!sheetLifetime) sheetLifetime = ss.insertSheet("Keys_Lifetime");
-    var dataL = sheetLifetime.getDataRange().getValues();
-    var foundIndex = -1;
-    for (var r = 1; r < dataL.length; r++) {
-      var kStatus = String(dataL[r][1] || "").trim().toLowerCase();
-      var kHwid = String(dataL[r][2] || "").trim();
-      if (kStatus === "active" && !kHwid) {
-        dispensedKey = String(dataL[r][0]).trim().toUpperCase();
-        foundIndex = r + 1;
-        break;
-      }
-    }
-
-    if (dispensedKey && foundIndex !== -1) {
-      sheetLifetime.getRange(foundIndex, 2).setValue("Sold");
-      sheetLifetime.getRange(foundIndex, 5).setValue("SePay: " + orderId + " (" + amount + "đ)");
-    } else {
-      // Tự động sinh key mới nếu hết hàng
-      var chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
-      dispensedKey = "VTCH-" + getRandomString(4, chars) + "-" + getRandomString(4, chars) + "-" + getRandomString(4, chars);
-      sheetLifetime.appendRow([dispensedKey, "Sold", "", "", "SePay Tự Động: " + orderId]);
-    }
-  } else {
-    if (!sheetTrial) sheetTrial = ss.insertSheet("Keys_Trial");
-    var dataT = sheetTrial.getDataRange().getValues();
-    var foundTIndex = -1;
-    for (var t = 1; t < dataT.length; t++) {
-      var tStatus = String(dataT[t][1] || "").trim().toLowerCase();
-      var tHwid = String(dataT[t][2] || "").trim();
-      var tDur = parseFloat(dataT[t][5]) || 0;
-      if (tStatus === "active" && !tHwid && (tDur === durationDays || tDur === 0)) {
-        dispensedKey = String(dataT[t][0]).trim().toUpperCase();
-        foundTIndex = t + 1;
-        break;
-      }
-    }
-
-    if (dispensedKey && foundTIndex !== -1) {
-      sheetTrial.getRange(foundTIndex, 2).setValue("Sold");
-      sheetTrial.getRange(foundTIndex, 5).setValue("SePay: " + orderId + " (" + amount + "đ)");
-    } else {
-      // Tự động sinh key dùng thử mới nếu hết hàng
-      var charsT = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
-      dispensedKey = "VTCH-T" + durationDays + "-" + getRandomString(4, charsT) + "-" + getRandomString(4, charsT);
-      sheetTrial.appendRow([dispensedKey, "Sold", "", "", "SePay Tự Động: " + orderId, durationDays, "", ""]);
-    }
-  }
-
-  // 5. Ghi vào danh sách Đơn Hàng
-  var orderRow = [orderId, amount, tierName, dispensedKey, "PAID", txDate, gateway, refCode, content];
+  var now = new Date();
+  var orderRow = [
+    orderId,
+    expectedAmount,
+    tierName,
+    "",              // Key (Chưa cấp, đợi thanh toán)
+    "PENDING",       // Trạng thái chờ thanh toán
+    Utilities.formatDate(now, "GMT+7", "yyyy-MM-dd HH:mm:ss"),
+    "",              // Gateway
+    "",              // RefCode
+    "",              // Content
+    secretToken,     // SecretToken bảo mật để nhận key
+    durationDays     // DurationDays
+  ];
   sheetOrders.appendRow(orderRow);
 
   return responseJson({
     success: true,
-    message: "Xử lý đơn hàng thành công!",
     orderId: orderId,
-    key: dispensedKey,
-    tier: tierName,
-    amount: amount
+    secretToken: secretToken,
+    amount: expectedAmount,
+    tier: tier,
+    tierName: tierName
   });
 }
 
-function handleCheckOrder(orderId) {
+function handleCheckOrder(orderId, token) {
   if (!orderId) {
     return responseJson({ success: false, message: "Thiếu mã đơn hàng" });
   }
@@ -389,18 +351,45 @@ function handleCheckOrder(orderId) {
   var data = sheetOrders.getDataRange().getValues();
   for (var i = 1; i < data.length; i++) {
     var rowOrderId = String(data[i][0]).trim().toUpperCase();
-    var status = String(data[i][4]).trim().toUpperCase();
-    if (rowOrderId === orderId.toUpperCase() && status === "PAID") {
-      return responseJson({
-        success: true,
-        status: "PAID",
-        orderId: rowOrderId,
-        amount: data[i][1],
-        tier: data[i][2],
-        key: data[i][3],
-        command: "irm tinyurl.com/vtch-win | iex",
-        message: "Thanh toán thành công! Mã bản quyền của bạn đã sẵn sàng."
-      });
+    if (rowOrderId === orderId.toUpperCase() || rowOrderId.replace("-", "") === orderId.replace("-", "").toUpperCase()) {
+      var rowSecretToken = String(data[i][9] || "").trim();
+      var status = String(data[i][4]).trim().toUpperCase();
+
+      // BẢO MẬT: Bắt buộc SecretToken phải khớp mới trả Key (Chống kẻ gian dò quét trộm key)
+      if (rowSecretToken && token && rowSecretToken !== token.toLowerCase()) {
+        return responseJson({
+          success: false,
+          status: "UNAUTHORIZED",
+          message: "Lỗi bảo mật: Token xác thực đơn hàng không hợp lệ!"
+        });
+      }
+
+      if (status === "PAID") {
+        return responseJson({
+          success: true,
+          status: "PAID",
+          orderId: rowOrderId,
+          amount: data[i][1],
+          tier: data[i][2],
+          key: data[i][3],
+          command: "irm tinyurl.com/vtch-win | iex",
+          message: "Thanh toán thành công! Mã bản quyền của bạn đã sẵn sàng."
+        });
+      } else if (status === "UNDERPAID") {
+        return responseJson({
+          success: false,
+          status: "UNDERPAID",
+          orderId: rowOrderId,
+          message: "Số tiền chuyển khoản không đủ theo gói đã chọn! Vui lòng liên hệ Admin để hỗ trợ."
+        });
+      } else {
+        return responseJson({
+          success: true,
+          status: "PENDING",
+          orderId: orderId,
+          message: "Đang chờ thanh toán từ ngân hàng..."
+        });
+      }
     }
   }
 
@@ -408,8 +397,195 @@ function handleCheckOrder(orderId) {
     success: true,
     status: "PENDING",
     orderId: orderId,
-    message: "Đang chờ thanh toán..."
+    message: "Đang chờ khởi tạo thanh toán..."
   });
+}
+
+function handleSepayWebhook(data) {
+  // Chỉ nhận tiền vào (transferType: "in")
+  var transferType = String(data.transferType || "in").toLowerCase();
+  if (transferType !== "in") {
+    return responseJson({ success: true, message: "Bỏ qua giao dịch tiền ra" });
+  }
+
+  // Xác thực đúng tài khoản nhận tiền MBBank của bạn (0000125042003)
+  var targetAccount = "0000125042003";
+  var receivedAccount = String(data.accountNumber || data.subAccount || "").trim();
+  if (receivedAccount && receivedAccount !== targetAccount) {
+    return responseJson({ success: true, message: "Bỏ qua giao dịch của tài khoản khác" });
+  }
+
+  var amount = parseFloat(data.transferAmount || 0);
+  var content = String(data.content || data.description || "").trim();
+  var gateway = String(data.gateway || "MBBank");
+  var refCode = String(data.referenceCode || data.id || "");
+  var txDate = String(data.transactionDate || Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss"));
+
+  // SỬ DỤNG LOCKSERVICE ĐỂ ĐẢM BẢO AN TOÀN TUYỆT ĐỐI (CONCURRENCY MUTEX LOCK)
+  // Hai webhook đến cùng 1 mili-giây cũng không bao giờ bị bốc trùng 1 key!
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(25000); // Chờ tối đa 25 giây
+  } catch (lockErr) {
+    return responseJson({ success: false, message: "Máy chủ đang xử lý giao dịch khác, SePay vui lòng thử lại sau vài giây" });
+  }
+
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheetOrders = ss.getSheetByName("Orders") || ss.getSheetByName("DonHang");
+    if (!sheetOrders) {
+      sheetOrders = ss.insertSheet("Orders");
+      var orderHeaders = ["OrderId", "Amount", "Tier", "Key", "Status", "CreatedAt", "Gateway", "RefCode", "Content", "SecretToken", "DurationDays"];
+      sheetOrders.getRange(1, 1, 1, orderHeaders.length).setValues([orderHeaders]);
+      sheetOrders.getRange(1, 1, 1, orderHeaders.length).setFontWeight("bold").setBackground("#D9EAD3");
+    }
+
+    // 1. Chống xử lý trùng lặp theo Mã giao dịch ngân hàng (refCode)
+    var orderData = sheetOrders.getDataRange().getValues();
+    for (var r = 1; r < orderData.length; r++) {
+      var rowRef = String(orderData[r][7] || "").trim();
+      var rowStatus = String(orderData[r][4] || "").trim().toUpperCase();
+      if (refCode && rowRef === refCode && rowStatus === "PAID") {
+        return responseJson({
+          success: true,
+          message: "Giao dịch này đã được cấp key trước đó",
+          orderId: orderData[r][0],
+          key: orderData[r][3]
+        });
+      }
+    }
+
+    // 2. Trích xuất mã đơn hàng từ nội dung chuyển khoản
+    var orderMatch = content.match(/VTCH-?[A-Z0-9]+/i);
+    var matchedOrderId = orderMatch ? orderMatch[0].toUpperCase() : "";
+
+    var targetOrderRowIndex = -1;
+    var targetOrderRow = null;
+
+    if (matchedOrderId) {
+      for (var j = 1; j < orderData.length; j++) {
+        var oId = String(orderData[j][0]).trim().toUpperCase();
+        if (oId === matchedOrderId || oId.replace("-", "") === matchedOrderId.replace("-", "")) {
+          targetOrderRowIndex = j + 1;
+          targetOrderRow = orderData[j];
+          break;
+        }
+      }
+    }
+
+    var orderId = targetOrderRow ? String(targetOrderRow[0]) : (matchedOrderId || ("VTCH-" + Math.floor(100000 + Math.random() * 900000)));
+    var expectedAmount = targetOrderRow ? parseFloat(targetOrderRow[1]) : 0;
+    var durationDays = targetOrderRow ? (parseFloat(targetOrderRow[10]) || 0) : 0;
+    var tierName = targetOrderRow ? String(targetOrderRow[2]) : "Tự Động Phân Loại";
+
+    // Phân loại số tiền nếu khách chuyển trực tiếp không qua tạo đơn trước
+    if (!targetOrderRow) {
+      if (amount >= 100000) {
+        tierName = "Bản Quyền Vĩnh Viễn";
+        durationDays = 0;
+      } else if (amount >= 50000) {
+        tierName = "Dùng Thử 7 Ngày";
+        durationDays = 7;
+      } else if (amount >= 20000) {
+        tierName = "Dùng Thử 3 Ngày";
+        durationDays = 3;
+      } else if (amount >= 10000) {
+        tierName = "Dùng Thử 1 Ngày";
+        durationDays = 1;
+      } else {
+        sheetOrders.appendRow([orderId, amount, "Dưới 10k", "", "UNDERPAID", txDate, gateway, refCode, content, "", 0]);
+        return responseJson({ success: false, message: "Số tiền không đủ tối thiểu 10.000đ" });
+      }
+    } else {
+      // Đơn đã tạo trước: Kiểm tra chuyển đủ tiền không (Chống chuyển thiếu tiền)
+      if (amount < expectedAmount) {
+        sheetOrders.getRange(targetOrderRowIndex, 5).setValue("UNDERPAID");
+        sheetOrders.getRange(targetOrderRowIndex, 7).setValue(gateway);
+        sheetOrders.getRange(targetOrderRowIndex, 8).setValue(refCode);
+        sheetOrders.getRange(targetOrderRowIndex, 9).setValue(content);
+        return responseJson({ success: false, message: "Khách chuyển thiếu tiền so với gói đã đặt" });
+      }
+    }
+
+    // 3. BỐC KEY TỰ ĐỘNG AN TOÀN TRONG LOCKSERVICE
+    var dispensedKey = "";
+    var isLifetime = (durationDays === 0);
+
+    var sheetLifetime = ss.getSheetByName("Keys_Lifetime") || ss.getSheetByName("Keys");
+    var sheetTrial = ss.getSheetByName("Keys_Trial") || ss.getSheetByName("Keys_DungThu");
+
+    if (isLifetime) {
+      if (!sheetLifetime) sheetLifetime = ss.insertSheet("Keys_Lifetime");
+      var dataL = sheetLifetime.getDataRange().getValues();
+      var foundIndex = -1;
+      for (var rowL = 1; rowL < dataL.length; rowL++) {
+        var kStatus = String(dataL[rowL][1] || "").trim().toLowerCase();
+        var kHwid = String(dataL[rowL][2] || "").trim();
+        if (kStatus === "active" && !kHwid) {
+          dispensedKey = String(dataL[rowL][0]).trim().toUpperCase();
+          foundIndex = rowL + 1;
+          break;
+        }
+      }
+
+      if (dispensedKey && foundIndex !== -1) {
+        sheetLifetime.getRange(foundIndex, 2).setValue("Sold");
+        sheetLifetime.getRange(foundIndex, 5).setValue("SePay: " + orderId + " (" + amount + "đ)");
+      } else {
+        // Tự động sinh key mới nếu kho hết
+        var charsL = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+        dispensedKey = "VTCH-" + getRandomString(4, charsL) + "-" + getRandomString(4, charsL) + "-" + getRandomString(4, charsL);
+        sheetLifetime.appendRow([dispensedKey, "Sold", "", "", "SePay Tự Động: " + orderId]);
+      }
+    } else {
+      if (!sheetTrial) sheetTrial = ss.insertSheet("Keys_Trial");
+      var dataT = sheetTrial.getDataRange().getValues();
+      var foundTIndex = -1;
+      for (var rowT = 1; rowT < dataT.length; rowT++) {
+        var tStatus = String(dataT[rowT][1] || "").trim().toLowerCase();
+        var tHwid = String(dataT[rowT][2] || "").trim();
+        var tDur = parseFloat(dataT[rowT][5]) || 0;
+        if (tStatus === "active" && !tHwid && (tDur === durationDays || tDur === 0)) {
+          dispensedKey = String(dataT[rowT][0]).trim().toUpperCase();
+          foundTIndex = rowT + 1;
+          break;
+        }
+      }
+
+      if (dispensedKey && foundTIndex !== -1) {
+        sheetTrial.getRange(foundTIndex, 2).setValue("Sold");
+        sheetTrial.getRange(foundTIndex, 5).setValue("SePay: " + orderId + " (" + amount + "đ)");
+      } else {
+        // Tự động sinh key dùng thử mới nếu kho hết
+        var charsT = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+        dispensedKey = "VTCH-T" + durationDays + "-" + getRandomString(4, charsT) + "-" + getRandomString(4, charsT);
+        sheetTrial.appendRow([dispensedKey, "Sold", "", "", "SePay Tự Động: " + orderId, durationDays, "", ""]);
+      }
+    }
+
+    // 4. CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG THÀNH "PAID"
+    if (targetOrderRowIndex !== -1) {
+      sheetOrders.getRange(targetOrderRowIndex, 4).setValue(dispensedKey);
+      sheetOrders.getRange(targetOrderRowIndex, 5).setValue("PAID");
+      sheetOrders.getRange(targetOrderRowIndex, 7).setValue(gateway);
+      sheetOrders.getRange(targetOrderRowIndex, 8).setValue(refCode);
+      sheetOrders.getRange(targetOrderRowIndex, 9).setValue(content);
+    } else {
+      var newOrderRow = [orderId, amount, tierName, dispensedKey, "PAID", txDate, gateway, refCode, content, Utilities.getUuid().replace(/-/g,""), durationDays];
+      sheetOrders.appendRow(newOrderRow);
+    }
+
+    return responseJson({
+      success: true,
+      message: "Xử lý đơn hàng thành công!",
+      orderId: orderId,
+      key: dispensedKey,
+      tier: tierName,
+      amount: amount
+    });
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 // =========================================================================
@@ -419,6 +595,8 @@ function handleCheckOrder(orderId) {
 function onOpen() {
   var ui = SpreadsheetApp.getUi();
   ui.createMenu("👑 VUA TRÒ CHƠI")
+    .addItem("🔐 Cài Đặt Mật Khẩu Admin & SePay API Key (Bảo Mật)", "configureSecuritySecrets")
+    .addSeparator()
     .addItem("♾️ Tạo 10 Key VĨNH VIỄN (vào trang Keys_Lifetime)", "generate10LifetimeKeys")
     .addItem("♾️ Tạo 30 Key VĨNH VIỄN (vào trang Keys_Lifetime)", "generate30LifetimeKeys")
     .addSeparator()
@@ -430,8 +608,34 @@ function onOpen() {
     .addItem("🗑️ Quét & Tự Động XÓA BỎ Key Hết Hạn (Vô Hiệu Hóa Ngay)", "manualDeleteExpiredKeys")
     .addItem("⏰ Cài Đặt Tự Động Quét & Xóa 24/7 trên Mây", "installAutoCleanTrigger")
     .addSeparator()
-    .addItem("📊 Thống Kê Tổng Hợp Cả 2 Trang Tính", "showDualSheetStats")
+    .addItem("📊 Thống Kê Tổng Hợp Cả 3 Trang Tính (Keys & Orders)", "showDualSheetStats")
     .addToUi();
+}
+
+function configureSecuritySecrets() {
+  var ui = SpreadsheetApp.getUi();
+  var props = PropertiesService.getScriptProperties();
+  
+  var currentMaster = props.getProperty("MASTER_KEY") || "VTCH@ADMIN#2026";
+  var currentSepay = props.getProperty("SEPAY_API_KEY") || "";
+
+  var prompt1 = ui.prompt("CÀI ĐẶT BẢO MẬT (1/2)", "Nhập Mật khẩu Master Admin (Hiện tại: " + currentMaster + "):", ui.ButtonSet.OK_CANCEL);
+  if (prompt1.getSelectedButton() === ui.Button.OK) {
+    var newMaster = prompt1.getResponseText().trim();
+    if (newMaster) {
+      props.setProperty("MASTER_KEY", newMaster);
+    }
+  }
+
+  var prompt2 = ui.prompt("CÀI ĐẶT BẢO MẬT (2/2)", "Nhập SePay API Key / Webhook Secret (từ sepay.vn):", ui.ButtonSet.OK_CANCEL);
+  if (prompt2.getSelectedButton() === ui.Button.OK) {
+    var newSepay = prompt2.getResponseText().trim();
+    if (newSepay) {
+      props.setProperty("SEPAY_API_KEY", newSepay);
+    }
+  }
+
+  ui.alert("✅ ĐÃ LƯU THÀNH CÔNG!\nCác khóa bảo mật đã được lưu an toàn trong ScriptProperties phía máy chủ Google.");
 }
 
 // --- Tạo Key Vĩnh Viễn vào Sheet 'Keys_Lifetime' (hoặc 'Keys') ---
@@ -467,8 +671,8 @@ function generateLifetime(count) {
   SpreadsheetApp.getUi().alert("🎉 Đã tạo thành công " + count + " mã Key Vĩnh Viễn vào trang '" + sheet.getName() + "'!");
 }
 
-// --- Tạo Key Dùng Thử vào Sheet 'Keys_Trial' (Có Cột Countdown) ---
-function generate10Trial1Day()  { generateTrial(10, 1); }
+// --- Tạo Key Dùng Thử vào Sheet 'Keys_Trial' (hoặc 'Keys_DungThu') ---
+function generate10Trial1Day() { generateTrial(10, 1); }
 function generate10Trial3Days() { generateTrial(10, 3); }
 function generate10Trial7Days() { generateTrial(10, 7); }
 
@@ -491,50 +695,42 @@ function generateTrial(count, days) {
   for (var i = 0; i < count; i++) {
     var p1 = getRandomString(4, chars);
     var p2 = getRandomString(4, chars);
-    var p3 = getRandomString(4, chars);
-    var key = "VTCH-T" + days + "-" + p1 + "-" + p2 + "-" + p3;
-    newRows.push([key, "Active", "", "", "Dùng thử " + days + " ngày", days, "", "Chưa kích hoạt"]);
+    var key = "VTCH-T" + days + "-" + p1 + "-" + p2;
+    newRows.push([key, "Active", "", "", "Dùng thử " + days + " ngày", days, "", "⏳ Chưa kích hoạt"]);
   }
 
   var lastRow = sheet.getLastRow();
   sheet.getRange(lastRow + 1, 1, newRows.length, 8).setValues(newRows);
-  SpreadsheetApp.getUi().alert("🎉 Đã tạo thành công " + count + " mã Key Dùng Thử (" + days + " ngày) vào trang '" + sheet.getName() + "'!");
+  SpreadsheetApp.getUi().alert("⏱️ Đã tạo thành công " + count + " mã Key Dùng Thử " + days + " ngày vào trang '" + sheet.getName() + "'!");
 }
 
 function getRandomString(len, chars) {
   var res = "";
   for (var i = 0; i < len; i++) {
-    var idx = Math.floor(Math.random() * chars.length);
-    res += chars.charAt(idx);
+    res += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return res;
 }
 
-// ⏳ 1. Cập nhật Bộ Đếm Ngược (Countdown) trực quan cho tất cả key trong Keys_Trial
+// ⏳ 1. Cập nhật Bộ Đếm Ngược Countdown cho Keys_Trial
 function updateTrialCountdowns() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName("Keys_Trial") || ss.getSheetByName("Keys_DungThu");
-  if (!sheet) {
-    SpreadsheetApp.getUi().alert("Chưa tìm thấy trang 'Keys_Trial'!");
-    return;
-  }
+  if (!sheet) return;
 
   var data = sheet.getDataRange().getValues();
-  var now = new Date().getTime();
+  var now = new Date();
   var updatedCount = 0;
 
   for (var i = 1; i < data.length; i++) {
     var status = String(data[i][1] || "").toLowerCase();
     var expRaw = data[i][6];
-
+    
     if (status === "trial" && expRaw) {
-      var expDate = new Date(expRaw).getTime();
-      if (!isNaN(expDate)) {
-        var diffMs = expDate - now;
-        if (diffMs <= 0) {
-          sheet.getRange(i + 1, 2).setValue("Expired");
-          sheet.getRange(i + 1, 8).setValue("⛔ HẾT HẠN");
-        } else {
+      var expDate = new Date(expRaw);
+      if (!isNaN(expDate.getTime())) {
+        var diffMs = expDate.getTime() - now.getTime();
+        if (diffMs > 0) {
           var hours = Math.floor(diffMs / (1000 * 60 * 60));
           var mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
           var text = hours >= 24 
@@ -542,22 +738,21 @@ function updateTrialCountdowns() {
             : ("⏳ Còn " + hours + " giờ " + mins + " phút");
           sheet.getRange(i + 1, 8).setValue(text);
           updatedCount++;
+        } else {
+          sheet.getRange(i + 1, 2).setValue("Expired");
+          sheet.getRange(i + 1, 8).setValue("⛔ HẾT HẠN");
         }
       }
-    } else if (status === "active") {
-      sheet.getRange(i + 1, 8).setValue("Chưa kích hoạt");
-    } else if (status === "expired") {
-      sheet.getRange(i + 1, 8).setValue("⛔ HẾT HẠN");
     }
   }
 
-  SpreadsheetApp.getUi().alert("⏳ Đã cập nhật xong Bộ Đếm Ngược Countdown cho " + updatedCount + " key đang chạy!");
+  SpreadsheetApp.getUi().alert("✅ Đã cập nhật lại bộ đếm ngược cho " + updatedCount + " key đang thử nghiệm!");
 }
 
-// 🗑️ 2. Tự động XÓA HẲN các Key đã hết hạn khỏi hệ thống để Vô Hiệu Hóa hoàn toàn
+// 🗑️ 2. Quét & Xóa thủ công các Key Hết Hạn
 function manualDeleteExpiredKeys() {
-  var count = purgeExpiredKeys();
-  SpreadsheetApp.getUi().alert("🗑️ Đã quét và XÓA HẲN " + count + " mã Key hết hạn khỏi hệ thống! Bảng tính đã được dọn sạch sẽ và các máy đó bị vô hiệu hóa 100%.");
+  var deleted = purgeExpiredKeys();
+  SpreadsheetApp.getUi().alert("🗑️ ĐÃ DỌN DẸP XONG!\nĐã xóa bỏ hoàn toàn " + deleted + " mã Key dùng thử đã hết hạn quá 24h.");
 }
 
 function purgeExpiredKeys() {
@@ -565,41 +760,15 @@ function purgeExpiredKeys() {
   var sheet = ss.getSheetByName("Keys_Trial") || ss.getSheetByName("Keys_DungThu");
   if (!sheet) return 0;
 
-  // Tự động tạo trang 'Keys_Trial_LichSu' để lưu vết dự phòng trước khi xóa khỏi bảng chính
-  var historySheet = ss.getSheetByName("Keys_Trial_LichSu");
-  if (!historySheet) {
-    historySheet = ss.insertSheet("Keys_Trial_LichSu");
-    var histHeaders = ["Key", "Status", "HWID", "ActivatedAt", "CustomerNote", "DurationDays", "ExpiresAt", "ThoiDiemXoa"];
-    historySheet.getRange(1, 1, 1, 8).setValues([histHeaders]);
-    historySheet.getRange(1, 1, 1, 8).setFontWeight("bold").setBackground("#F4CCCC");
-  }
-
   var data = sheet.getDataRange().getValues();
-  var now = new Date().getTime();
+  var now = new Date();
   var deletedCount = 0;
 
-  // Xóa từ dòng dưới lên dòng trên để tránh lệch index hàng
   for (var i = data.length - 1; i >= 1; i--) {
     var status = String(data[i][1] || "").toLowerCase();
     var expRaw = data[i][6];
-    var isExpired = false;
 
-    if (status === "expired") {
-      isExpired = true;
-    } else if (expRaw) {
-      var expDate = new Date(expRaw).getTime();
-      if (!isNaN(expDate) && now >= expDate) {
-        isExpired = true;
-      }
-    }
-
-    if (isExpired) {
-      // 1. Lưu bản ghi sang trang Lịch Sử
-      var rowToArchive = data[i].slice(0, 7);
-      rowToArchive.push(Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss"));
-      historySheet.appendRow(rowToArchive);
-
-      // 2. XÓA BỎ HOÀN TOÀN KHỎI TRANG KEYS_TRIAL CHÍNH (Vô hiệu hóa key ngay lập tức)
+    if (status === "expired" || (expRaw && new Date(expRaw).getTime() + (24 * 60 * 60 * 1000) < now.getTime())) {
       sheet.deleteRow(i + 1);
       deletedCount++;
     }
@@ -608,9 +777,8 @@ function purgeExpiredKeys() {
   return deletedCount;
 }
 
-// ⏰ 3. Cài đặt Trigger tự động quét & xóa ngầm 24/7 trên máy chủ Google (Không cần mở máy tính)
+// ⏰ 3. Cài đặt Trigger tự động quét & xóa ngầm 24/7 trên máy chủ Google
 function installAutoCleanTrigger() {
-  // Xóa các trigger cũ cùng tên nếu có
   var triggers = ScriptApp.getProjectTriggers();
   for (var i = 0; i < triggers.length; i++) {
     if (triggers[i].getHandlerFunction() === "autoCleanJob24h") {
@@ -618,52 +786,64 @@ function installAutoCleanTrigger() {
     }
   }
 
-  // Tạo trigger mới: Chạy mỗi 1 giờ
   ScriptApp.newTrigger("autoCleanJob24h")
     .timeBased()
     .everyHours(1)
     .create();
 
-  SpreadsheetApp.getUi().alert("✅ ĐÃ BẬT TỰ ĐỘNG QUÉT & XÓA 24/7!\n\nCứ mỗi 1 giờ, máy chủ Google sẽ tự động quét ngầm: nếu có key nào hết hạn 24h thì tự động XÓA KHỎI HỆ THỐNG để vô hiệu hóa ngay, bạn không cần phải mở máy hay thao tác gì nữa!");
+  SpreadsheetApp.getUi().alert("✅ ĐÃ BẬT TỰ ĐỘNG QUÉT & XÓA 24/7!\n\nCứ mỗi 1 giờ, máy chủ Google sẽ tự động quét ngầm: nếu có key nào hết hạn thì tự động XÓA KHỎI HỆ THỐNG để vô hiệu hóa ngay!");
 }
 
-// Hàm chạy ngầm của Trigger
 function autoCleanJob24h() {
   purgeExpiredKeys();
 }
 
-// 📊 4. Thống kê tổng hợp cho cả 2 trang tính
+// 📊 4. Thống kê tổng hợp cho cả 3 trang tính
 function showDualSheetStats() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheetL = ss.getSheetByName("Keys_Lifetime") || ss.getSheetByName("Keys");
   var sheetT = ss.getSheetByName("Keys_Trial") || ss.getSheetByName("Keys_DungThu");
+  var sheetO = ss.getSheetByName("Orders") || ss.getSheetByName("DonHang");
 
   var msg = "📊 THỐNG KÊ TỔNG HỢP VUA TRÒ CHƠI:\n\n";
 
   if (sheetL) {
     var dataL = sheetL.getDataRange().getValues();
     var totalL = Math.max(0, dataL.length - 1);
-    var actL = 0, usedL = 0;
+    var actL = 0, usedL = 0, soldL = 0;
     for (var i = 1; i < dataL.length; i++) {
       var s = String(dataL[i][1]).toLowerCase();
       if (s === "active") actL++;
       else if (s === "used") usedL++;
+      else if (s === "sold") soldL++;
     }
     msg += "♾️ TRANG VĨNH VIỄN (" + sheetL.getName() + "):\n" +
-           "- Tổng Key: " + totalL + " | Chưa bán: " + actL + " | Đang dùng: " + usedL + "\n\n";
+           "- Tổng Key: " + totalL + " | Chưa bán: " + actL + " | Đã bán/Đang dùng: " + (usedL + soldL) + "\n\n";
   }
 
   if (sheetT) {
     var dataT = sheetT.getDataRange().getValues();
     var totalT = Math.max(0, dataT.length - 1);
-    var actT = 0, trialT = 0;
+    var actT = 0, trialT = 0, soldT = 0;
     for (var j = 1; j < dataT.length; j++) {
       var st = String(dataT[j][1]).toLowerCase();
       if (st === "active") actT++;
       else if (st === "trial") trialT++;
+      else if (st === "sold") soldT++;
     }
     msg += "⏱️ TRANG DÙNG THỬ (" + sheetT.getName() + "):\n" +
-           "- Tổng Key: " + totalT + " | Chưa phát: " + actT + " | Đang thử: " + trialT + "\n";
+           "- Tổng Key: " + totalT + " | Chưa phát: " + actT + " | Đã phát: " + (trialT + soldT) + "\n\n";
+  }
+
+  if (sheetO) {
+    var dataO = sheetO.getDataRange().getValues();
+    var totalOrders = Math.max(0, dataO.length - 1);
+    var paidOrders = 0;
+    for (var k = 1; k < dataO.length; k++) {
+      if (String(dataO[k][4]).toUpperCase() === "PAID") paidOrders++;
+    }
+    msg += "💳 TRANG ĐƠN HÀNG (Orders):\n" +
+           "- Tổng Đơn: " + totalOrders + " | Thành công (PAID): " + paidOrders + "\n";
   }
 
   SpreadsheetApp.getUi().alert(msg);

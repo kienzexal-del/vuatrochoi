@@ -6,6 +6,7 @@ function button(text,action,cls='') {const b=el('button',text,cls); b.addEventLi
 function error(message) {$('alert').textContent=message; $('alert').hidden=!message;}
 function toast(message) {$('toast').textContent=message; $('toast').hidden=false; setTimeout(()=>$('toast').hidden=true,3000);}
 let gisReady = false, credential = '';
+const SESSION_KEY = 'vtch.google.tab-session';
 let loginOpening = false;
 async function login() {
   if (!$('demo').hidden) {
@@ -54,6 +55,42 @@ function parseJwt(token) {
     return JSON.parse(jsonPayload);
   } catch(e) {
     return null;
+  }
+}
+
+function currentGoogleProfile(token) {
+  const profile = parseJwt(token);
+  if (profile?.aud !== GOOGLE_CLIENT_ID || !Number.isSafeInteger(profile?.exp) ||
+      profile.exp <= Math.floor(Date.now() / 1000)) return null;
+  return {
+    name: profile.name || 'Tài khoản Google',
+    picture: profile.picture
+  };
+}
+
+function saveTabSession(token) {
+  try {
+    if (token) sessionStorage.setItem(SESSION_KEY, token);
+    else sessionStorage.removeItem(SESSION_KEY);
+  } catch {
+    // Sign-in still works if the browser blocks session storage.
+  }
+}
+
+function restoreTabSession() {
+  try {
+    const saved = sessionStorage.getItem(SESSION_KEY);
+    if (!saved) return;
+    const profile = currentGoogleProfile(saved);
+    if (!profile) {
+      saveTabSession('');
+      return;
+    }
+    // Used only for UI. The backend still verifies the token on order requests.
+    credential = saved;
+    user = profile;
+  } catch {
+    // Stay signed out when session storage is unavailable.
   }
 }
 
@@ -150,6 +187,17 @@ async function directGasRequest(action, fields = {}) {
 }
 
 async function accountRequest(action, fields = {}) {
+  if (!currentGoogleProfile(credential)) {
+    credential = '';
+    user = null;
+    orders = [];
+    saveTabSession('');
+    account();
+    route();
+    const message = 'Phiên Google đã hết hạn. Vui lòng đăng nhập lại.';
+    error(message);
+    throw new Error(message);
+  }
   try {
     return await request('/api/shop-account', {
       method:'POST', body:JSON.stringify({action, credential, ...fields})
@@ -195,7 +243,11 @@ function account() {
     historyLink.addEventListener('click', () => {menu.open=false;});
     panel.append(historyLink,button('Đăng xuất',async()=>{
     try {
-      if(gisReady) {credential=''; google.accounts.id.disableAutoSelect();}
+      if(credential) {
+        credential='';
+        saveTabSession('');
+        window.google?.accounts?.id?.disableAutoSelect();
+      }
       else await request('/api/logout',{method:'POST'});
       user=null;orders=[];clearTimeout(timer);revision++;account();location.hash='shop';route();
     }
@@ -239,7 +291,7 @@ function showOrders() {
 }
 async function loadOrders() {
   const version=revision;$('orders').replaceChildren(el('p','Đang tải đơn hàng…','loading'));$('refresh').disabled=true;
-  try {const result=await (gisReady ? accountRequest('list') : request('/api/orders'));if(version!==revision)return;orders=normalizeOrders(result.orders);showOrders();error('');}
+  try {const result=await (credential ? accountRequest('list') : request('/api/orders'));if(version!==revision)return;orders=normalizeOrders(result.orders);showOrders();error('');}
   catch(e){if(version!==revision)return;$('orders').replaceChildren(empty('Chưa tải được đơn hàng',e.message,loadOrders,'Thử lại'));}
   finally {$('refresh').disabled=false;}
 }
@@ -269,7 +321,7 @@ async function loadDetail(id,quiet=false) {
   clearTimeout(timer); const version=revision;
   if(!quiet)$('detail').replaceChildren(el('p','Đang tải đơn hàng…','loading'));
   try {
-    const result=await (gisReady ? accountRequest('detail',{orderId:id}) : request(`/api/orders/${encodeURIComponent(id)}`));
+    const result=await (credential ? accountRequest('detail',{orderId:id}) : request(`/api/orders/${encodeURIComponent(id)}`));
     if(version!==revision||location.hash!==`#order/${id}`)return;
     if(!validOrder(result.order))throw new Error('Dữ liệu đơn hàng chưa hợp lệ. Vui lòng thử lại.');
     displayOrder(result.order);error('');
@@ -297,7 +349,7 @@ $('buy').addEventListener('click',async()=>{
   creating=true;account();error('');
   try {
     const requestId=crypto.randomUUID();
-    const result=await (gisReady ? accountRequest('create',{plan:selected.id,requestId}) :
+    const result=await (credential ? accountRequest('create',{plan:selected.id,requestId}) :
       request('/api/orders',{method:'POST',headers:{'Idempotency-Key':requestId},body:JSON.stringify({plan:selected.id})}));
     if(!validOrder(result.order))throw new Error('Chưa xác nhận được đơn hàng. Hãy xem “Đơn hàng của tôi” trước khi thử mua lại.');
     location.hash=`order/${result.order.id}`;
@@ -339,11 +391,13 @@ async function startGoogleSignIn() {
         credential = result.credential;
         const profile = (await accountRequest('me')).user;
         user = {...profile, picture: profile?.picture || parseJwt(credential)?.picture};
+        saveTabSession(credential);
         document.querySelector('.login-dialog[open]')?.close();
         account();
         route();
       } catch {
         credential = '';
+        saveTabSession('');
         error('Không xác nhận được tài khoản Google. Vui lòng thử lại.');
       }
     }
@@ -362,6 +416,7 @@ if (['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) {
     // A local static preview can still display the store.
   }
 }
+if ($('demo').hidden) restoreTabSession();
 loading = false;
 account();
 route();

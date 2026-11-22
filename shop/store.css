@@ -116,3 +116,35 @@ body::before {
   .brand-logo { width: 30px; height: 30px; }
   .profile-login { padding-inline: 10px; }
 }
+
+.header .shell { display: flex; flex-wrap: nowrap; justify-content: flex-start; gap: 12px; padding-block: 8px; min-height: 66px; }
+.header .account { margin-inline-start: auto; }
+.brand-logo { width: 48px; height: 48px; border-radius: 0; object-fit: contain; }
+.site-menu-toggle, .site-menu-close { display: grid; place-items: center; flex: 0 0 42px; width: 42px; height: 42px; padding: 0; font-size: 22px; }
+.site-drawer { position: fixed; inset: 0 auto 0 0; margin: 0; height: 100dvh; max-height: none; width: min(320px, 88vw); max-width: none; padding: 18px; border: 0; border-right: 1px solid var(--line); color: var(--text); background: #142338; box-shadow: 12px 0 42px #0007; }
+.site-drawer::backdrop { background: #040b15a8; }
+.drawer-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.site-drawer nav { display: grid; margin-top: 18px; gap: 6px; }
+.site-drawer nav a { text-align: left; padding: 14px; border: 0; border-radius: 8px; }
+.site-drawer nav a:hover { background: #263c53; color: var(--text); }
+@media (prefers-reduced-motion: no-preference) {
+  .site-drawer[open] { animation: drawer-in 180ms ease-out; }
+}
+@keyframes drawer-in { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+.mobile-guide { --glass-surface: #17293bd9; --glass-border: #b8e0ff45; --text-secondary: #b9cadd; --text-tertiary: #aabed1; padding: 0 0 36px; background: transparent; }
+.mobile-guide .header { width: 100%; }
+.mobile-guide .header .shell { padding-inline: clamp(14px, 4vw, 36px); }
+.mobile-guide .wrapper { max-width: 750px; padding: 28px clamp(12px, 4vw, 24px); }
+.mobile-guide .hero-title { color: var(--text); background: none; -webkit-text-fill-color: currentColor; }
+.mobile-guide .hero-header { text-align: center; }
+.mobile-guide .glass-panel { min-height: 0; }
+@media (max-width: 390px) {
+  .header .shell { gap: 7px; padding-inline: 12px; }
+  .header .brand { gap: 5px; font-size: 14px; }
+  .brand-logo { width: 36px; height: 36px; }
+  .profile-login { padding-inline: 8px; }
+}
+
+.footer .benefits { margin: 0; gap: 8px 18px; text-shadow: none; }
+.footer .shell { align-items: baseline; }
+@media (max-width: 780px) { .footer .shell { align-items: flex-start; } }

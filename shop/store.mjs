@@ -296,7 +296,7 @@ $('refresh').addEventListener('click',loadOrders);
 $('back').addEventListener('click',()=>location.hash='orders');
 window.addEventListener('hashchange', () => {
   route();
-  if (location.hash === '#mobile-install') $('mobile-install').scrollIntoView();
+  if (location.hash === '#mobile-install') location.replace('/mobile/');
   else window.scrollTo({top: 0, behavior: 'instant'});
 });
 route();

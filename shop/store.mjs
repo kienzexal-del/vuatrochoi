@@ -285,7 +285,8 @@ function route() {
   const hash=location.hash.slice(1)||'shop';const detail=/^order\/[A-Z0-9-]{6,64}$/.test(hash);
   const view=hash==='orders'?'orders':detail?'detail':'shop';
   for(const name of ['shop','orders','detail'])$(`${name}-view`).hidden=name!==view;
-  $('nav-shop').setAttribute('aria-current', hash === 'shop' ? 'page' : 'false');
+  const shopLink = document.querySelector('#site-menu a[href="/buy#shop"]');
+  shopLink?.setAttribute('aria-current', hash === 'shop' ? 'page' : 'false');
   if(view==='shop')return;
   if(loading){$(view==='orders'?'orders':'detail').replaceChildren(el('p','Đang kiểm tra phiên đăng nhập…','loading'));return;}
   if(!user){$(view==='orders'?'orders':'detail').replaceChildren(empty('Đơn hàng đi cùng tài khoản','Đăng nhập bằng tài khoản đã dùng để mua. Bạn có thể xem lại đơn và key trên thiết bị này.',login,'Đăng nhập'));return;}

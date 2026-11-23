@@ -101,7 +101,6 @@ function renderCatalog() {
   const group = byId('game-group').value;
   const matches = games.filter(game => game.name.toLowerCase().includes(query) &&
     (group === 'all' || comboIds.has(game.id) === (group === 'combo')));
-  byId('game-count').textContent = matches.length + ' game';
   const cards = matches.map(game => {
     const card = make('a', '', 'game-card');
     card.href = '#game/' + game.id;
@@ -424,5 +423,5 @@ try {
   setupFeatured();
   route();
 } catch {
-  byId('game-count').textContent = 'Chưa tải được danh mục. Hãy tải lại trang.';
+  // Catalog load failed
 }

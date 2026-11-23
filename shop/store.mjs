@@ -11,7 +11,7 @@ const signInSource = new URLSearchParams(location.search).get('signin');
 let loginOpening = false;
 async function login() {
   if (!$('demo').hidden) {
-    location.assign('/auth/login');
+    location.assign(signInSource === 'catalog' ? '/auth/login?signin=catalog' : '/auth/login');
     return;
   }
   if (loginOpening || document.querySelector('.login-dialog[open]')) return;
@@ -44,6 +44,117 @@ async function login() {
 }
 const API_URL = 'https://script.google.com/macros/s/AKfycbzsJ4SvFtnCRROeB3SZHNcq65oReT-wlBQJlwF9eG4WUsDI9cJT4JuXLLuH9Y6TYZdRJg/exec';
 const BANK_CONFIG = { bank: 'MB', account: '0000125042003', name: 'NGUYEN VAN KIEN' };
+const SAVED_ORDERS_KEY = 'vtch_saved_orders';
+
+function safeOrder(o) {
+  if (!o || typeof o !== 'object') return null;
+  const id = typeof o.id === 'string' ? o.id : (typeof o.orderId === 'string' ? o.orderId : '');
+  if (!/^[A-Z0-9-]{6,64}$/.test(id)) return null;
+  const matchedPlan = plans.find(p => p.id === o.plan || p.name === o.plan || p.id === o.tier || p.name === o.tier || p.price === o.amount);
+  const plan = matchedPlan ? matchedPlan.id : 'lifetime';
+  const amount = Number.isSafeInteger(o.amount) && o.amount > 0 ? o.amount : (matchedPlan ? matchedPlan.price : 100000);
+  const status = Object.hasOwn(states, o.status) ? o.status : 'PENDING';
+  const createdAt = Number.isFinite(Date.parse(o.createdAt)) ? o.createdAt : new Date().toISOString();
+  return {
+    id,
+    plan,
+    amount,
+    status,
+    createdAt,
+    key: typeof o.key === 'string' ? o.key : '',
+    secretToken: typeof o.secretToken === 'string' ? o.secretToken : (localStorage.getItem(`vtch_token_${id}`) || ''),
+    payment: o.payment || BANK_CONFIG
+  };
+}
+
+function getSavedOrders() {
+  try {
+    const raw = localStorage.getItem(SAVED_ORDERS_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    return (Array.isArray(list) ? list : []).map(safeOrder).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function syncSavedOrders(list) {
+  try {
+    const sanitized = (Array.isArray(list) ? list : []).map(safeOrder).filter(Boolean);
+    localStorage.setItem(SAVED_ORDERS_KEY, JSON.stringify(sanitized));
+  } catch {}
+}
+
+function saveSavedOrder(order, secretToken = '') {
+  try {
+    const safe = safeOrder(order);
+    if (!safe) return;
+    if (secretToken) safe.secretToken = secretToken;
+    const list = getSavedOrders();
+    const index = list.findIndex(o => o.id === safe.id);
+    if (index >= 0) {
+      list[index] = {
+        ...list[index],
+        ...safe,
+        key: safe.key || list[index].key || '',
+        secretToken: safe.secretToken || list[index].secretToken || ''
+      };
+    } else {
+      list.unshift(safe);
+    }
+    syncSavedOrders(list);
+  } catch {}
+}
+
+function mergeOrders(apiOrders = [], localOrders = []) {
+  const map = new Map();
+  for (const raw of localOrders) {
+    const o = safeOrder(raw);
+    if (o) map.set(o.id, o);
+  }
+  for (const raw of apiOrders) {
+    const o = safeOrder(raw);
+    if (!o) continue;
+    const existing = map.get(o.id);
+    if (existing) {
+      map.set(o.id, {
+        ...existing,
+        ...o,
+        key: o.key || existing.key || '',
+        secretToken: existing.secretToken || o.secretToken || ''
+      });
+    } else {
+      map.set(o.id, o);
+    }
+  }
+  const merged = Array.from(map.values());
+  merged.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  return merged;
+}
+
+async function refreshLocalOrders(localList) {
+  const list = (Array.isArray(localList) ? localList : []).map(safeOrder).filter(Boolean);
+  await Promise.allSettled(list.map(async item => {
+    const token = item.secretToken || localStorage.getItem(`vtch_token_${item.id}`) || '';
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_URL}?action=check_order&orderId=${encodeURIComponent(item.id)}&token=${encodeURIComponent(token)}`, {
+        signal: AbortSignal.timeout(5000)
+      });
+      const data = await res.json();
+      if (data && (data.status === 'PAID' || data.status === 'PENDING' || data.status === 'UNDERPAID')) {
+        item.status = data.status;
+        if (data.key) item.key = data.key;
+        if (data.amount && Number.isSafeInteger(data.amount)) item.amount = data.amount;
+        if (data.tier) {
+          const matched = plans.find(p => p.id === data.tier || p.name === data.tier);
+          if (matched) item.plan = matched.id;
+        }
+      }
+    } catch {}
+  }));
+  syncSavedOrders(list);
+  return list;
+}
 
 async function directGasRequest(action, fields = {}) {
   if (action === 'me') {
@@ -81,6 +192,7 @@ async function directGasRequest(action, fields = {}) {
     };
     try {
       localStorage.setItem(`vtch_token_${data.orderId}`, data.secretToken);
+      saveSavedOrder(order, data.secretToken);
     } catch(e) {}
     return { order };
   }
@@ -91,6 +203,10 @@ async function directGasRequest(action, fields = {}) {
     try {
       token = localStorage.getItem(`vtch_token_${orderId}`) || '';
     } catch(e) {}
+    if (!token) {
+      const local = getSavedOrders().find(o => o.id === orderId);
+      if (local?.secretToken) token = local.secretToken;
+    }
 
     let order = null;
     if (token) {
@@ -107,26 +223,37 @@ async function directGasRequest(action, fields = {}) {
             key: data.key || '',
             payment: BANK_CONFIG
           };
+          saveSavedOrder(order, token);
         }
       } catch(e) {}
     }
 
     if (!order && credential) {
-      const res = await fetch(`${API_URL}?action=my_orders&id_token=${encodeURIComponent(credential)}`);
-      const data = await res.json();
-      if (data && data.success && Array.isArray(data.orders)) {
-        const found = data.orders.find(o => o.orderId === orderId);
-        if (found) {
-          order = {
-            id: found.orderId,
-            plan: plans.find(p => p.id === found.tier || p.name === found.tier || p.price === found.amount)?.id || 'lifetime',
-            amount: found.amount,
-            status: found.status,
-            createdAt: found.createdAt || new Date().toISOString(),
-            key: found.key || '',
-            payment: BANK_CONFIG
-          };
+      try {
+        const res = await fetch(`${API_URL}?action=my_orders&id_token=${encodeURIComponent(credential)}`);
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.orders)) {
+          const found = data.orders.find(o => o.orderId === orderId);
+          if (found) {
+            order = {
+              id: found.orderId,
+              plan: plans.find(p => p.id === found.tier || p.name === found.tier || p.price === found.amount)?.id || 'lifetime',
+              amount: found.amount,
+              status: found.status,
+              createdAt: found.createdAt || new Date().toISOString(),
+              key: found.key || '',
+              payment: BANK_CONFIG
+            };
+            saveSavedOrder(order);
+          }
         }
+      } catch(e) {}
+    }
+
+    if (!order) {
+      const saved = getSavedOrders().find(o => o.id === orderId);
+      if (saved) {
+        order = safeOrder(saved);
       }
     }
 
@@ -240,13 +367,81 @@ function showOrders() {
   }
   list.append(container);
 }
+function showReauthNotice() {
+  const existing = document.querySelector('.reauth-notice');
+  if (existing) existing.remove();
+  const notice = el('div', undefined, 'notice reauth-notice');
+  notice.style.cssText = 'display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;padding:14px 18px;border-radius:12px;background:rgba(59,130,246,0.12);border:1px solid rgba(130,212,255,0.3);color:var(--text);';
+  const text = el('div');
+  text.innerHTML = '<strong>Phiên Google đã hết hạn</strong><br><small style="color:var(--muted)">Đơn hàng và key trên máy vẫn hiển thị đầy đủ. Bấm nút bên cạnh để đăng nhập lại nếu muốn đồng bộ thêm đơn từ Google.</small>';
+  const reBtn = button('Đăng nhập lại bằng Google', async () => {
+    await login();
+    loadOrders();
+  }, 'primary');
+  notice.append(text, reBtn);
+  $('orders').prepend(notice);
+}
+
 async function loadOrders() {
-  const version=revision;$('orders').replaceChildren(el('p','Đang tải đơn hàng…','loading'));$('refresh').disabled=true;
-  try {const result=await (credential ? accountRequest('list') : request('/api/orders'));if(version!==revision)return;orders=normalizeOrders(result.orders);showOrders();error('');}
-  catch(e){if(version!==revision)return;$('orders').replaceChildren(empty('Chưa tải được đơn hàng',e.message,loadOrders,'Thử lại'));}
-  finally {$('refresh').disabled=false;}
+  const version = revision;
+  $('orders').replaceChildren(el('p', 'Đang tải đơn hàng…', 'loading'));
+  $('refresh').disabled = true;
+  let reauthNeeded = false;
+
+  try {
+    let apiOrders = [];
+    if (credential) {
+      try {
+        const result = await accountRequest('list');
+        apiOrders = result.orders || [];
+      } catch (err) {
+        const msg = err?.message || '';
+        if (/Lỗi bảo mật|đăng nhập tài khoản Google|Phiên Google đã hết hạn/i.test(msg)) {
+          reauthNeeded = true;
+        } else {
+          throw err;
+        }
+      }
+    } else {
+      const result = await request('/api/orders');
+      apiOrders = result.orders || [];
+    }
+
+    if (version !== revision) return;
+
+    let localOrders = getSavedOrders();
+    if (reauthNeeded || localOrders.some(o => o.status !== 'PAID' || !o.key)) {
+      localOrders = await refreshLocalOrders(localOrders);
+    }
+    if (version !== revision) return;
+
+    const merged = mergeOrders(apiOrders, localOrders);
+    syncSavedOrders(merged);
+    orders = normalizeOrders(merged);
+    showOrders();
+    error('');
+
+    if (reauthNeeded) {
+      showReauthNotice();
+    }
+  } catch (e) {
+    if (version !== revision) return;
+    let localOrders = getSavedOrders();
+    if (localOrders.length > 0) {
+      localOrders = await refreshLocalOrders(localOrders);
+      if (version !== revision) return;
+      orders = normalizeOrders(localOrders);
+      showOrders();
+      showReauthNotice();
+    } else {
+      $('orders').replaceChildren(empty('Chưa tải được đơn hàng', e.message, loadOrders, 'Thử lại'));
+    }
+  } finally {
+    $('refresh').disabled = false;
+  }
 }
 function displayOrder(order) {
+  if (order?.id) saveSavedOrder(order);
   const box=$('detail');box.replaceChildren();box.append(el('span',states[order.status],`badge ${order.status}`),el('h2',`Bản quyền ${plans.find(p=>p.id===order.plan).name}`),el('p',`Mã đơn: ${order.id}`,'muted'));
   if(order.status==='PAID') {
     if(typeof order.key!=='string'||!order.key){box.append(el('p','Thanh toán đã xác nhận. Key đang được xử lý; hãy kiểm tra lại sau ít phút.'));}

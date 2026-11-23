@@ -156,7 +156,8 @@ export const server = http.createServer(async (req, res) => {
   // --- EXISTING VUATROCHOI ENDPOINTS ---
   if (path === '/auth/login') {
     signedIn = true;
-    res.writeHead(302, { Location: '/buy#orders' });
+    const dest = url.searchParams.get('signin') === 'catalog' ? '/games/' : '/buy#orders';
+    res.writeHead(302, { Location: dest });
     res.end();
     return;
   }

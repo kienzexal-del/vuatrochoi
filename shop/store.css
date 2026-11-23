@@ -171,3 +171,12 @@ body::before {
 }
 .package-menu[open] summary::after { transform: translateY(2px) rotate(225deg); }
 .package-options { display: grid; gap: 4px; margin: 6px 0 0 14px; }
+.catalog-brand { gap: 10px; }
+.catalog-wordmark {
+  letter-spacing: -0.01em;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text, #f0f4f8);
+}
+.catalog-wordmark > span { color: var(--accent, #82d4ff); }
+

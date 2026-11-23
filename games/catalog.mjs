@@ -627,7 +627,7 @@ function route() {
   player?.destroy(); player = null;
   if (game) {
     const isCombo = comboIds.has(game.id);
-    const back = make('a','← Về danh mục','back-link'); back.href = '#catalog';
+    const back = make('a','← Quay lại','back-link'); back.href = '#catalog';
     const hero = make('div','','game-hero'), cover = make('img'), heading = make('div', '', 'game-hero-info');
     cover.src = game.banner; cover.alt = '';
     

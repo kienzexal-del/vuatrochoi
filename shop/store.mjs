@@ -682,45 +682,8 @@ function displayOrder(order) {
 
     // Centered Action Buttons
     const actions = el('div', undefined, 'detail-actions centered');
-    const simBtn = button('⚡ Giả lập thanh toán thành công', async () => {
-      simBtn.disabled = true;
-      simBtn.textContent = 'Đang kích hoạt tài khoản...';
-      let fulfilled = false;
-      try {
-        const res = await fetch('/api/steam/simulate-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderId: order.id })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.ok) {
-            fulfilled = true;
-            toast('Giả lập thanh toán thành công!');
-            await loadDetail(order.id);
-            return;
-          }
-        }
-      } catch (e) {}
-
-      if (!fulfilled) {
-        order.status = 'PAID';
-        if (!order.account) {
-          const isCombo = order.plan === 'combo_31' || (order.amount === 100000);
-          order.account = isCombo ? 'whkzw21078' : 'Aereww111';
-          order.password = isCombo ? 'yamvd58819' : 'Aereww111';
-          order.key = `Account: ${order.account} | Password: ${order.password}`;
-          order.slotId = isCombo ? 'combo_31' : 'god_of_war';
-        }
-        saveSavedOrder(order);
-        toast('Giả lập thanh toán thành công!');
-        displayOrder(order);
-      }
-    }, 'btn-simulate-pay');
-    simBtn.style.maxWidth = '360px';
-
     const checkBtn = button('Kiểm tra thanh toán', () => loadDetail(order.id));
-    actions.append(simBtn, checkBtn);
+    actions.append(checkBtn);
     box.append(actions);
 
     const note = el('p', 'Chuyển đúng số tiền và nội dung. Hệ thống sẽ tự động cấp tài khoản & mật khẩu sau khi nhận tiền.', 'fine order-note-centered');

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Danh mục game Steam — Vua Trò Chơi</title>
+  <link rel="stylesheet" href="/shop/store.css">
+  <link rel="stylesheet" href="/games/catalog.css">
+  <script type="module" src="/games/catalog.mjs"></script>
+</head>
+<body>
+  <header class="header"><div class="shell">
+    <button class="site-menu-toggle" aria-label="Mở menu" aria-haspopup="dialog" aria-controls="site-menu">☰</button>
+    <a class="brand catalog-brand" href="/games/">
+      <img class="brand-logo" src="/shop/game-gia-re.png" alt="">
+      <span class="catalog-wordmark">Game Giá <span>Rẻ</span></span>
+    </a>
+  </div></header>
+  <main class="shell catalog">
+    <section id="catalog-view">
+      <section id="featured-games" class="featured-games" aria-label="Game nổi bật" hidden></section>
+      <div class="catalog-intro"><h1>Danh mục game Steam Offline</h1><p>Xem giới thiệu, cấu hình PC và trailer trước khi chọn game.</p></div>
+      <div class="catalog-toolbar">
+        <label>Tìm game<input id="game-search" type="search" placeholder="Ví dụ: Elden Ring"></label>
+        <label>Danh mục<select id="game-group"><option value="all">Tất cả game</option><option value="combo">Gói Siêu Combo (Đủ 31 Game Bom Tấn)</option><option value="single">Game Lẻ Đồng Giá 50k</option></select></label>
+        <p id="game-count" role="status"></p>
+      </div>
+      <div id="game-grid" class="catalog-grid"></div>
+    </section>
+    <section id="game-detail" hidden></section>
+  </main>
+  <footer class="footer"><div class="shell"><span>Vua Trò Chơi</span><span>Thông tin game và cấu hình từ Steam.</span></div></footer>
+  <dialog id="site-menu" class="site-drawer" aria-label="Điều hướng">
+    <div class="drawer-head"><strong>Vua Trò Chơi</strong><button class="site-menu-close" aria-label="Đóng menu">×</button></div>
+    <nav aria-label="Điều hướng chính">
+      <a href="/games/#catalog" aria-current="page">Danh mục Steam Offline</a>
+      <details class="package-menu">
+        <summary>Chọn gói Vua Trò Chơi</summary>
+        <div class="package-options">
+          <a href="/buy#shop">PC</a>
+          <a href="/mobile/">Điện thoại - FREE</a>
+        </div>
+      </details>
+    </nav>
+  </dialog>
+  <script type="module" src="/shop/site-menu.mjs"></script>
+</body>
+</html>

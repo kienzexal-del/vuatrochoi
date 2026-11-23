@@ -1,0 +1,518 @@
+[
+  {
+    "id": 2358720,
+    "name": "Black Myth: Wukong",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg?t=1760601605",
+    "genre": [
+      "Action",
+      "Adventure",
+      "RPG"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 64-bit<br></li><li><strong>Processor:</strong> Intel Core i5-8400 / AMD Ryzen 5 1600<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GeForce GTX 1060 6GB / AMD Radeon RX 580 8GB<br></li><li><strong>DirectX:</strong> Version 11<br></li><li><strong>Storage:</strong> 130 GB available space<br></li><li><strong>Sound Card:</strong> Windows Compatible Audio Device<br></li><li><strong>Additional Notes:</strong> HDD Supported, SSD Recommended. The above specifications were tested with DLSS/FSR/XeSS enabled.</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 64-bit<br></li><li><strong>Processor:</strong> Intel Core i7-9700 / AMD Ryzen 5 5500<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GeForce RTX 2060 / AMD Radeon RX 5700 XT / INTEL Arc A750<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 130 GB available space<br></li><li><strong>Sound Card:</strong> Windows Compatible Audio Device<br></li><li><strong>Additional Notes:</strong> SSD Required. The above specifications were tested with DLSS/FSR/XeSS enabled.</li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/2358720/743632/6acf4311bb6a59d300b902ab6a3f445215089d9c/1750812851/hls_264_master.m3u8?t=1729236218"
+  },
+  {
+    "id": 1245620,
+    "name": "ELDEN RING",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg?t=1790290043",
+    "genre": [
+      "Action",
+      "RPG"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10<br></li><li><strong>Processor:</strong> INTEL CORE I5-8400 or AMD RYZEN 3 3300X<br></li><li><strong>Memory:</strong> 12 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GEFORCE GTX 1060 3 GB or AMD RADEON RX 580 4 GB<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 60 GB available space<br></li><li><strong>Sound Card:</strong> Windows Compatible Audio Device<br></li><li><strong>Additional Notes:</strong> </li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10/11<br></li><li><strong>Processor:</strong> INTEL CORE I7-8700K or AMD RYZEN 5 3600X<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GEFORCE GTX 1070 8 GB or AMD RADEON RX VEGA 56 8 GB<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 60 GB available space<br></li><li><strong>Sound Card:</strong> Windows Compatible Audio Device<br></li><li><strong>Additional Notes:</strong> </li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/1245620/468149/7d588828f80907ca97efdcb1e6ef72b4ce2b1d0d/1750650511/hls_264_master.m3u8?t=1654109241"
+  },
+  {
+    "id": 1086940,
+    "name": "Baldur's Gate 3",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1086940/48a2fcbda8565bb45025e98fd8ebde8a7203f6a0/header.jpg?t=1777363040",
+    "genre": [
+      "Adventure",
+      "RPG",
+      "Strategy"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 64-bit<br></li><li><strong>Processor:</strong> Intel I5 4690 / AMD FX 8350 / Snapdragon X Elite<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> Nvidia GTX 970 / RX 480 / Intel Arc A380 / Qualcomm Adreno X1 (4GB+ of VRAM)<br></li><li><strong>DirectX:</strong> Version 11<br></li><li><strong>Storage:</strong> 150 GB available space<br></li><li><strong>Additional Notes:</strong> SSD required</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 64-bit<br></li><li><strong>Processor:</strong> Intel i7 8700K / AMD r5 3600<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> Nvidia 2060 Super / RX 5700 XT / Intel Arc A580 (8GB+ of VRAM)<br></li><li><strong>DirectX:</strong> Version 11<br></li><li><strong>Storage:</strong> 150 GB available space<br></li><li><strong>Additional Notes:</strong> SSD required</li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/1086940/637951/59ca25b847b0e471638d1e2474acf71b068d57f0/1750615003/hls_264_master.m3u8?t=1702007645"
+  },
+  {
+    "id": 1888930,
+    "name": "The Last of Us Part I",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1888930/header.jpg?t=1750959031",
+    "genre": [
+      "Action",
+      "Adventure"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 (Version 1909 or Newer)<br></li><li><strong>Processor:</strong> AMD Ryzen 5 1500X, Intel Core i7-4770K<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> AMD Radeon RX 470 (4 GB), AMD Radeon RX 6500 XT (4 GB), NVIDIA GeForce GTX 970 (4 GB), NVIDIA GeForce GTX 1050 Ti (4 GB)<br></li><li><strong>Storage:</strong> 100 GB available space<br></li><li><strong>Additional Notes:</strong> SSD Recommended</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 (Version 1909 or Newer)<br></li><li><strong>Processor:</strong> AMD Ryzen 5 3600X, Intel Core i7-8700<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> AMD Radeon RX 5700 XT (8 GB), AMD Radeon RX 6600 XT (8 GB), NVIDIA GeForce RTX 2070 SUPER (8 GB), NVIDIA GeForce RTX 3060 (8 GB)<br></li><li><strong>Storage:</strong> 100 GB available space<br></li><li><strong>Additional Notes:</strong> SSD Recommended</li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/1888930/550396/09468ce88d62c431fbbbbbc89c3a0c1b84e50ca8/1750740074/hls_264_master.m3u8?t=1680015399"
+  },
+  {
+    "id": 2531310,
+    "featuredTrailer": "https://video.fastly.steamstatic.com/store_trailers/2531310/861867/c3dedb932f9954828dc34ded348a15bcdbe22d79/1750816628/hls_264_master.m3u8",
+    "name": "The Last of Us Part II Remastered",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2531310/header.jpg?t=1750959180",
+    "genre": [
+      "Action",
+      "Adventure"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10/11 64-bit (version 1909 or higher)<br></li><li><strong>Processor:</strong> Intel Core i3-8100, AMD Ryzen 3 1300X<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GeForce GTX 1650, AMD Radeon RX 5500XT<br></li><li><strong>Storage:</strong> 150 GB available space<br></li><li><strong>Additional Notes:</strong> SSD Required</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10/11 64-bit (version 1909 or higher)<br></li><li><strong>Processor:</strong> Intel Core i5-8600, AMD Ryzen 5 3600<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GeForce RTX 3060, AMD Radeon RX 5700<br></li><li><strong>Storage:</strong> 150 GB available space<br></li><li><strong>Additional Notes:</strong> SSD Required</li></ul>",
+    "trailer": null
+  },
+  {
+    "id": 1091500,
+    "name": "Cyberpunk 2077",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1091500/48a93d6445a67520ea49833c93dae8f2e68fc540/header_alt_assets_9.jpg?t=1794474878",
+    "genre": [
+      "RPG"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> 64-bit Windows 10<br></li><li><strong>Processor:</strong> Core i7-6700 or Ryzen 5 1600<br></li><li><strong>Memory:</strong> 12 GB RAM<br></li><li><strong>Graphics:</strong> GeForce GTX 1060 6GB or Radeon RX 580 8GB or Arc A380<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 70 GB available space<br></li><li><strong>Additional Notes:</strong> SSD required. Attention: In this game you will encounter a variety of visual effects that may provide seizures or loss of consciousness in a minority of people. If you or someone you know experiences any of the above symptoms while playing, stop and seek medical attention immediately.</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> 64-bit Windows 10<br></li><li><strong>Processor:</strong> Core i7-12700 or Ryzen 7 7800X3D<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> GeForce RTX 2060 SUPER or Radeon RX 5700 XT or Arc A770<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 70 GB available space<br></li><li><strong>Additional Notes:</strong> SSD required.</li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/1091500/512843956/7ddc0c953816d19d719b299eb76b1ce188e17225/1792676918/hls_264_master.m3u8?t=1792682496"
+  },
+  {
+    "id": 883710,
+    "name": "Resident Evil 2",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/883710/header.jpg?t=1779433152",
+    "genre": [
+      "Action"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> WINDOWS® 10 (64-BIT Required)<br></li><li><strong>Processor:</strong> Intel® Core™ i5-4460 or AMD FX™-6300 or better<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA® GeForce® GTX 960 or AMD Radeon™ RX 460<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 26 GB available space<br></li><li><strong>Additional Notes:</strong> This game is expected to run at 1080p/30 FPS. If you have don't have enough graphics memory to run the game at your selected texture quality, you must go to Options &gt; Graphics and lower the texture quality or shadow quality, or decrease the resolution. An internet connection is required for product activation. (Network connectivity uses Steam® developed by Valve® Corporation.)</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> WINDOWS® 10 (64-BIT Required)<br></li><li><strong>Processor:</strong> Intel® Core™ i7-3770 or AMD FX™-9590 or better<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA® GeForce® GTX 1060 or AMD Radeon™ RX 480  with 3GB VRAM<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 26 GB available space<br></li><li><strong>Additional Notes:</strong> This game is expected to run at 1080p/60 FPS. An internet connection is required for product activation. (Network connectivity uses Steam® developed by Valve® Corporation.)</li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/883710/209425/c1fc24f1fdcba7b7b8682606c2e020416118f0fc/1750593194/hls_264_master.m3u8?t=1550208255"
+  },
+  {
+    "id": 2050650,
+    "name": "Resident Evil 4",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2050650/header.jpg?t=1772502922",
+    "genre": [
+      "Action",
+      "Adventure"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 (64 bit)<br></li><li><strong>Processor:</strong> AMD Ryzen 3 1200 / Intel Core i5-7500<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> AMD Radeon RX 560 with 4GB VRAM / NVIDIA GeForce GTX 1050 Ti with 4GB VRAM<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Network:</strong> Broadband Internet connection<br></li><li><strong>Additional Notes:</strong> Estimated performance (when set to Prioritize Performance): 1080p/45fps. ・Framerate might drop in graphics-intensive scenes. ・AMD Radeon RX 6700 XT or NVIDIA GeForce RTX 2060 required to support ray tracing.</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 (64 bit)/Windows 11 (64 bit)<br></li><li><strong>Processor:</strong> AMD Ryzen 5 3600 / Intel Core i7 8700<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> AMD Radeon RX 5700 / NVIDIA GeForce GTX 1070<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Network:</strong> Broadband Internet connection<br></li><li><strong>Additional Notes:</strong> Estimated performance: 1080p/60fps ・Framerate might drop in graphics-intensive scenes. ・AMD Radeon RX 6700 XT or NVIDIA GeForce RTX 2070 required to support ray tracing.</li></ul>",
+    "trailer": null
+  },
+  {
+    "id": 418370,
+    "name": "Resident Evil 7 Biohazard",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/418370/header.jpg?t=1778464947",
+    "genre": [
+      "Action",
+      "Adventure"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> WINDOWS® 10 (64-BIT Required)<br></li><li><strong>Processor:</strong> Intel® Core™ i5-4460, 2.70GHz or AMD FX™-6300 or better<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA® GeForce® GTX 960 or AMD Radeon™ RX 460<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 24 GB available space<br></li><li><strong>Sound Card:</strong> DirectSound compatible (must support DirectX® 9.0c or higher)<br></li><li><strong>Additional Notes:</strong> Hardware specification target 1080P/30FPS. May require reduction in Texture Quality settings or turning Texture streaming to OFF due to high VRAM requirements. *Internet connection required for game activation.</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> WINDOWS® 10 (64-BIT Required) / Windows 11 (64-BIT Required)<br></li><li><strong>Processor:</strong> Intel® Core™ i7 3770 3.4GHz  or AMD equivalent or better<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA® GeForce® GTX 1060 with 3GB VRAM<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 24 GB available space<br></li><li><strong>Sound Card:</strong> DirectSound compatible (must support DirectX® 9.0c or higher)<br></li><li><strong>Additional Notes:</strong> Hardware specification target 1080P/60FPS. *Internet connection required for game activation.</li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/418370/62363/d290cb3e64ed6116ff533a89d621c04ccd8872cf/1750527947/hls_264_master.m3u8?t=1485771799"
+  },
+  {
+    "id": 1196590,
+    "name": "Resident Evil Village",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1196590/header.jpg?t=1776927117",
+    "genre": [
+      "Action"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 (64 bit)<br></li><li><strong>Processor:</strong> AMD Ryzen 3 1200  ／ Intel Core i5-7500<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> AMD Radeon RX 560 with 4GB VRAM ／ NVIDIA GeForce GTX 1050 Ti with 4GB VRAM<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Additional Notes:</strong> Estimated performance (when set to Prioritize Performance): 1080p/60fps. ・Framerate might drop in graphics-intensive scenes. ・AMD Radeon RX 6700 XT or NVIDIA GeForce RTX 2060 required to support ray tracing.</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 (64 bit)/Windows 11 (64 bit)<br></li><li><strong>Processor:</strong> AMD Ryzen 5 3600 ／ Intel Core i7 8700<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> AMD Radeon RX 5700 ／ NVIDIA GeForce GTX 1070<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Additional Notes:</strong> Estimated performance: 1080p/60fps ・Framerate might drop in graphics-intensive scenes. ・AMD Radeon RX 6700 XT or NVIDIA GeForce RTX 2070 required to support ray tracing.</li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/1196590/353105/c4d2e7bd3aa61da9fb69206b8ce64c4f30cf7b5a/1750637512/hls_264_master.m3u8?t=1615523833"
+  },
+  {
+    "id": 1659040,
+    "name": "HITMAN World of Assassination",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1659040/f0b4e512af976fbc5261acf927ac12ed625b0a18/header_alt_assets_15.jpg?t=1795174276",
+    "genre": [
+      "Action",
+      "Adventure"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> OS 64-bit Windows 10<br></li><li><strong>Processor:</strong> Intel CPU Core i5-2500K 3.3GHz / AMD CPU Phenom II X4 940<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GeForce GTX 660 / Radeon HD 7870<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 60 GB available space</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> OS 64-bit Windows 10<br></li><li><strong>Processor:</strong> Intel CPU Core i7 4790 4 GHz<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> Nvidia GPU GeForce GTX 1070 / AMD GPU Radeon RX Vega 56 8GB<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 60 GB available space</li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/1659040/1806890548/20552fef12e3b1265c55d74faa692dda326ab641/1792749969/hls_264_master.m3u8?t=1793286891"
+  },
+  {
+    "id": 1145360,
+    "name": "Hades",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145360/header.jpg?t=1758127023",
+    "genre": [
+      "Action",
+      "Indie",
+      "RPG"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS *:</strong> Windows 7 SP1<br></li><li><strong>Processor:</strong> Dual Core 2.4 GHz<br></li><li><strong>Memory:</strong> 4 GB RAM<br></li><li><strong>Graphics:</strong> 1GB VRAM / DirectX 10+ support<br></li><li><strong>Storage:</strong> 15 GB available space</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li><strong>OS *:</strong> Windows 7 SP1<br></li><li><strong>Processor:</strong> Dual Core 3.0 GHz+<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> 2GB VRAM / DirectX 10+ support<br></li><li><strong>Storage:</strong> 20 GB available space</li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/1145360/312686/b0312c49135823cc34946e98148abfb8da71f0fb/1750627549/hls_264_master.m3u8?t=1600353465"
+  },
+  {
+    "id": 1222140,
+    "name": "Detroit: Become Human",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1222140/header.jpg?t=1667468479",
+    "genre": [
+      "Action",
+      "Adventure"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 (64 bit)<br></li><li><strong>Processor:</strong> Intel Core i5-2300 @ 2.8 GHz or AMD Ryzen 3 1200 @ 3.1GHz or AMD FX-8350 @ 4.2GHz<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> Nvidia GeForce GTX 780 or AMD HD 7950 with 3GB VRAM minimum (Support of Vulkan 1.1 required)<br></li><li><strong>Storage:</strong> 55 GB available space</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 (64 bit)<br></li><li><strong>Processor:</strong> Intel Core i5-6600 @ 3.3 GHz or AMD Ryzen 3 1300 X @ 3.4 GHz<br></li><li><strong>Memory:</strong> 12 GB RAM<br></li><li><strong>Graphics:</strong> Nvidia GeForce GTX 1060 or AMD Radeon RX 580 with 4GB VRAM minimum (Support of Vulkan 1.1 required)<br></li><li><strong>Storage:</strong> 55 GB available space</li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/1222140/282775/c86acba0a15a3378984a05920f3513b23bba9147/1750644428/hls_264_master.m3u8?t=1590429401"
+  },
+  {
+    "id": 2322010,
+    "featuredTrailer": "https://video.fastly.steamstatic.com/store_trailers/2322010/754785/cd4512509a851f1f5e98b3ddffdda87de8bac9f1/1750811709/hls_264_master.m3u8",
+    "name": "God of War Ragnarök",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2322010/header.jpg?t=1776465233",
+    "genre": [
+      "Action",
+      "Adventure",
+      "RPG"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 20H1<br></li><li><strong>Processor:</strong> Intel i5-4670k or AMD Ryzen 3 1200<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GTX 1060 (6GB) or AMD RX 5500 XT (8GB) or Intel Arc A750<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 190 GB available space</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 20H1<br></li><li><strong>Processor:</strong> Intel i5-8600 or AMD Ryzen 5 3600<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA RTX 2060 Super or AMD RX 5700 or Intel Arc A770<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 190 GB available space</li></ul>",
+    "trailer": null
+  },
+  {
+    "id": 1817190,
+    "name": "Marvel's Spider-Man: Miles Morales",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1817190/header.jpg?t=1787838710",
+    "genre": [
+      "Action",
+      "Adventure"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 64-bit 1909<br></li><li><strong>Processor:</strong> Intel Core i3-4160, 3.6 GHz or AMD equivalent<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GTX 950 or AMD Radeon RX 470<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 75 GB available space</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 64-bit 1909<br></li><li><strong>Processor:</strong> Intel Core i5-4670, 3.4 Ghz or AMD Ryzen 5 1600, 3.2 Ghz<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GTX 1060 6GB or AMD Radeon RX 580 8GB<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 75 GB available space<br></li><li><strong>Additional Notes:</strong> 75 GB SSD space Recommended</li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/1817190/511935/1557888f7cb7bf7f56fb3b43c00daf9537f374ca/1750737979/hls_264_master.m3u8?t=1672784168"
+  },
+  {
+    "id": 3321460,
+    "name": "Crimson Desert",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3321460/236f3814be7a97d86831800691b6096d449222a8/header.jpg?t=1794478066",
+    "genre": [
+      "Action",
+      "Adventure"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 64-bit<br></li><li><strong>Processor:</strong> Ryzen 5 2600X / i5-8500<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> RX 5500 XT / GTX 1060<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 180 GB available space<br></li><li><strong>Sound Card:</strong> Windows Compatible Audio Device<br></li><li><strong>Additional Notes:</strong> SSD required.</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 64-bit<br></li><li><strong>Processor:</strong> Ryzen 5 5600 / i5-11600K<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> RX 6700 XT / RTX 2080 <br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 180 GB available space<br></li><li><strong>Sound Card:</strong> Windows Compatible Audio Device<br></li><li><strong>Additional Notes:</strong> SSD required.</li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/3321460/1724826854/cbd1e430f212635a9749c326a39461e196c2d3a6/1787797072/hls_264_master.m3u8?t=1787809904"
+  },
+  {
+    "id": 1942280,
+    "name": "Brotato",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1942280/f98281910016f8924be37cce3d4b119f5223a358/header.jpg?t=1794905667",
+    "genre": [
+      "Action",
+      "Casual",
+      "Indie",
+      "RPG"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS *:</strong> Windows 7+<br></li><li><strong>Processor:</strong> 2 Ghz<br></li><li><strong>Memory:</strong> 4 GB RAM<br></li><li><strong>Graphics:</strong> 128MB, OpenGL 3+<br></li><li><strong>Storage:</strong> 200 MB available space</li></ul>",
+    "recommended": null,
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/1942280/776977/3c3b725174c83d8d873735bd5e80af3220010ed7/1750742089/hls_264_master.m3u8?t=1729849696"
+  },
+  {
+    "id": 2638890,
+    "name": "Onimusha: Way of the Sword",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2638890/ce31174fea86d0bafa21b26e853dcd0b7326e36f/header.jpg?t=1794985748",
+    "genre": [
+      "Action",
+      "Adventure",
+      "RPG"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 11<br></li><li><strong>Processor:</strong> Intel Core i5-8400 / AMD Ryzen 3 3100<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> GeForce GTX 1660(6GB) / Radeon RX 5500 XT(8GB)<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 50 GB available space<br></li><li><strong>Additional Notes:</strong> 30 FPS gameplay can be achieved on the 'Low' Graphics Preset at 1080p resolution (using upscaling). Note: The frame rate may drop during periods of excessive load. Note: An SSD is required. - The specifications are subject to change without prior notice. - Super Resolution is enabled via NVIDIA DLSS 4.5 and AMD FSR 3.1. - Upscaling performance estimations were made based on DLSS 4.0 and FSR 3.1 usage. - Depending on your specifications, it is advised to increase the memory available in your system if you wish to run other programs (such as for recording footage, or streaming) while playing the game.</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 11<br></li><li><strong>Processor:</strong> Intel Core i5-10400 / AMD Ryzen 5 3600<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> GeForce RTX 2060 Super (8GB) / Radeon RX 6600(8GB)<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 50 GB available space<br></li><li><strong>Additional Notes:</strong> 60 FPS gameplay can be achieved on the 'Medium' Graphics Preset at 1080p resolution (using upscaling). Note: The frame rate may drop during periods of excessive load. Note: An SSD is required. - The specifications are subject to change without prior notice. - Super Resolution is enabled via NVIDIA DLSS 4.5 and AMD FSR 3.1. - Upscaling performance estimations were made based on DLSS 4.0 and FSR 3.1 usage. - Depending on your specifications, it is advised to increase the memory available in your system if you wish to run other programs (such as for recording footage, or streaming) while playing the game.</li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/2638890/429039714/045e35d40894f3a42bf861f282b7ee563648093f/1788938110/hls_264_master.m3u8?t=1789430725"
+  },
+  {
+    "id": 1636440,
+    "name": "SILENT HILL: Townfall",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1636440/0ed1cb4bc30631f95b92f7f13bb06c15d49b4afa/header.jpg?t=1792553312",
+    "genre": [
+      "Action",
+      "Adventure"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 11 x64<br></li><li><strong>Processor:</strong> AMD Ryzen 5 3600 / Intel i7-8700K<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GeForce RTX 2060 Super / AMD Radeon RX 6600<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 75 GB available space<br></li><li><strong>Sound Card:</strong> Windows Compatible Audio Device<br></li><li><strong>Additional Notes:</strong> Playing on minimum requirements should enable to play on Low settings at 1080p 30fps.</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 11 x64<br></li><li><strong>Processor:</strong> AMD Ryzen 7 5700X / Intel i7-9700K<br></li><li><strong>Memory:</strong> 32 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GeForce RTX 3080 / AMD Radeon RX 7800 XT<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 75 GB available space<br></li><li><strong>Sound Card:</strong> Windows Compatible Audio Device<br></li><li><strong>Additional Notes:</strong> Playing on recommended requirements should enable play on High settings at 4K 30fps (using DLSS,FSR or TSR Balanced mode).</li></ul>",
+    "trailer": null
+  },
+  {
+    "id": 2103140,
+    "name": "Magicraft",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2103140/c67d87d288165604423bcac5f3857d555f9dabd9/header.jpg?t=1790072393",
+    "genre": [
+      "Action",
+      "Adventure",
+      "Indie",
+      "RPG"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS *:</strong> Windows 7 or later<br></li><li><strong>Processor:</strong> Intel Core i3-3240 (2 * 3400); AMD FX-4300 (4 * 3800)<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong>  GeForce GTX 560 Ti (1024 VRAM); Radeon HD 7750 (1024 VRAM)<br></li><li><strong>DirectX:</strong> Version 10<br></li><li><strong>Storage:</strong> 2 GB available space</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li><strong>OS:</strong>  Windows 10<br></li><li><strong>Processor:</strong> Intel Core i5-3470<br></li><li><strong>Memory:</strong> 32 GB RAM<br></li><li><strong>Graphics:</strong> GeForce GTX 1050 (2048 VRAM); Radeon R9 380 (2048 VRAM)<br></li><li><strong>Storage:</strong> 3 GB available space</li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/2103140/780296/b92df6abcbe9613f976c41d6ac7809c30c9126bf/1750746753/hls_264_master.m3u8?t=1730514726"
+  },
+  {
+    "id": 289070,
+    "name": "Sid Meier's Civilization VI",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/289070/header.jpg?t=1792718069",
+    "genre": [
+      "Strategy"
+    ],
+    "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS *:</strong> Windows 7x64 / Windows 8.1x64 / Windows 10x64<br></li><li><strong>Processor:</strong> Intel Core i3 2.5 Ghz or AMD Phenom II 2.6 Ghz or greater<br></li><li><strong>Memory:</strong> 4 GB RAM<br></li><li><strong>Graphics:</strong> 1 GB &amp; AMD 5570 or nVidia 450 or Intel Integrated Graphics 530<br></li><li><strong>DirectX:</strong> Version 11<br></li><li><strong>Storage:</strong> 17 GB available space<br></li><li><strong>Sound Card:</strong> DirectX Compatible Sound Device<br></li><li><strong>Additional Notes:</strong> Initial installation requires one-time Internet connection for Steam authentication; software installations required (included with the game) include Steam Client, Microsoft Visual C++ 2012 and 2015 Runtime Libraries, and Microsoft DirectX. Internet connection and acceptance of Steam™ Subscriber Agreement required for activation. See  for details.</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS *:</strong> Windows 7x64 / Windows 8.1x64 / Windows 10x64<br></li><li><strong>Processor:</strong> Fourth Generation Intel Core i5 2.5 Ghz or AMD FX8350 4.0 Ghz or greater<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> 2GB &amp; AMD 7970 or nVidia 770 or greater<br></li><li><strong>DirectX:</strong> Version 11<br></li><li><strong>Storage:</strong> 23 GB available space<br></li><li><strong>Sound Card:</strong> DirectX Compatible Sound Device</li></ul>",
+    "trailer": "https://video.akamai.steamstatic.com/store_trailers/289070/76617/1f43ec5aa4bd687389eb29886a2539cc984530e9/1750500626/hls_264_master.m3u8?t=1476737061"
+  },
+  {
+    "id": 644930,
+    "name": "They Are Billions",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/644930/header.jpg?t=1595631876",
+    "genre": [
+      "Chiến thuật"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li><strong>HĐH *:</strong> Windows 7, 8, 10 (32 and 64 bits)<br></li><li><strong>Bộ xử lý:</strong> INTEL, AMD 2 cores CPU at 2Ghz<br></li><li><strong>Bộ nhớ:</strong> 4 GB RAM<br></li><li><strong>Đồ họa:</strong> Intel HD3000, Radeon, Nvidia card with shader model 3, 1GB video ram.<br></li><li><strong>DirectX:</strong> Phiên bản 9.0c<br></li><li><strong>Lưu trữ:</strong> 4 GB chỗ trống khả dụng<br></li><li><strong>Ghi chú thêm:</strong> Minimum resolution: 1360x768, recomended FULL HD 1920x1080.</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li><strong>HĐH *:</strong> Windows 7, 8, 10  (64 bits)<br></li><li><strong>Bộ xử lý:</strong> INTEL. AMD 4 cores CPU at 3Ghz<br></li><li><strong>Bộ nhớ:</strong> 8 GB RAM<br></li><li><strong>Đồ họa:</strong> Radeon 7950 or above, Nvidia GTX 670 or above.  4GB video ram.<br></li><li><strong>DirectX:</strong> Phiên bản 9.0c<br></li><li><strong>Lưu trữ:</strong> 4 GB chỗ trống khả dụng<br></li><li><strong>Ghi chú thêm:</strong> 4K Monitor (3840x2160)</li></ul>",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/644930/227432/5fe05ca220fee13118f1f6484fdc55b4ff6bca33/1750566112/hls_264_master.m3u8?t=1560875080"
+  },
+  {
+    "id": 892970,
+    "name": "Valheim",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/892970/df65cafab20dae97a243c7cc988e8bf959e4b906/header.jpg?t=1791544831",
+    "genre": [
+      "Hành động",
+      "Phiêu lưu",
+      "Indie",
+      "Nhập vai (RPG)"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10 or later<br></li><li><strong>Bộ xử lý:</strong> 2.6 GHz Quad Core or similar<br></li><li><strong>Bộ nhớ:</strong> 8 GB RAM<br></li><li><strong>Đồ họa:</strong> GeForce GTX 950 or Radeon HD 7970<br></li><li><strong>DirectX:</strong> Phiên bản 11<br></li><li><strong>Lưu trữ:</strong> 1 GB chỗ trống khả dụng<br></li><li><strong>Ghi chú thêm:</strong> The following languages have been partially translated by the community: Svenska, Italiano, Romanian, български, македонски, Suomi, Dansk, íslenska, Lietuvių kalba, čeština, Magyar nyelv, Português europeu, 한국어 (불완전한), Norsk, ภาษาไทย, ქართული ენა, Abenaki, Slovenčina</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10 or later<br></li><li><strong>Bộ xử lý:</strong> i5 3GHz or Ryzen 5 3GHz<br></li><li><strong>Bộ nhớ:</strong> 16 GB RAM<br></li><li><strong>Đồ họa:</strong> GeForce GTX 1060 or Radeon RX 580<br></li><li><strong>DirectX:</strong> Phiên bản 11<br></li><li><strong>Kết nối:</strong> Cáp mạng Internet<br></li><li><strong>Lưu trữ:</strong> 1 GB chỗ trống khả dụng</li></ul>",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/892970/1773403435/2417a8f159c3b08912ee0c08e6a78d70452a083f/1788934690/hls_264_master.m3u8?t=1788958575"
+  },
+  {
+    "id": 2114740,
+    "name": "Blasphemous 2",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2114740/f159b10bb670fabbe0a4a1837b16547f9f9f6a78/header.jpg?t=1790929406",
+    "genre": [
+      "Hành động",
+      "Phiêu lưu",
+      "Indie"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10<br></li><li><strong>Bộ xử lý:</strong> Intel Core 2 Duo E8400 or AMD Phenom II X2 550<br></li><li><strong>Bộ nhớ:</strong> 4 GB RAM<br></li><li><strong>Đồ họa:</strong> NVIDIA GeForce GT 520, 1 GB or AMD Radeon HD 7470, 1 GB or Intel HD Graphics 4400<br></li><li><strong>Lưu trữ:</strong> 4 GB chỗ trống khả dụng</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10<br></li><li><strong>Bộ xử lý:</strong> Intel Core i3-550 or AMD FX-4100<br></li><li><strong>Bộ nhớ:</strong> 6 GB RAM<br></li><li><strong>Đồ họa:</strong> NVIDIA GeForce GT 710, 1 GB or AMD Radeon R7 240, 1 GB or Intel HD Graphics 530<br></li><li><strong>Lưu trữ:</strong> 4 GB chỗ trống khả dụng</li></ul>",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/2114740/603832258/bf8e065f906893eed1609244ae7d5b587aa63388/1780510831/hls_264_master.m3u8?t=1780775110"
+  },
+  {
+    "id": 535930,
+    "name": "Two Point Hospital",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/535930/header.jpg?t=1763648286",
+    "genre": [
+      "Indie",
+      "Mô phỏng"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH *:</strong> Windows 7 64-bit<br></li><li><strong>Bộ xử lý:</strong> Intel Core i3 6100 or AMD FX-4350<br></li><li><strong>Bộ nhớ:</strong> 4 GB RAM<br></li><li><strong>Đồ họa:</strong> NVIDIA Geforce GT 1030, 2GB (Legacy: NVIDIA GeForce GTX 460), AMD RX550, 2GB (Legacy: AMD Radeon HD 6850), Integrated: Intel HD Graphics 630<br></li><li><strong>DirectX:</strong> Phiên bản 11<br></li><li><strong>Lưu trữ:</strong> 6 GB chỗ trống khả dụng<br></li><li><strong>Ghi chú thêm:</strong> Microsoft no longer supports Windows 10 or older versions</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10  64-bit<br></li><li><strong>Bộ xử lý:</strong> Intel Core i5 6600 or AMD Ryzen 1600x<br></li><li><strong>Bộ nhớ:</strong> 8 GB RAM<br></li><li><strong>Đồ họa:</strong> NVIDIA Geforce GTX 1060, 3 GB (Legacy: NVIDIA Geforce GTX 780, 4GB) or AMD RX 580, 4 GB (Legacy: AMD R9 290X, 4GB)<br></li><li><strong>DirectX:</strong> Phiên bản 11<br></li><li><strong>Lưu trữ:</strong> 6 GB chỗ trống khả dụng<br></li><li><strong>Ghi chú thêm:</strong> Microsoft no longer supports Windows 10 or older versions</li></ul>",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/535930/181784/94f65733a5abb3866ac6418ebd50eff834616abb/1750547367/hls_264_master.m3u8?t=1535609052"
+  },
+  {
+    "id": 2868840,
+    "name": "Slay the Spire 2",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2868840/b0958d387dc366211e0f353443710cfcf9fdb020/header.jpg?t=1787169309",
+    "genre": [
+      "Indie",
+      "Chiến thuật",
+      "Truy cập sớm"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10 (64-bit)<br></li><li><strong>Bộ xử lý:</strong> Dual-core 2.0 GHz<br></li><li><strong>Bộ nhớ:</strong> 4 GB RAM<br></li><li><strong>Đồ họa:</strong> DirectX 12 or Vulkan compatible, 1 GB VRAM<br></li><li><strong>Lưu trữ:</strong> 4 GB chỗ trống khả dụng</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10 (64-bit)<br></li><li><strong>Bộ xử lý:</strong> Quad-core 3.0 GHz<br></li><li><strong>Bộ nhớ:</strong> 8 GB RAM<br></li><li><strong>Đồ họa:</strong> DirectX 12 or Vulkan compatible, 2 GB VRAM<br></li><li><strong>Lưu trữ:</strong> 4 GB chỗ trống khả dụng</li></ul>",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/2868840/1627257579/a83072d3f9fb135618cc17b8390a50a19656a00d/1771464864/hls_264_master.m3u8?t=1771531786"
+  },
+  {
+    "id": 1371980,
+    "name": "No Rest for the Wicked",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1371980/331de7e745f43867f0a220339153ac6019822ea4/header.jpg?t=1792498726",
+    "genre": [
+      "Hành động",
+      "Phiêu lưu",
+      "Nhập vai (RPG)",
+      "Truy cập sớm"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10<br></li><li><strong>Bộ xử lý:</strong> Intel Core i5-8400 / AMD Ryzen 5 2600<br></li><li><strong>Bộ nhớ:</strong> 16 GB RAM<br></li><li><strong>Đồ họa:</strong> Nvidia GeForce GTX 1080 / AMD Radeon 5600 XT<br></li><li><strong>Lưu trữ:</strong> 46 GB chỗ trống khả dụng<br></li><li><strong>Ghi chú thêm:</strong> SSD Required. Intel Iris Xe Integrated Graphics is not supported.</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10 / Windows 11<br></li><li><strong>Bộ xử lý:</strong> Intel Core i7-11700K / AMD Ryzen 7 5800X<br></li><li><strong>Bộ nhớ:</strong> 32 GB RAM<br></li><li><strong>Đồ họa:</strong> Nvidia GeForce RTX 2060 / AMD Radeon RX 5700 XT<br></li><li><strong>Lưu trữ:</strong> 46 GB chỗ trống khả dụng<br></li><li><strong>Ghi chú thêm:</strong> SSD Required. Intel Iris Xe Integrated Graphics is not supported.</li></ul>",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/1371980/488625512/5690cd66515b87b74e708c908b6243c2b176274c/1789376658/hls_264_master.m3u8?t=1789377117"
+  },
+  {
+    "id": 108600,
+    "name": "Project Zomboid",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/108600/header.jpg?t=1794338497",
+    "genre": [
+      "Indie",
+      "Nhập vai (RPG)",
+      "Mô phỏng",
+      "Truy cập sớm"
+    ],
+    "minimum": "<ul class=\"bb_ul\"><li><strong>OS:</strong> Windows 10 / 11 - 64 Bit<br>\t</li><li>64bit OS required<br>\t</li><li><strong>Processor:</strong> Intel 2.77GHz Quad-core<br>\t</li><li><strong>Memory:</strong> 8Gb Ram<br>\t</li><li><strong>Hard Disk Space:</strong> 10Gb<br>\t</li><li><strong>Video Card:</strong> Dedicated graphics card with 4 GB of VRAM minimum, OpenGL 2.1 and GLSL 1.2 support (generally 2012 or newer)<br>        </li><li><strong>Sound:</strong> FMOD compatible sound card\t</li></ul>",
+    "recommended": "<strong>Recommended:</strong><br>Windows 10/11 64-bit, 16 GB RAM, DirectX 12",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/108600/619982392/141cfd121ea068a87c023951bdbfee87ca524de1/1785320937/hls_264_master.m3u8?t=1785324122"
+  },
+  {
+    "id": 1466060,
+    "name": "Tainted Grail: The Fall of Avalon",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1466060/5660590ed7a97a0e2dddf20fd7a83379e23b7231/header.jpg?t=1793295003",
+    "genre": [
+      "Hành động",
+      "Phiêu lưu",
+      "Indie",
+      "Nhập vai (RPG)"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10 64-bit<br></li><li><strong>Bộ xử lý:</strong> i5 8th gen or AMD equivalent<br></li><li><strong>Bộ nhớ:</strong> 12 GB RAM<br></li><li><strong>Đồ họa:</strong> GTX 1060 6GB or AMD equivalent<br></li><li><strong>DirectX:</strong> Phiên bản 11<br></li><li><strong>Lưu trữ:</strong> 31 GB chỗ trống khả dụng<br></li><li><strong>Ghi chú thêm:</strong> Low settings, 30 FPS, Full HD, SSD Strongly Recommended</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10/11 (64-bit)<br></li><li><strong>Bộ xử lý:</strong> i7 13th gen<br></li><li><strong>Bộ nhớ:</strong> 16 GB RAM<br></li><li><strong>Đồ họa:</strong> RTX 2070 Super<br></li><li><strong>DirectX:</strong> Phiên bản 11<br></li><li><strong>Lưu trữ:</strong> 31 GB chỗ trống khả dụng<br></li><li><strong>Ghi chú thêm:</strong> Ultra settings, 60 FPS, Full HD, SSD Strongly Recommended</li></ul>",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/1466060/26296970/c56f0dc3b3c847ae3f4715a230313aefe4fb6f14/1748581544/hls_264_master.m3u8?t=1748644536"
+  },
+  {
+    "id": 4115450,
+    "featuredTrailer": "https://video.fastly.steamstatic.com/store_trailers/4115450/664334575/770d51a385d199e86d14445dfe938539582b6603/1792600747/hls_264_master.m3u8?t=1792637474",
+    "name": "Phantom Blade Zero",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4115450/7f882f889630270d3d3fb93825ac6f55b55e7a6c/header.jpg?t=1793261976",
+    "genre": [
+      "Hành động",
+      "Nhập vai (RPG)"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10/11 (64bit required)<br></li><li><strong>Bộ xử lý:</strong> Intel Core i7-8700K / AMD Ryzen 5 3600<br></li><li><strong>Bộ nhớ:</strong> 16 GB RAM<br></li><li><strong>Đồ họa:</strong> NVIDIA GeForce GTX 1660 6GB / AMD Radeon RX 5500 XT 8GB<br></li><li><strong>DirectX:</strong> Phiên bản 12<br></li><li><strong>Lưu trữ:</strong> 145 GB chỗ trống khả dụng<br></li><li><strong>Ghi chú thêm:</strong> 1080p / 30 FPS with upscaling enabled. SSD installation required.</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10/11 (64bit required)<br></li><li><strong>Bộ xử lý:</strong> Intel Core i5-10600K / AMD Ryzen 5 5600X<br></li><li><strong>Bộ nhớ:</strong> 16 GB RAM<br></li><li><strong>Đồ họa:</strong> NVIDIA GeForce RTX 3060 Ti 8GB / AMD Radeon RX 6700 XT 12GB<br></li><li><strong>DirectX:</strong> Phiên bản 12<br></li><li><strong>Lưu trữ:</strong> 145 GB chỗ trống khả dụng<br></li><li><strong>Ghi chú thêm:</strong> 1440p / 60 FPS with upscaling enabled. SSD installation required.</li></ul>",
+    "trailer": ""
+  },
+  {
+    "id": 1285190,
+    "name": "Borderlands 4",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1285190/986a88d1b0e1420b00183def2a7034508353afa3/header.jpg?t=1795201629",
+    "genre": [
+      "Hành động",
+      "Phiêu lưu",
+      "Nhập vai (RPG)"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10 / Windows 11<br></li><li><strong>Bộ xử lý:</strong> Intel Core i7-9700 / AMD Ryzen 7 2700X<br></li><li><strong>Bộ nhớ:</strong> 16 GB RAM<br></li><li><strong>Đồ họa:</strong> NVIDIA GeForce RTX 2070 / AMD Radeon RX 5700 XT / Intel Arc A580<br></li><li><strong>Lưu trữ:</strong> 100 GB chỗ trống khả dụng<br></li><li><strong>Ghi chú thêm:</strong> Requires a 64-bit processor and operating system.   Requires 8 CPU Cores for processor.    Requires 8 GB VRAM for graphics.   SSD storage required </li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10 / Windows 11<br></li><li><strong>Bộ xử lý:</strong> Intel Core i7-12700 / AMD Ryzen 7 5800X<br></li><li><strong>Bộ nhớ:</strong> 32 GB RAM<br></li><li><strong>Đồ họa:</strong> NVIDIA GeForce RTX 3080 / AMD Radeon RX 6800 XT / Intel Arc B580<br></li><li><strong>Lưu trữ:</strong> 100 GB chỗ trống khả dụng<br></li><li><strong>Ghi chú thêm:</strong> Requires a 64-bit processor and operating system. SSD storage required </li></ul>",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/1285190/2002012534/7efa917fa8054768619348586d3edee3a21df9df/1757537866/hls_264_master.m3u8?t=1757606406"
+  },
+  {
+    "id": 1366540,
+    "name": "Dyson Sphere Program",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1366540/2521472f3f71b6f179515fdcfa33d27c212ba3ce/header.jpg?t=1776523171",
+    "genre": [
+      "Indie",
+      "Mô phỏng",
+      "Chiến thuật",
+      "Truy cập sớm"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH *:</strong> Windows 7(64-Bit)<br></li><li><strong>Bộ xử lý:</strong> i3-530 2.93GHZ 2 Core<br></li><li><strong>Bộ nhớ:</strong> 8 GB RAM<br></li><li><strong>Đồ họa:</strong> Dedicated graphics card, GTX 750 Ti 2GB<br></li><li><strong>DirectX:</strong> Phiên bản 11<br></li><li><strong>Lưu trữ:</strong> 5 GB chỗ trống khả dụng<br></li><li><strong>Card âm thanh:</strong> DirectX compatible<br></li><li><strong>Ghi chú thêm:</strong> GPU must support Shader Model 5.0</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10(64-Bit)<br></li><li><strong>Bộ xử lý:</strong> i9 11900KF8 Core<br></li><li><strong>Bộ nhớ:</strong> 32 GB RAM<br></li><li><strong>Đồ họa:</strong> Dedicated graphics card, GTX 2070<br></li><li><strong>DirectX:</strong> Phiên bản 11<br></li><li><strong>Lưu trữ:</strong> 20 GB chỗ trống khả dụng<br></li><li><strong>Card âm thanh:</strong> DirectX compatible<br></li><li><strong>Ghi chú thêm:</strong> GPU must support Shader Model 5.0. Display Resolution 1080p +</li></ul>",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/1366540/473973/01446d5c7146c214cb486ba1f258694d57d4e9a2/1750680312/hls_264_master.m3u8?t=1776521674"
+  },
+  {
+    "id": 397540,
+    "name": "Borderlands 3",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/397540/header.jpg?t=1793288452",
+    "genre": [
+      "Hành động",
+      "Nhập vai (RPG)"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH *:</strong> Windows 7/10 (latest service pack)<br></li><li><strong>Bộ xử lý:</strong> AMD FX-8350 or Intel i5-3570<br></li><li><strong>Bộ nhớ:</strong> 6 GB RAM<br></li><li><strong>Đồ họa:</strong> AMD Radeon™ HD 7970 or NVIDIA GeForce GTX 680 2 GB<br></li><li><strong>DirectX:</strong> Phiên bản 11<br></li><li><strong>Lưu trữ:</strong> 75 GB chỗ trống khả dụng<br></li><li><strong>Card âm thanh:</strong> DirectX Compatible</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH *:</strong> Windows 7/10 (latest service pack)<br></li><li><strong>Bộ xử lý:</strong> AMD Ryzen™ 5 2600 (Intel i7-4770)<br></li><li><strong>Bộ nhớ:</strong> 16 GB RAM<br></li><li><strong>Đồ họa:</strong> AMD Radeon™ RX 590 or NVIDIA GeForce GTX 1060 6GB<br></li><li><strong>DirectX:</strong> Phiên bản 12<br></li><li><strong>Lưu trữ:</strong> 75 GB chỗ trống khả dụng<br></li><li><strong>Card âm thanh:</strong> DirectX Compatible</li></ul>",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/397540/443193/6e37fe1e3b0d805793c6a8dbb0369745ec233eba/1750525758/hls_264_master.m3u8?t=1646090218"
+  },
+  {
+    "id": 1057090,
+    "name": "Ori and the Will of the Wisps",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1057090/header.jpg?t=1759530749",
+    "genre": [
+      "Hành động"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li><strong>HĐH:</strong> Windows 10 Version 18362.0 or higher<br></li><li><strong>Bộ xử lý:</strong> AMD Athlon X4 | Intel Core i5 4460<br></li><li><strong>Bộ nhớ:</strong> 8 GB RAM<br></li><li><strong>Đồ họa:</strong> Nvidia GTX 950 | AMD R7 370<br></li><li><strong>DirectX:</strong> Phiên bản 11<br></li><li><strong>Lưu trữ:</strong> 20 GB chỗ trống khả dụng</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li><strong>HĐH:</strong> Windows 10 Version 18362.0 or higher<br></li><li><strong>Bộ xử lý:</strong> AMD Ryzen 3 | Intel i5 Skylake<br></li><li><strong>Bộ nhớ:</strong> 8 GB RAM<br></li><li><strong>Đồ họa:</strong> Nvidia GTX 970 | AMD RX 570<br></li><li><strong>DirectX:</strong> Phiên bản 11<br></li><li><strong>Lưu trữ:</strong> 20 GB chỗ trống khả dụng</li></ul>",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/1057090/275562/d5ae82dcc0983c4d675ca617dc205a8d444d4f44/1750610401/hls_264_master.m3u8?t=1585866497"
+  },
+  {
+    "id": 1105670,
+    "name": "The Last Spell",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1105670/header.jpg?t=1795083084",
+    "genre": [
+      "Hành động",
+      "Indie",
+      "Nhập vai (RPG)",
+      "Chiến thuật"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li><strong>HĐH *:</strong> Windows 7<br></li><li><strong>Bộ xử lý:</strong> Intel Core i5-3470 or AMD FX-8370<br></li><li><strong>Bộ nhớ:</strong> 4 GB RAM<br></li><li><strong>Đồ họa:</strong> NVIDIA GeForce GTX 650, 2 GB or AMD Radeon HD 7770, 2 GB<br></li><li><strong>DirectX:</strong> Phiên bản 9.0<br></li><li><strong>Lưu trữ:</strong> 2 GB chỗ trống khả dụng</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li><strong>HĐH:</strong> Windows 10<br></li><li><strong>Bộ xử lý:</strong> Intel Core i5-8400 or AMD Ryzen 5 2600<br></li><li><strong>Bộ nhớ:</strong> 8 GB RAM<br></li><li><strong>Đồ họa:</strong> NVIDIA GeForce GTX 660, 2 GB or AMD Radeon HD 7870, 2 GB<br></li><li><strong>DirectX:</strong> Phiên bản 9.0<br></li><li><strong>Lưu trữ:</strong> 2 GB chỗ trống khả dụng</li></ul>",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/1105670/545588/d662ed926a7a096c4a8d103da4c379b65494715e/1750620126/hls_264_master.m3u8?t=1678374033"
+  },
+  {
+    "id": 1721060,
+    "name": "Mandragora: Whispers of the Witch Tree",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1721060/6b32b6cb65442613c9f2a5bed21e76b31f2107ac/header.jpg?t=1786452629",
+    "genre": [
+      "Hành động",
+      "Indie",
+      "Nhập vai (RPG)"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10 or Windows 11 (64-bit)<br></li><li><strong>Bộ xử lý:</strong> Intel Core i5-6500 or AMD Ryzen 5 1400 or similar<br></li><li><strong>Bộ nhớ:</strong> 8 GB RAM<br></li><li><strong>Đồ họa:</strong> Nvidia GeForce GTX 1060 6 GB or AMD RX 480 or similar<br></li><li><strong>DirectX:</strong> Phiên bản 12<br></li><li><strong>Lưu trữ:</strong> 18 GB chỗ trống khả dụng</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10 or Windows 11 (64-bit)<br></li><li><strong>Bộ xử lý:</strong> Intel Core i5-7600k or AMD Ryzen 5 3600X or similar<br></li><li><strong>Bộ nhớ:</strong> 16 GB RAM<br></li><li><strong>Đồ họa:</strong> Nvidia Geforce RTX 2070 8 GB or RX 6600 XT or similar<br></li><li><strong>DirectX:</strong> Phiên bản 12<br></li><li><strong>Lưu trữ:</strong> 18 GB chỗ trống khả dụng</li></ul>",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/1721060/1951673634/310337cade9d6e074f90cceaa1e0123bd8ee8291/1751900491/hls_264_master.m3u8?t=1751902576"
+  },
+  {
+    "id": 1236300,
+    "name": "Resident Evil Re:Verse",
+    "banner": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1236300/header.jpg",
+    "genre": [
+      "Action",
+      "Adventure"
+    ],
+    "minimum": "OS: Windows 10 64-bit<br>Processor: AMD Ryzen 3 1200 / Intel Core i5-7500<br>Memory: 8 GB RAM<br>Graphics: AMD Radeon RX 560 4 GB / NVIDIA GeForce GTX 1050 Ti 4 GB",
+    "recommended": "OS: Windows 10 64-bit<br>Processor: AMD Ryzen 5 3600 / Intel Core i7-8700<br>Memory: 16 GB RAM<br>Graphics: AMD Radeon RX 5700 / NVIDIA GeForce GTX 1070",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/1236300/341783/88a4e882bcccfdbe5bfddb0054764babdbad1e5a/1751208038/hls_264_master.m3u8?t=1611270098"
+  },
+  {
+    "id": 774361,
+    "name": "Blasphemous",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/774361/header.jpg?t=1780479368",
+    "genre": [
+      "Hành động",
+      "Phiêu lưu",
+      "Indie"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH *:</strong> Windows 7 64-bit<br></li><li><strong>Bộ xử lý:</strong> Intel Core2 Duo E8400 or AMD Phenom II x2 550<br></li><li><strong>Bộ nhớ:</strong> 4 GB RAM<br></li><li><strong>Đồ họa:</strong> GeForce GTX 260 or Radeon HD 4850<br></li><li><strong>Lưu trữ:</strong> 4 GB chỗ trống khả dụng</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10<br></li><li><strong>Bộ xử lý:</strong> Intel Core i5-750 or AMD Phenom II x4 945<br></li><li><strong>Bộ nhớ:</strong> 4 GB RAM<br></li><li><strong>Đồ họa:</strong> GeForce GTX 650 or Radeon HD 5770<br></li><li><strong>Lưu trữ:</strong> 4 GB chỗ trống khả dụng</li></ul>",
+    "trailer": ""
+  },
+  {
+    "id": 1199030,
+    "name": "Tainted Grail: Conquest",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1199030/header.jpg?t=1748103885",
+    "genre": [
+      "Hành động",
+      "Indie",
+      "Nhập vai (RPG)"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH *:</strong> Windows 7/8/10 64-bit<br></li><li><strong>Bộ xử lý:</strong> 3.2 GHz Dual Core Processor<br></li><li><strong>Bộ nhớ:</strong> 8 GB RAM<br></li><li><strong>Đồ họa:</strong> GTX 750 2GB / equivalent Radeon<br></li><li><strong>Lưu trữ:</strong> 8 GB chỗ trống khả dụng</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit</li></ul>",
+    "trailer": ""
+  },
+  {
+    "id": 1938090,
+    "name": "Call of Duty: Modern Warfare 4",
+    "banner": "/games/modern-warfare-4-vault.png",
+    "genre": [
+      "Hành động"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows® 10 64 Bit (latest update)*<br></li><li><strong>Bộ xử lý:</strong> AMD Ryzen™ 5 1400 or Intel® Core™ i5-6600<br></li><li><strong>Bộ nhớ:</strong> 8 GB RAM<br></li><li><strong>Đồ họa:</strong> AMD Radeon™ RX 470, NVIDIA® GeForce® GTX 970 / 1060 or Intel® Arc™ A580<br></li><li><strong>Kết nối:</strong> Cáp mạng Internet<br></li><li><strong>Lưu trữ:</strong> 115 GB chỗ trống khả dụng<br></li><li><strong>Card âm thanh:</strong> DirectX compatible<br></li><li><strong>Ghi chú thêm:</strong> *Trial, Beta or Insider versions of compatible Windows® operating systems may not be supported. SSD with 115 GB available space at launch.</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows® 11 64 Bit (latest update)*<br></li><li><strong>Bộ xử lý:</strong> AMD Ryzen™ 5 3600 or Intel® Core™ i7-8700K<br></li><li><strong>Bộ nhớ:</strong> 16 GB RAM<br></li><li><strong>Đồ họa:</strong> AMD Radeon™ RX 6600XT, NVIDIA® GeForce® RTX 3060 or Intel® Arc™ B580<br></li><li><strong>DirectX:</strong> Phiên bản 12<br></li><li><strong>Kết nối:</strong> Cáp mạng Internet<br></li><li><strong>Lưu trữ:</strong> 115 GB chỗ trống khả dụng<br></li><li><strong>Card âm thanh:</strong> DirectX compatible<br></li><li><strong>Ghi chú thêm:</strong> *Trial, Beta or Insider versions of compatible Windows® operating systems may not be supported. SSD with 115 GB available space at launch.</li></ul>",
+    "trailer": "https://video.fastly.steamstatic.com/store_trailers/4435490/521186344/93ff29319322a9fde59d1ac50aa843dcd58fcf1a/1792689008/hls_264_master.m3u8?t=1792728041"
+  },
+  {
+    "id": 2012510,
+    "name": "Stormgate",
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2012510/4e251165266f09be89f5b0e61cbd8d832fe2b4e9/header.jpg?t=1777771043",
+    "genre": [
+      "Hành động",
+      "Chiến thuật",
+      "Chơi miễn phí"
+    ],
+    "minimum": "<strong>Tối thiểu:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10+ (64 bit)<br></li><li><strong>Bộ xử lý:</strong> 6 Cores, 2.3 GHz<br></li><li><strong>Bộ nhớ:</strong> 16 GB RAM<br></li><li><strong>Đồ họa:</strong> GeForce GTX 1060<br></li><li><strong>DirectX:</strong> Phiên bản 11<br></li><li><strong>Lưu trữ:</strong> 15 GB chỗ trống khả dụng</li></ul>",
+    "recommended": "<strong>Khuyến nghị:</strong><br><ul class=\"bb_ul\"><li>Yêu cầu vi xử lý và hệ điều hành đều chạy 64-bit<br></li><li><strong>HĐH:</strong> Windows 10+ (64 bit)<br></li><li><strong>Bộ xử lý:</strong> 8 Cores, 3 GHz<br></li><li><strong>Bộ nhớ:</strong> 16 GB RAM<br></li><li><strong>Đồ họa:</strong> GeForce RTX 2060<br></li><li><strong>DirectX:</strong> Phiên bản 11<br></li><li><strong>Lưu trữ:</strong> 15 GB chỗ trống khả dụng</li></ul>",
+    "trailer": ""
+  }
+]

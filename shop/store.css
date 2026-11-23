@@ -148,3 +148,26 @@ body::before {
 .footer .benefits { margin: 0; gap: 8px 18px; text-shadow: none; }
 .footer .shell { align-items: baseline; }
 @media (max-width: 780px) { .footer .shell { align-items: flex-start; } }
+
+.package-menu summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 8px;
+  list-style: none;
+  cursor: pointer;
+}
+.package-menu summary::-webkit-details-marker { display: none; }
+.package-menu summary:hover, .package-menu[open] summary { background: #263c53; }
+.package-menu summary::after {
+  content: "";
+  flex: 0 0 8px;
+  height: 8px;
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+  transform: translateY(-2px) rotate(45deg);
+}
+.package-menu[open] summary::after { transform: translateY(2px) rotate(225deg); }
+.package-options { display: grid; gap: 4px; margin: 6px 0 0 14px; }

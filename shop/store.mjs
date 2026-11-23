@@ -272,9 +272,7 @@ async function accountRequest(action, fields = {}) {
     saveGoogleSession('');
     account();
     route();
-    const message = 'Phiên Google đã hết hạn. Vui lòng đăng nhập lại.';
-    error(message);
-    throw new Error(message);
+    throw new Error('Yêu cầu đăng nhập tài khoản');
   }
   try {
     return await request('/api/shop-account', {
@@ -367,26 +365,10 @@ function showOrders() {
   }
   list.append(container);
 }
-function showReauthNotice() {
-  const existing = document.querySelector('.reauth-notice');
-  if (existing) existing.remove();
-  const notice = el('div', undefined, 'notice reauth-notice');
-  notice.style.cssText = 'display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;padding:14px 18px;border-radius:12px;background:rgba(59,130,246,0.12);border:1px solid rgba(130,212,255,0.3);color:var(--text);';
-  const text = el('div');
-  text.innerHTML = '<strong>Phiên Google đã hết hạn</strong><br><small style="color:var(--muted)">Đơn hàng và key trên máy vẫn hiển thị đầy đủ. Bấm nút bên cạnh để đăng nhập lại nếu muốn đồng bộ thêm đơn từ Google.</small>';
-  const reBtn = button('Đăng nhập lại bằng Google', async () => {
-    await login();
-    loadOrders();
-  }, 'primary');
-  notice.append(text, reBtn);
-  $('orders').prepend(notice);
-}
-
 async function loadOrders() {
   const version = revision;
   $('orders').replaceChildren(el('p', 'Đang tải đơn hàng…', 'loading'));
   $('refresh').disabled = true;
-  let reauthNeeded = false;
 
   try {
     let apiOrders = [];
@@ -395,22 +377,21 @@ async function loadOrders() {
         const result = await accountRequest('list');
         apiOrders = result.orders || [];
       } catch (err) {
-        const msg = err?.message || '';
-        if (/Lỗi bảo mật|đăng nhập tài khoản Google|Phiên Google đã hết hạn/i.test(msg)) {
-          reauthNeeded = true;
-        } else {
-          throw err;
-        }
+        // Quietly fallback to local orders without displaying warning
       }
     } else {
-      const result = await request('/api/orders');
-      apiOrders = result.orders || [];
+      try {
+        const result = await request('/api/orders');
+        apiOrders = result.orders || [];
+      } catch (err) {
+        // Quietly fallback
+      }
     }
 
     if (version !== revision) return;
 
     let localOrders = getSavedOrders();
-    if (reauthNeeded || localOrders.some(o => o.status !== 'PAID' || !o.key)) {
+    if (localOrders.some(o => o.status !== 'PAID' || !o.key)) {
       localOrders = await refreshLocalOrders(localOrders);
     }
     if (version !== revision) return;
@@ -420,10 +401,6 @@ async function loadOrders() {
     orders = normalizeOrders(merged);
     showOrders();
     error('');
-
-    if (reauthNeeded) {
-      showReauthNotice();
-    }
   } catch (e) {
     if (version !== revision) return;
     let localOrders = getSavedOrders();
@@ -432,9 +409,8 @@ async function loadOrders() {
       if (version !== revision) return;
       orders = normalizeOrders(localOrders);
       showOrders();
-      showReauthNotice();
     } else {
-      $('orders').replaceChildren(empty('Chưa tải được đơn hàng', e.message, loadOrders, 'Thử lại'));
+      showOrders();
     }
   } finally {
     $('refresh').disabled = false;

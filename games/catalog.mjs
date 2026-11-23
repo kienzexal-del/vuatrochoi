@@ -80,6 +80,7 @@ let player;
 let hlsLibrary;
 let pageRevision = 0;
 let stopFeatured = () => {};
+let stopComboSlider = () => {};
 
 function specs(markup = '') {
   const clean = markup.replace(/<br\s*\/?\s*>|<\/li>/gi, '\n');
@@ -96,34 +97,292 @@ function specs(markup = '') {
   }));
 }
 
+function userIcon() {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('aria-hidden', 'true');
+  const path = document.createElementNS(svg.namespaceURI, 'path');
+  path.setAttribute('d', 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m12-13a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z');
+  svg.append(path);
+  return svg;
+}
+
+function googleAvatar(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && /^lh\d+\.googleusercontent\.com$/.test(url.hostname) ? url.href : '';
+  } catch { return ''; }
+}
+
+function createComboShowcase(showDrawerByDefault = false, customComboMatches = null) {
+  stopComboSlider();
+
+  const comboGamesList = customComboMatches || games.filter(g => comboIds.has(g.id));
+  const sliderCandidateIds = [2358720, 1245620, 1086940, 1888930, 2531310, 1091500, 2050650, 4115450, 1222140, 1145360, 1196590];
+  const sliderGames = sliderCandidateIds.map(id => games.find(g => g.id === id)).filter(Boolean);
+
+  const showcase = make('div', '', 'combo-showcase');
+  const mainCard = make('div', '', 'combo-card-main');
+
+  // Slider container
+  const sliderContainer = make('div', '', 'combo-slider-container');
+  const stage = make('div', '', 'combo-slider-stage');
+
+  const link = make('a', '', 'combo-slider-link');
+  const img = make('img', '', 'combo-slider-img');
+  img.alt = '';
+  link.append(img);
+
+  const badge = make('span', '31 Game Bom Tấn', 'combo-slider-badge');
+  const slideInfo = make('div', '', 'combo-slide-info');
+  const slideTitle = make('span', '', 'combo-slide-title');
+  const slideGenre = make('span', '', 'combo-slide-genre');
+  slideInfo.append(slideTitle, slideGenre);
+
+  const prevBtn = make('button', '❮', 'combo-slider-btn prev');
+  prevBtn.type = 'button';
+  prevBtn.setAttribute('aria-label', 'Game trước');
+
+  const nextBtn = make('button', '❯', 'combo-slider-btn next');
+  nextBtn.type = 'button';
+  nextBtn.setAttribute('aria-label', 'Game tiếp theo');
+
+  stage.append(link, badge, slideInfo, prevBtn, nextBtn);
+
+  const dotsContainer = make('div', '', 'combo-slider-dots');
+  const dots = (sliderGames.length > 0 ? sliderGames : [games[0]]).map((game, i) => {
+    const dot = make('button', '', 'combo-slider-dot');
+    dot.type = 'button';
+    dot.setAttribute('aria-label', game.name);
+    dot.addEventListener('click', () => setSlide(i));
+    dotsContainer.append(dot);
+    return dot;
+  });
+
+  sliderContainer.append(stage, dotsContainer);
+
+  let currentIndex = 0;
+  let timer = null;
+  let isHovered = false;
+
+  function getSlideImgSrc(game) {
+    if ([2358720, 1245620, 1888930, 2531310, 4115450].includes(game.id)) {
+      return new URL(`featured-${game.id}.${game.id === 1888930 ? 'png' : 'jpg'}`, import.meta.url).pathname;
+    }
+    return game.banner;
+  }
+
+  function setSlide(index) {
+    if (!sliderGames.length) return;
+    currentIndex = (index + sliderGames.length) % sliderGames.length;
+    const game = sliderGames[currentIndex];
+    img.src = getSlideImgSrc(game);
+    link.href = '#game/' + game.id;
+    link.setAttribute('aria-label', 'Xem chi tiết ' + game.name);
+    slideTitle.textContent = game.name;
+    slideGenre.textContent = (game.genre || []).join(' · ');
+    dots.forEach((dot, idx) => dot.classList.toggle('active', idx === currentIndex));
+
+    img.getAnimations().forEach(a => a.cancel());
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      img.animate([
+        { opacity: 0.5, transform: 'scale(1.03)' },
+        { opacity: 1, transform: 'scale(1)' }
+      ], { duration: 320, easing: 'ease-out' });
+    }
+    schedule();
+  }
+
+  function schedule() {
+    clearTimeout(timer);
+    if (isHovered || document.hidden || byId('catalog-view').hidden) return;
+    timer = setTimeout(() => setSlide(currentIndex + 1), 3800);
+  }
+
+  prevBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    setSlide(currentIndex - 1);
+  });
+  nextBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    setSlide(currentIndex + 1);
+  });
+
+  stage.addEventListener('pointerenter', e => {
+    if (e.pointerType !== 'mouse') return;
+    isHovered = true;
+    clearTimeout(timer);
+  });
+  stage.addEventListener('pointerleave', e => {
+    if (e.pointerType !== 'mouse') return;
+    isHovered = false;
+    schedule();
+  });
+
+  stopComboSlider = () => {
+    clearTimeout(timer);
+  };
+
+  setSlide(0);
+
+  // Right info panel
+  const infoPanel = make('div', '', 'combo-info-panel');
+  const tagRow = make('div', '', 'combo-tag-row');
+  const tagHot = make('span', 'TIẾT KIỆM 93%', 'combo-tag-hot');
+  const tagCount = make('span', '31 GAME TRONG 1 TÀI KHOẢN', 'combo-tag-count');
+  tagRow.append(tagHot, tagCount);
+
+  const title = make('h2', 'Gói Siêu Combo (Trọn Bộ 31 Game Bom Tấn Steam)', 'combo-title');
+  const desc = make('p', '', 'combo-description');
+  desc.innerHTML = 'Sở hữu trọn bộ 31 siêu phẩm AAA đình đám nhất trên Steam: <strong>Black Myth: Wukong, Elden Ring, Baldur\'s Gate 3, The Last of Us I & II, Cyberpunk 2077, trọn bộ Resident Evil (2, 4, 7, Village), Hades, Detroit: Become Human, Slay the Spire 2</strong>...';
+
+  const highlights = make('div', '', 'combo-highlights');
+  highlights.append(
+    make('div', '✓ Chỉ 1 tài khoản Steam Offline sở hữu vĩnh viễn cả 31 game', 'combo-highlight-item'),
+    make('div', '✓ Tải game trực tiếp tốc độ cao từ Steam, lưu file save trên máy', 'combo-highlight-item'),
+    make('div', '✓ Nhận tài khoản & mật khẩu kèm mã Steam Guard tự động ngay sau khi thanh toán', 'combo-highlight-item')
+  );
+
+  const pricingBar = make('div', '', 'combo-pricing-bar');
+  const priceGroup = make('div', '', 'combo-price-group');
+  const price = make('span', '100.000đ', 'combo-price');
+  const priceOrig = make('span', '1.550.000đ', 'combo-price-orig');
+  const discountBadge = make('span', '-93%', 'combo-badge-discount');
+  priceGroup.append(price, priceOrig, discountBadge);
+
+  const actions = make('div', '', 'combo-actions');
+  const buyBtn = make('a', 'Mua Gói Combo 100k', 'primary combo-buy-btn');
+  buyBtn.href = '/buy#shop';
+
+  const toggleBtn = make('button', '', 'combo-toggle-list-btn');
+  toggleBtn.type = 'button';
+  toggleBtn.id = 'combo-toggle-btn';
+  const btnText = make('span', showDrawerByDefault ? 'Thu gọn danh sách' : 'Xem danh sách 31 game', 'btn-text');
+  const btnBadge = make('span', String(comboGamesList.length), 'btn-badge');
+  toggleBtn.append(btnText, btnBadge);
+
+  actions.append(buyBtn, toggleBtn);
+  pricingBar.append(priceGroup, actions);
+  infoPanel.append(tagRow, title, desc, highlights, pricingBar);
+
+  mainCard.append(sliderContainer, infoPanel);
+
+  // Drawer for 31 games
+  const drawer = make('div', '', 'combo-games-drawer');
+  drawer.id = 'combo-games-drawer';
+  drawer.hidden = !showDrawerByDefault;
+
+  const drawerHeader = make('div', '', 'combo-drawer-header');
+  const drawerTitle = make('h3', customComboMatches ? `Tìm thấy ${comboGamesList.length} game trong Gói Siêu Combo:` : 'Danh sách 31 game có trong Gói Siêu Combo:');
+  const drawerSub = make('p', 'Bấm vào từng game để xem giới thiệu, cốt truyện, cấu hình PC và trailer');
+  drawerHeader.append(drawerTitle, drawerSub);
+
+  const grid = make('div', '', 'combo-grid');
+  comboGamesList.forEach(game => {
+    const card = make('a', '', 'game-card combo-item-card');
+    card.href = '#game/' + game.id;
+    const cover = make('img');
+    cover.alt = '';
+    cover.src = game.banner;
+    cover.loading = 'lazy';
+
+    const label = make('div', '', 'game-card-content');
+    const gTitle = make('h2', game.name);
+    const meta = make('div', '', 'game-card-meta');
+    const cBadge = make('span', 'Trong Gói Combo', 'card-badge badge-combo');
+    const pBox = make('div', '', 'card-price-box');
+    const pText = make('span', 'Đã gồm trong gói', 'card-price-included');
+    pBox.append(pText);
+    meta.append(cBadge, pBox);
+    label.append(gTitle, meta);
+    card.append(cover, label);
+    grid.append(card);
+  });
+
+  drawer.append(drawerHeader, grid);
+
+  toggleBtn.addEventListener('click', () => {
+    const isHidden = drawer.hidden;
+    drawer.hidden = !isHidden;
+    btnText.textContent = isHidden ? 'Thu gọn danh sách' : 'Xem danh sách 31 game';
+    if (isHidden) {
+      drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+
+  showcase.append(mainCard, drawer);
+  return showcase;
+}
+
 function renderCatalog() {
   const query = byId('game-search').value.trim().toLowerCase();
   const group = byId('game-group').value;
-  const matches = games.filter(game => game.name.toLowerCase().includes(query) &&
-    (group === 'all' || comboIds.has(game.id) === (group === 'combo')));
-  const cards = matches.map(game => {
+
+  const comboGames = games.filter(g => comboIds.has(g.id));
+  const singleGames = games.filter(g => !comboIds.has(g.id));
+
+  const nodes = [];
+
+  function makeSingleCard(game) {
     const card = make('a', '', 'game-card');
     card.href = '#game/' + game.id;
-    const cover = make('img'); cover.alt = ''; cover.src = game.banner; cover.loading = 'lazy';
-    
+    const cover = make('img');
+    cover.alt = '';
+    cover.src = game.banner;
+    cover.loading = 'lazy';
+
     const label = make('div', '', 'game-card-content');
     const title = make('h2', game.name);
-    
-    const isCombo = comboIds.has(game.id);
     const meta = make('div', '', 'game-card-meta');
-    
-    const badge = make('span', isCombo ? 'Combo 31 Game' : 'Game Lẻ', 'card-badge ' + (isCombo ? 'badge-combo' : 'badge-single'));
+    const badge = make('span', 'Game Lẻ Steam', 'card-badge badge-single');
     const priceBox = make('div', '', 'card-price-box');
-    const price = make('strong', isCombo ? '100.000đ' : '50.000đ', 'card-price');
-    const origPrice = make('span', isCombo ? '1.550.000đ' : '1.200.000đ', 'card-price-orig');
+    const price = make('strong', '50.000đ', 'card-price');
+    const origPrice = make('span', '1.200.000đ', 'card-price-orig');
     priceBox.append(price, origPrice);
-    
     meta.append(badge, priceBox);
     label.append(title, meta);
     card.append(cover, label);
     return card;
-  });
-  byId('game-grid').replaceChildren(...(cards.length ? cards : [make('p','Không tìm thấy game phù hợp.','game-panel')]));
+  }
+
+  function makeSectionHeader(titleText, subText) {
+    const header = make('div', '', 'grid-section-title');
+    header.append(make('h3', titleText));
+    if (subText) header.append(make('p', subText));
+    return header;
+  }
+
+  if (query) {
+    const matchingCombo = comboGames.filter(g => g.name.toLowerCase().includes(query));
+    const matchingSingle = singleGames.filter(g => g.name.toLowerCase().includes(query));
+    const matchesComboWord = 'gói siêu combo'.includes(query) || 'combo'.includes(query) || '31'.includes(query);
+
+    if (group !== 'single' && (matchingCombo.length > 0 || matchesComboWord)) {
+      nodes.push(createComboShowcase(true, matchingCombo.length > 0 ? matchingCombo : comboGames));
+    }
+
+    if (group !== 'combo' && matchingSingle.length > 0) {
+      nodes.push(makeSectionHeader('Game Lẻ Steam Offline (Đồng Giá 50k)', 'Mỗi tài khoản 1 game riêng biệt, chơi vĩnh viễn'));
+      matchingSingle.forEach(game => nodes.push(makeSingleCard(game)));
+    }
+
+    if (!nodes.length) {
+      nodes.push(make('p', 'Không tìm thấy game phù hợp.', 'game-panel'));
+    }
+  } else {
+    if (group === 'all') {
+      nodes.push(createComboShowcase(false));
+      nodes.push(makeSectionHeader('Game Lẻ Steam Offline (Đồng Giá 50k)', 'Mỗi tài khoản 1 game riêng biệt, tải và chơi vĩnh viễn'));
+      singleGames.forEach(game => nodes.push(makeSingleCard(game)));
+    } else if (group === 'combo') {
+      nodes.push(createComboShowcase(true));
+    } else if (group === 'single') {
+      nodes.push(makeSectionHeader('Game Lẻ Steam Offline (Đồng Giá 50k)', 'Mỗi tài khoản 1 game riêng biệt, tải và chơi vĩnh viễn'));
+      singleGames.forEach(game => nodes.push(makeSingleCard(game)));
+    }
+  }
+
+  byId('game-grid').replaceChildren(...nodes);
 }
 
 function requirements(game) {
@@ -341,6 +600,7 @@ function route() {
   detail.replaceChildren();
   byId('catalog-view').hidden = Boolean(game); detail.hidden = !game;
   stopFeatured();
+  stopComboSlider();
   const revision = ++pageRevision;
   player?.destroy(); player = null;
   if (game) {
@@ -379,6 +639,8 @@ function route() {
     const story = make('section','','game-panel');
     story.append(make('h2','Cốt truyện'),make('p',synopsis[game.id] || 'Xem giới thiệu chính thức trên Steam.'));
     detail.append(back,hero,story,requirements(game),trailer(game,revision));
+  } else {
+    renderCatalog();
   }
   window.scrollTo(0,0);
 }
@@ -393,11 +655,31 @@ function renderCatalogAccount(credential) {
     return;
   }
   const menu = make('details', '', 'profile-menu');
-  const trigger = make('summary', 'Tài khoản', 'catalog-login');
+  const trigger = make('summary', '', 'profile-trigger');
   trigger.setAttribute('aria-label', 'Menu tài khoản');
+
+  const avatar = googleAvatar(profile.picture) || (profile.picture?.startsWith('https://') ? profile.picture : '');
+  if (avatar) {
+    const photo = make('img', '', 'profile-photo');
+    photo.src = avatar;
+    photo.alt = profile.name || 'Avatar';
+    photo.referrerPolicy = 'no-referrer';
+    photo.addEventListener('error', () => {
+      trigger.replaceChildren(userIcon());
+    }, { once: true });
+    trigger.append(photo);
+  } else {
+    trigger.append(userIcon());
+  }
+
   const actions = make('div', '', 'profile-panel');
+  if (profile.name) {
+    const userName = make('div', profile.name, 'profile-user-name');
+    actions.append(userName);
+  }
   const orders = make('a', 'Đơn hàng của tôi');
   orders.href = '/buy#orders';
+  orders.addEventListener('click', () => { menu.open = false; });
   const signOut = make('button', 'Đăng xuất');
   signOut.addEventListener('click', () => {
     saveGoogleSession('');
@@ -407,6 +689,13 @@ function renderCatalogAccount(credential) {
   menu.append(trigger, actions);
   account.replaceChildren(menu);
 }
+
+document.addEventListener('click', event => {
+  const menu = document.querySelector('#catalog-account .profile-menu');
+  if (menu && menu.open && !menu.contains(event.target)) {
+    menu.open = false;
+  }
+});
 
 renderCatalogAccount(readGoogleSession());
 subscribeGoogleSession(renderCatalogAccount);

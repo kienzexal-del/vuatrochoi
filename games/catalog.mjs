@@ -447,7 +447,7 @@ function trailer(game, revision, featuredPreview = false) {
   } else if (stream) {
     const video = make('video');
     video.controls = !featuredPreview; video.playsInline = true; video.poster = game.banner;
-    video.muted = true; video.defaultMuted = true; video.autoplay = true;
+    video.muted = !featuredPreview; video.defaultMuted = !featuredPreview; video.autoplay = true;
     video.preload = 'auto'; video.setAttribute('aria-label','Trailer ' + game.name);
     const play = make('button','Phát trailer','primary');
     async function startTrailer() {
@@ -475,6 +475,19 @@ function trailer(game, revision, featuredPreview = false) {
         if (error.name === 'NotAllowedError') {
           video.muted = true;
           await video.play().then(() => play.remove()).catch(() => { play.disabled = false; });
+          if (featuredPreview && video.isConnected) {
+            const sound = make('button', 'Bật tiếng', 'primary featured-sound');
+            sound.addEventListener('click', async () => {
+              video.muted = false;
+              try {
+                await video.play();
+                sound.remove();
+              } catch {
+                video.muted = true;
+              }
+            });
+            panel.append(sound);
+          }
         } else {
           play.disabled = false;
         }

@@ -1,0 +1,14 @@
+.git/
+.github/
+graphify-out/
+scratch/
+*.ps1
+*.md
+*.test.mjs
+GoogleAppsScript_Code.js
+shop/.preview-state.json
+shop/preview-server.mjs
+shop/steam-guard-proxy.mjs
+shop/steam-preview.html
+audit-security.mjs
+run-security-audit.ps1

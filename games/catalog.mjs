@@ -824,42 +824,11 @@ export async function openDirectPaymentModal({ gameId, title, price, isCombo }) 
     }
   } catch (err) {}
 
-  if (!order) {
-    const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
-    order = {
-      orderId: `VTCH-OFF-${rand}`,
-      gameId,
-      title: title || (isCombo ? 'Gói Siêu Combo: 31 Game Bom Tấn AAA' : 'Game Steam Offline'),
-      price: price || (isCombo ? 100000 : 50000),
-      status: 'PENDING',
-      createdAt: Date.now(),
-      paymentInfo: { bank: 'MB', account: '0000125042003', name: 'NGUYEN VAN KIEN' }
-    };
-  }
+  if (!order) { body.replaceChildren(make("p", "Chưa tạo được đơn hàng. Vui lòng liên hệ shop trước khi chuyển tiền.")); return; }
 
   renderPendingModalView(dialog, body, order, { gameId, title, price, isCombo });
 }
 
-function getGameCredentials(gameId) {
-  const map = {
-    combo_31: { account: 'whkzw21078', password: 'yamvd58819', slotId: 'combo_31' },
-    2322010: { account: 'Aereww111', password: 'Aereww111', slotId: 'god_of_war' },
-    god_of_war: { account: 'Aereww111', password: 'Aereww111', slotId: 'god_of_war' },
-    1938090: { account: 'h3z2k_mw4', password: 'vtr41_cod', slotId: 'cod_mw' },
-    cod_mw: { account: 'h3z2k_mw4', password: 'vtr41_cod', slotId: 'cod_mw' },
-    1091500: { account: 'shuaihua20251001', password: '18621862', slotId: 'cyberpunk_2077' },
-    cyberpunk_2077: { account: 'shuaihua20251001', password: '18621862', slotId: 'cyberpunk_2077' },
-    1817190: { account: '5z8uk9iff', password: '5z8u43AA', slotId: 'spiderman_miles' },
-    spiderman_miles: { account: '5z8uk9iff', password: '5z8u43AA', slotId: 'spiderman_miles' },
-    1659040: { account: 'whkzw21078', password: 'yamvd58819', slotId: 'hitman_woa' },
-    hitman_woa: { account: 'whkzw21078', password: 'yamvd58819', slotId: 'hitman_woa' },
-    761620: { account: 'xiaofang215', password: 'xiaofang215', slotId: 'onimusha' },
-    onimusha: { account: 'xiaofang215', password: 'xiaofang215', slotId: 'onimusha' },
-    289070: { account: 'civ6_vip', password: 'civ6_pwd', slotId: 'civ_6' },
-    civ_6: { account: 'civ6_vip', password: 'civ6_pwd', slotId: 'civ_6' }
-  };
-  return map[gameId] || map['combo_31'];
-}
 
 function renderPendingModalView(dialog, body, order, meta) {
   body.replaceChildren();
@@ -910,48 +879,7 @@ function renderPendingModalView(dialog, body, order, meta) {
   const pollText = make('span', 'Đang tự động kiểm tra thanh toán mỗi 2s...');
   pollStatus.append(pulse, pollText);
 
-  // 1-Click Simulation Button
-  const simBtn = make('button', '⚡ Giả lập thanh toán thành công', 'btn-simulate-pay');
-  simBtn.type = 'button';
-  simBtn.onclick = async () => {
-    simBtn.disabled = true;
-    simBtn.textContent = 'Đang kích hoạt tài khoản...';
-    let fulfilled = false;
-    try {
-      const res = await fetch('/api/steam/simulate-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: order.orderId })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.ok && data.order) {
-          fulfilled = true;
-          if (activePaymentPoll) {
-            clearInterval(activePaymentPoll);
-            activePaymentPoll = null;
-          }
-          renderFulfilledModalView(dialog, body, data.order, meta);
-          return;
-        }
-      }
-    } catch (e) {}
-
-    if (!fulfilled) {
-      const creds = getGameCredentials(meta.gameId || order.gameId);
-      order.status = 'PAID';
-      order.account = creds.account;
-      order.password = creds.password;
-      order.slotId = creds.slotId;
-      if (activePaymentPoll) {
-        clearInterval(activePaymentPoll);
-        activePaymentPoll = null;
-      }
-      renderFulfilledModalView(dialog, body, order, meta);
-    }
-  };
-
-  body.append(summary, qrBox, bankInfo, pollStatus, simBtn);
+  body.append(summary, qrBox, bankInfo, pollStatus);
 
   // Auto polling
   if (activePaymentPoll) clearInterval(activePaymentPoll);

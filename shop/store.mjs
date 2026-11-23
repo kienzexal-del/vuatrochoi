@@ -420,3 +420,4 @@ if ($('demo').hidden) restoreTabSession();
 loading = false;
 account();
 route();
+if (!user && new URLSearchParams(location.search).get('signin') === '1') void login();

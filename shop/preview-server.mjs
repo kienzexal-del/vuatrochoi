@@ -115,6 +115,7 @@ export const server = http.createServer(async (req, res) => {
         if (result.error === 'COOLDOWN_ACTIVE') status = 429;
         else if (result.error === 'OUT_OF_QUOTA') status = 410;
         else if (result.error === 'ORDER_NOT_FOUND') status = 404;
+        else if (result.error === 'ORDER_NOT_PAID') status = 402;
         else status = 502;
       }
       json(result, status);
@@ -129,6 +130,111 @@ export const server = http.createServer(async (req, res) => {
     const order = await steamProxy.getOrder(orderId);
     if (order) json({ ok: true, order });
     else json({ ok: false, error: 'ORDER_NOT_FOUND' }, 404);
+    return;
+  }
+
+  // Simulate payment completion (1-click test simulation for preview and local testing)
+  if (path === '/api/steam/simulate-payment' && req.method === 'POST') {
+    let body = '';
+    for await (const chunk of req) body += chunk;
+    try {
+      let parsed;
+      try {
+        parsed = JSON.parse(body || '{}');
+      } catch (e) {
+        json({ ok: false, error: 'BAD_REQUEST', message: 'Invalid JSON payload: ' + e.message }, 400);
+        return;
+      }
+      const payload = (parsed && typeof parsed === 'object') ? parsed : {};
+      const { orderId } = payload;
+      if (!orderId) {
+        json({ ok: false, error: 'MISSING_ORDER_ID', message: 'Thiếu orderId' }, 400);
+        return;
+      }
+      const result = await steamProxy.fulfillOrder(orderId);
+      if (result.ok) {
+        const r = rows.find(x => x.id === orderId);
+        if (r) r.status = 'PAID';
+        json({ ok: true, order: result.order }, 200);
+      } else {
+        const status = result.error === 'ORDER_NOT_FOUND' ? 404 : result.error === 'OUT_OF_STOCK' ? 410 : 400;
+        json(result, status);
+      }
+    } catch (err) {
+      json({ ok: false, error: 'SERVER_ERROR', message: err.message }, 500);
+    }
+    return;
+  }
+
+  // SePay Webhook Endpoint: Verifies incoming bank transfer and fulfills order
+  if (path === '/api/sepay/webhook' && req.method === 'POST') {
+    let body = '';
+    for await (const chunk of req) body += chunk;
+    try {
+      let payload;
+      try {
+        payload = JSON.parse(body || '{}');
+      } catch (e) {
+        json({ success: false, error: 'BAD_REQUEST', message: 'Invalid JSON payload: ' + e.message }, 400);
+        return;
+      }
+
+      const { transferType, accountNumber, content, transferAmount } = payload || {};
+
+      if (!transferType) {
+        json({ success: false, error: 'INVALID_TRANSFER_TYPE', message: 'Thiếu trường transferType' }, 400);
+        return;
+      }
+
+      if (transferType !== 'in') {
+        json({ success: false, message: 'Bỏ qua giao dịch không phải tiền vào (transferType != in)' }, 200);
+        return;
+      }
+
+      if (!accountNumber || accountNumber !== '0000125042003') {
+        json({ success: false, error: 'INVALID_ACCOUNT', message: 'Tài khoản nhận không hợp lệ hoặc không khớp' }, 400);
+        return;
+      }
+
+      const match = String(content || '').match(/(VTCH(?:-[A-Z0-9]+)+)/i) || String(content || '').match(/(VTCH-?[A-Z0-9]+)/i);
+      if (!match) {
+        json({ success: false, error: 'ORDER_NOT_FOUND_IN_CONTENT', message: 'Không tìm thấy mã đơn hàng trong nội dung chuyển khoản' }, 400);
+        return;
+      }
+
+      const orderId = match[1].toUpperCase();
+
+      const order = (await steamProxy.getOrder(orderId)) || rows.find(x => x.id === orderId);
+      if (!order) {
+        json({ success: false, error: 'ORDER_NOT_FOUND', message: 'Không tìm thấy đơn hàng' }, 404);
+        return;
+      }
+
+      const expectedPrice = order.price ?? order.amount ?? 0;
+      const amount = Number(transferAmount);
+      if (Number.isNaN(amount) || amount < expectedPrice) {
+        json({ success: false, error: 'UNDERPAID', message: 'Số tiền chuyển khoản không đủ so với giá đơn hàng' }, 400);
+        return;
+      }
+
+      const result = await steamProxy.fulfillOrder(orderId);
+      if (result.ok) {
+        const r = rows.find(x => x.id === orderId);
+        if (r) r.status = 'PAID';
+        json({ success: true, orderId, order: result.order }, 200);
+      } else {
+        const r = rows.find(x => x.id === orderId);
+        if (r) {
+          r.status = 'PAID';
+          json({ success: true, orderId }, 200);
+        } else {
+          const status = result.error === 'ORDER_NOT_FOUND' ? 404 : result.error === 'OUT_OF_STOCK' ? 410 : 400;
+          json({ success: false, error: result.error, message: result.message }, status);
+        }
+      }
+    } catch (err) {
+      json({ success: false, error: 'SERVER_ERROR', message: err.message }, 500);
+    }
     return;
   }
 
@@ -167,6 +273,38 @@ export const server = http.createServer(async (req, res) => {
   }
   if (path === '/api/me') {
     json({ user: signedIn ? { name: 'Khách dùng thử' } : null, demo: true });
+    return;
+  }
+
+  if (path.startsWith('/api/orders/') && req.method === 'GET') {
+    const orderId = path.replace('/api/orders/', '');
+    const order = rows.find(o => o.id === orderId);
+    if (order) {
+      json({ order });
+      return;
+    }
+    const steamOrder = await steamProxy.getOrder(orderId);
+    if (steamOrder) {
+      json({
+        order: {
+          id: steamOrder.orderId,
+          orderId: steamOrder.orderId,
+          plan: steamOrder.gameId === 'combo_31' ? 'combo_31' : 'game_' + steamOrder.gameId,
+          gameId: steamOrder.gameId,
+          title: steamOrder.title,
+          amount: steamOrder.price,
+          status: steamOrder.status,
+          createdAt: new Date(steamOrder.createdAt).toISOString(),
+          account: steamOrder.account,
+          password: steamOrder.password,
+          slotId: steamOrder.slotId,
+          key: steamOrder.account ? `Account: ${steamOrder.account} | Password: ${steamOrder.password}` : '',
+          payment: steamOrder.paymentInfo || { bank: 'MB', account: '0000125042003', name: 'NGUYEN VAN KIEN' }
+        }
+      });
+      return;
+    }
+    json({}, 404);
     return;
   }
 
@@ -211,11 +349,6 @@ export const server = http.createServer(async (req, res) => {
     }
     if (path === '/api/orders') {
       json({ orders: rows });
-      return;
-    }
-    const order = rows.find(o => path === `/api/orders/${o.id}`);
-    if (order) {
-      json({ order });
       return;
     }
     json({}, 404);

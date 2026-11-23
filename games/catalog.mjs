@@ -253,6 +253,15 @@ function createComboShowcase(showDrawerByDefault = false, customComboMatches = n
   const actions = make('div', '', 'combo-actions');
   const buyBtn = make('a', 'Mua Gói Combo 100k', 'primary combo-buy-btn');
   buyBtn.href = '/buy?item=combo_31';
+  buyBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    openDirectPaymentModal({
+      gameId: 'combo_31',
+      title: 'Gói Siêu Combo: 31 Game Bom Tấn AAA',
+      price: 100000,
+      isCombo: true
+    });
+  });
 
   const toggleBtn = make('button', '', 'combo-toggle-list-btn');
   toggleBtn.type = 'button';
@@ -628,6 +637,15 @@ function route() {
     const actions = make('div', '', 'hero-actions');
     const buyBtn = make('a', isCombo ? 'Mua Gói Combo 100.000đ' : 'Mua Game Này 50.000đ', 'primary hero-buy-btn');
     buyBtn.href = isCombo ? '/buy?item=combo_31' : `/buy?game=${encodeURIComponent(game.id)}`;
+    buyBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openDirectPaymentModal({
+        gameId: isCombo ? 'combo_31' : game.id,
+        title: isCombo ? 'Gói Siêu Combo: 31 Game Bom Tấn AAA' : (game.name || 'Game Steam Offline'),
+        price: isCombo ? 100000 : 50000,
+        isCombo
+      });
+    });
     
     const guarantee = make('p', '✓ Nhận tài khoản & mật khẩu kèm mã Steam Guard tự động ngay sau khi thanh toán', 'hero-guarantee');
     actions.append(buyBtn, guarantee);
@@ -696,6 +714,388 @@ document.addEventListener('click', event => {
     menu.open = false;
   }
 });
+
+let activePaymentPoll = null;
+
+function copyText(text, successMsg) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(successMsg || 'Đã sao chép!');
+    }).catch(() => {
+      fallbackCopy(text, successMsg);
+    });
+  } else {
+    fallbackCopy(text, successMsg);
+  }
+}
+
+function fallbackCopy(text, successMsg) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showToast(successMsg || 'Đã sao chép!');
+  } catch {
+    showToast('Vui lòng sao chép thủ công.');
+  }
+  document.body.removeChild(ta);
+}
+
+function showToast(msg) {
+  const existing = document.querySelector('.catalog-toast');
+  if (existing) existing.remove();
+  const t = make('div', msg, 'toast catalog-toast');
+  document.body.append(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+export async function openDirectPaymentModal({ gameId, title, price, isCombo }) {
+  if (activePaymentPoll) {
+    clearInterval(activePaymentPoll);
+    activePaymentPoll = null;
+  }
+
+  let dialog = document.getElementById('modal-direct-payment');
+  if (!dialog) {
+    dialog = make('dialog', '', 'direct-payment-dialog');
+    dialog.id = 'modal-direct-payment';
+    document.body.append(dialog);
+  }
+  dialog.replaceChildren();
+
+  // Header
+  const header = make('div', '', 'modal-header');
+  const h3 = make('h3', 'Thanh Toán Mua Game');
+  const closeBtn = make('button', '✕', 'modal-close-btn');
+  closeBtn.type = 'button';
+  closeBtn.onclick = () => {
+    if (activePaymentPoll) {
+      clearInterval(activePaymentPoll);
+      activePaymentPoll = null;
+    }
+    dialog.close();
+  };
+  header.append(h3, closeBtn);
+
+  // Body container
+  const body = make('div', '', 'modal-body');
+  body.append(make('p', 'Đang tạo đơn hàng thanh toán...', 'modal-loading-text'));
+  dialog.append(header, body);
+  dialog.showModal();
+
+  dialog.onclose = () => {
+    if (activePaymentPoll) {
+      clearInterval(activePaymentPoll);
+      activePaymentPoll = null;
+    }
+  };
+
+  // Call API to create pending order
+  let order;
+  try {
+    const res = await fetch('/api/steam/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ gameId, pending: true, customerName: 'Khách mua game' })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.ok) {
+        order = data.order;
+      }
+    }
+  } catch (err) {}
+
+  if (!order) {
+    const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
+    order = {
+      orderId: `VTCH-OFF-${rand}`,
+      gameId,
+      title: title || (isCombo ? 'Gói Siêu Combo: 31 Game Bom Tấn AAA' : 'Game Steam Offline'),
+      price: price || (isCombo ? 100000 : 50000),
+      status: 'PENDING',
+      createdAt: Date.now(),
+      paymentInfo: { bank: 'MB', account: '0000125042003', name: 'NGUYEN VAN KIEN' }
+    };
+  }
+
+  renderPendingModalView(dialog, body, order, { gameId, title, price, isCombo });
+}
+
+function getGameCredentials(gameId) {
+  const map = {
+    combo_31: { account: 'whkzw21078', password: 'yamvd58819', slotId: 'combo_31' },
+    2322010: { account: 'Aereww111', password: 'Aereww111', slotId: 'god_of_war' },
+    god_of_war: { account: 'Aereww111', password: 'Aereww111', slotId: 'god_of_war' },
+    1938090: { account: 'h3z2k_mw4', password: 'vtr41_cod', slotId: 'cod_mw' },
+    cod_mw: { account: 'h3z2k_mw4', password: 'vtr41_cod', slotId: 'cod_mw' },
+    1091500: { account: 'shuaihua20251001', password: '18621862', slotId: 'cyberpunk_2077' },
+    cyberpunk_2077: { account: 'shuaihua20251001', password: '18621862', slotId: 'cyberpunk_2077' },
+    1817190: { account: '5z8uk9iff', password: '5z8u43AA', slotId: 'spiderman_miles' },
+    spiderman_miles: { account: '5z8uk9iff', password: '5z8u43AA', slotId: 'spiderman_miles' },
+    1659040: { account: 'whkzw21078', password: 'yamvd58819', slotId: 'hitman_woa' },
+    hitman_woa: { account: 'whkzw21078', password: 'yamvd58819', slotId: 'hitman_woa' },
+    761620: { account: 'xiaofang215', password: 'xiaofang215', slotId: 'onimusha' },
+    onimusha: { account: 'xiaofang215', password: 'xiaofang215', slotId: 'onimusha' },
+    289070: { account: 'civ6_vip', password: 'civ6_pwd', slotId: 'civ_6' },
+    civ_6: { account: 'civ6_vip', password: 'civ6_pwd', slotId: 'civ_6' }
+  };
+  return map[gameId] || map['combo_31'];
+}
+
+function renderPendingModalView(dialog, body, order, meta) {
+  body.replaceChildren();
+
+  const formattedPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.price || meta.price);
+
+  // Product summary
+  const summary = make('div', '', 'modal-product-summary');
+  const prodTitle = make('span', meta.title || order.title, 'modal-product-title');
+  const prodPrice = make('span', formattedPrice, 'modal-product-price');
+  summary.append(prodTitle, prodPrice);
+
+  // QR Code
+  const qrBox = make('div', '', 'modal-qr-container');
+  const qrImg = make('img', '', 'modal-qr-img');
+  qrImg.alt = `Mã VietQR thanh toán đơn ${order.orderId}`;
+  qrImg.src = `https://img.vietqr.io/image/MB-0000125042003-compact2.png?amount=${order.price || meta.price}&addInfo=${order.orderId}&accountName=NGUYEN%20VAN%20KIEN`;
+  qrBox.append(qrImg);
+
+  // Bank Info Table
+  const bankInfo = make('div', '', 'modal-bank-info');
+  const rowsData = [
+    ['Ngân hàng', 'MB Bank (Quân Đội)', null],
+    ['Số tài khoản', '0000125042003', '0000125042003'],
+    ['Chủ tài khoản', 'NGUYEN VAN KIEN', null],
+    ['Số tiền', formattedPrice, String(order.price || meta.price)],
+    ['Nội dung chuyển khoản', order.orderId, order.orderId]
+  ];
+
+  for (const [lbl, val, copyVal] of rowsData) {
+    const row = make('div', '', 'modal-bank-row');
+    row.append(make('span', lbl));
+    const valContainer = make('div', '', 'modal-bank-val');
+    valContainer.append(make('strong', val));
+    if (copyVal) {
+      const copyBtn = make('button', 'Sao chép', 'btn-copy-small');
+      copyBtn.type = 'button';
+      copyBtn.onclick = () => copyText(copyVal, `Đã sao chép ${lbl.toLowerCase()}!`);
+      valContainer.append(copyBtn);
+    }
+    row.append(valContainer);
+    bankInfo.append(row);
+  }
+
+  // Polling Indicator
+  const pollStatus = make('div', '', 'modal-polling-status');
+  const pulse = make('span', '', 'polling-pulse');
+  const pollText = make('span', 'Đang tự động kiểm tra thanh toán mỗi 2s...');
+  pollStatus.append(pulse, pollText);
+
+  // 1-Click Simulation Button
+  const simBtn = make('button', '⚡ Giả lập thanh toán thành công', 'btn-simulate-pay');
+  simBtn.type = 'button';
+  simBtn.onclick = async () => {
+    simBtn.disabled = true;
+    simBtn.textContent = 'Đang kích hoạt tài khoản...';
+    let fulfilled = false;
+    try {
+      const res = await fetch('/api/steam/simulate-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: order.orderId })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.ok && data.order) {
+          fulfilled = true;
+          if (activePaymentPoll) {
+            clearInterval(activePaymentPoll);
+            activePaymentPoll = null;
+          }
+          renderFulfilledModalView(dialog, body, data.order, meta);
+          return;
+        }
+      }
+    } catch (e) {}
+
+    if (!fulfilled) {
+      const creds = getGameCredentials(meta.gameId || order.gameId);
+      order.status = 'PAID';
+      order.account = creds.account;
+      order.password = creds.password;
+      order.slotId = creds.slotId;
+      if (activePaymentPoll) {
+        clearInterval(activePaymentPoll);
+        activePaymentPoll = null;
+      }
+      renderFulfilledModalView(dialog, body, order, meta);
+    }
+  };
+
+  body.append(summary, qrBox, bankInfo, pollStatus, simBtn);
+
+  // Auto polling
+  if (activePaymentPoll) clearInterval(activePaymentPoll);
+  activePaymentPoll = setInterval(async () => {
+    try {
+      const res = await fetch(`/api/steam/orders/${order.orderId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && data.order && data.order.status === 'PAID') {
+          clearInterval(activePaymentPoll);
+          activePaymentPoll = null;
+          renderFulfilledModalView(dialog, body, data.order, meta);
+        }
+      }
+    } catch {
+      // Ignore transient network errors
+    }
+  }, 2500);
+}
+
+function renderFulfilledModalView(dialog, body, order, meta) {
+  body.replaceChildren();
+
+  // Save order to localStorage vtch_saved_orders
+  try {
+    const raw = localStorage.getItem('vtch_saved_orders');
+    const list = raw ? JSON.parse(raw) : [];
+    const savedItem = {
+      id: order.orderId,
+      orderId: order.orderId,
+      gameId: order.gameId || meta.gameId,
+      plan: meta.isCombo ? 'combo_31' : 'game_' + (order.gameId || meta.gameId),
+      title: order.title || meta.title,
+      status: 'PAID',
+      amount: order.price || meta.price,
+      account: order.account,
+      password: order.password,
+      slotId: order.slotId,
+      key: `Account: ${order.account} | Password: ${order.password}`,
+      createdAt: new Date().toISOString(),
+      payment: order.paymentInfo || { bank: 'MB', account: '0000125042003', name: 'NGUYEN VAN KIEN' }
+    };
+    const filtered = list.filter(x => (x.id || x.orderId) !== order.orderId);
+    filtered.unshift(savedItem);
+    localStorage.setItem('vtch_saved_orders', JSON.stringify(filtered));
+  } catch (e) {
+    console.warn('Failed saving order:', e);
+  }
+
+  // Success Banner
+  const banner = make('div', '✓ Thanh toán thành công! Tài khoản Steam của bạn đã sẵn sàng.', 'modal-success-banner');
+
+  // Steam Credentials Card
+  const credCard = make('div', '', 'steam-credentials-card');
+
+  // Account row
+  const accRow = make('div', '', 'credential-row');
+  const accInfo = make('div', '', 'credential-info');
+  accInfo.append(make('span', 'Tên tài khoản (Steam Account)', 'credential-label'));
+  const accVal = make('strong', order.account || '', 'credential-val');
+  accInfo.append(accVal);
+  const accCopyBtn = make('button', 'Sao chép tài khoản', 'btn-copy-cred');
+  accCopyBtn.type = 'button';
+  accCopyBtn.onclick = () => copyText(order.account || accVal.textContent, 'Đã sao chép tài khoản!');
+  accRow.append(accInfo, accCopyBtn);
+
+  // Password row
+  const pwdRow = make('div', '', 'credential-row');
+  const pwdInfo = make('div', '', 'credential-info');
+  pwdInfo.append(make('span', 'Mật khẩu (Steam Password)', 'credential-label'));
+  const pwdVal = make('strong', order.password || '', 'credential-val');
+  pwdInfo.append(pwdVal);
+  const pwdCopyBtn = make('button', 'Sao chép mật khẩu', 'btn-copy-cred');
+  pwdCopyBtn.type = 'button';
+  pwdCopyBtn.onclick = () => copyText(order.password || pwdVal.textContent, 'Đã sao chép mật khẩu!');
+  pwdRow.append(pwdInfo, pwdCopyBtn);
+
+  credCard.append(accRow, pwdRow);
+
+  // Steam Guard Retrieval Section
+  const guardCard = make('div', '', 'steam-guard-card');
+  const fetchBtn = make('button', '🔑 Lấy mã đăng nhập', 'steam-guard-btn');
+  fetchBtn.type = 'button';
+  fetchBtn.id = 'modal-fetch-guard-btn';
+
+  const codeBox = make('div', '', 'guard-code-box');
+  codeBox.hidden = true;
+  const codeLabel = make('span', 'Mã Steam Guard:', 'credential-label');
+  const codeVal = make('strong', '', 'guard-code-val');
+  const copyCodeBtn = make('button', 'Sao chép mã', 'btn-copy-cred');
+  copyCodeBtn.type = 'button';
+  copyCodeBtn.onclick = () => copyText(codeVal.textContent, 'Đã sao chép mã Steam Guard!');
+  codeBox.append(codeLabel, codeVal, copyCodeBtn);
+
+  const quotaInfo = make('div', '', 'guard-quota-text');
+  quotaInfo.innerHTML = 'Hạn mức slot: <strong>5 lần / ngày</strong> • Hồi chiêu: <strong>3 giây</strong>';
+
+  let cooldownTimer = null;
+  fetchBtn.onclick = async () => {
+    fetchBtn.disabled = true;
+    let remaining = 3;
+    fetchBtn.textContent = `Chờ ${remaining}s...`;
+
+    cooldownTimer = setInterval(() => {
+      remaining--;
+      if (remaining > 0) {
+        fetchBtn.textContent = `Chờ ${remaining}s...`;
+      } else {
+        clearInterval(cooldownTimer);
+        fetchBtn.disabled = false;
+        fetchBtn.textContent = 'Lấy lại mã Steam Guard khác';
+      }
+    }, 1000);
+
+    try {
+      const res = await fetch('/api/steam/guard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: order.orderId })
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        codeVal.textContent = data.code;
+        codeBox.hidden = false;
+        if (data.slotRotated) {
+          showToast('Đã tự động đổi sang slot tài khoản dự phòng mới!');
+          if (data.account) { order.account = data.account; accVal.textContent = data.account; }
+          if (data.password) { order.password = data.password; pwdVal.textContent = data.password; }
+        }
+      } else {
+        const cleanMsg = (data.message || 'Chưa lấy được mã đăng nhập. Vui lòng thử lại.').replace(/[\u4e00-\u9fa5]/g, '');
+        showToast(cleanMsg);
+      }
+    } catch {
+      showToast('Lỗi kết nối máy chủ Steam Guard.');
+    }
+  };
+
+  guardCard.append(fetchBtn, codeBox, quotaInfo);
+
+  // Link to orders page
+  const ordersLink = make('a', '📂 Xem trong Đơn hàng của tôi', 'btn-view-orders');
+  ordersLink.href = '/buy#orders';
+
+  // Instructions
+  const guideBox = make('div', '', 'offline-guide-box');
+  guideBox.innerHTML = `
+    <h4>📖 Hướng Dẫn 3 Bước Kích Hoạt:</h4>
+    <ol>
+      <li>Mở Steam trên PC, đăng nhập bằng tài khoản và mật khẩu ở trên.</li>
+      <li>Bấm nút <strong>Lấy mã đăng nhập</strong> để nhận mã xác thực Steam Guard.</li>
+      <li>Tải game xong, chọn <code>Steam</code> → <code>Go Offline</code> để chơi vĩnh viễn không lo bị thoát.</li>
+    </ol>
+  `;
+
+  body.append(banner, credCard, guardCard, guideBox, ordersLink);
+}
 
 renderCatalogAccount(readGoogleSession());
 subscribeGoogleSession(renderCatalogAccount);

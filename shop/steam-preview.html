@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bản Mẫu — Cửa Hàng Steam Offline Vua Trò Chơi</title>
+  <link rel="stylesheet" href="/shop/store.css">
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* Vua Tro Choi Glassmorphism & Steam Dark Theme Enhancement */
+    :root {
+      --bg: #101a28;
+      --surface: #192a3e;
+      --line: #39516a;
+      --text: #f3f7fc;
+      --muted: #b9cadd;
+      --accent: #82d4ff;
+      --ink: #071c2b;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      min-height: 100vh;
+    }
+    .vtch-glass {
+      background: linear-gradient(140deg, rgba(25, 42, 62, 0.85), rgba(12, 27, 42, 0.95) 70%);
+      border: 1px solid rgba(184, 224, 255, 0.18);
+      backdrop-filter: blur(16px) saturate(140%);
+      box-shadow: 0 16px 40px rgba(5, 13, 24, 0.4), inset 0 1px 0 rgba(225, 243, 255, 0.15);
+    }
+    .neon-border {
+      box-shadow: 0 0 25px rgba(130, 212, 255, 0.18);
+      border-color: rgba(130, 212, 255, 0.4);
+    }
+    .vip-glow {
+      box-shadow: 0 0 35px rgba(245, 158, 11, 0.22);
+    }
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.96; transform: scale(0.998); }
+    }
+    .pulse-vip { animation: pulse-subtle 3.5s ease-in-out infinite; }
+    .game-card-img {
+      transition: transform 0.35s ease, filter 0.35s ease;
+    }
+    .game-card:hover .game-card-img {
+      transform: scale(1.04);
+      filter: brightness(1.08);
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(10, 21, 35, 0.5); }
+    ::-webkit-scrollbar-thumb { background: rgba(130, 212, 255, 0.3); border-radius: 4px; }
+  </style>
+</head>
+<body class="antialiased selection:bg-[#82d4ff] selection:text-[#071c2b]">
+
+  <!-- Top Demo Banner -->
+  <div class="demo py-2 text-center text-xs font-medium text-amber-200 bg-amber-950/60 border-b border-amber-500/20">
+    Bản xem thử Staging • Đơn hàng minh họa, tự động lấy mã Steam Guard chính hãng (Không thanh toán tiền thật)
+  </div>
+
+  <!-- Header Vua Trò Chơi Standard -->
+  <header class="header border-b border-[#39516a]/50 bg-[#0a1523]/90 backdrop-blur-md sticky top-0 z-40">
+    <div class="shell max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <a class="brand flex items-center gap-3 text-white font-bold text-lg tracking-wide hover:opacity-90 transition-opacity" href="/buy#shop">
+          <img class="brand-logo w-9 h-9 rounded-xl object-cover border border-[#82d4ff]/30 shadow-md shadow-sky-500/10" src="/shop/game-gia-re.png" alt="Game Giá Rẻ">
+          <span>VUA TRÒ CHƠI</span>
+        </a>
+        <span class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-semibold tracking-wider">
+          VUA TRÒ CHƠI • STEAM OFFLINE
+        </span>
+      </div>
+
+      <!-- Navigation & View Switcher -->
+      <div class="flex items-center gap-2">
+        <a href="/buy#shop" class="text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors hidden sm:inline-block">
+          Gói Bản Quyền App
+        </a>
+        <div class="flex bg-slate-950/80 p-1 rounded-xl border border-[#39516a]/60 text-xs font-semibold shadow-inner">
+          <button id="tab-shop-btn" onclick="switchView('shop')" class="px-3.5 py-1.5 rounded-lg bg-[#82d4ff] text-[#071c2b] font-bold transition-all shadow-md">
+            🛒 Cửa Hàng
+          </button>
+          <button id="tab-order-btn" onclick="switchView('order')" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all">
+            🔑 Đơn Hàng & Steam Guard
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Alert Area -->
+  <div class="max-w-6xl mx-auto px-4 pt-4">
+    <!-- Slot rotation alert -->
+    <div id="slot-rotated-alert" class="vtch-glass border-cyan-500/40 p-4 rounded-xl text-xs text-cyan-200 flex items-start gap-3 shadow-lg" hidden>
+      <span class="text-base">🔄</span>
+      <div>
+        <strong class="text-cyan-300 font-bold block mb-0.5">Tự động xoay slot tài khoản!</strong>
+        Slot tài khoản chính đã đạt giới hạn 5 lần/ngày. Hệ thống đã tự động <span class="text-white font-semibold">chuyển đơn sang slot dự phòng khả dụng</span> để đảm bảo bạn lấy mã Steam Guard ngay lập tức.
+      </div>
+    </div>
+
+    <!-- Out of stock alert -->
+    <div id="out-of-stock-alert" class="vtch-glass border-amber-500/50 p-4 rounded-xl text-xs text-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg my-2" hidden>
+      <div class="flex items-start gap-3">
+        <span class="text-xl">⚠️</span>
+        <div>
+          <strong class="text-amber-400 font-bold text-sm block">TẠM HẾT HÀNG, VUI LÒNG ĐỢI</strong>
+          Toàn bộ các slot tài khoản cho tựa game này đã chạm hạn mức lấy mã trong 24H. Vui lòng quay lại sau hoặc liên hệ Admin để được cấp mã thủ công.
+        </div>
+      </div>
+      <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+        <a href="https://zalo.me/0987654321" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors flex items-center gap-1.5">
+          <span>💬</span> Nhắn Admin Zalo
+        </a>
+        <a href="https://t.me/vuatrochoi_support" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition-colors flex items-center gap-1.5">
+          <span>✈️</span> Nhắn Admin Telegram
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= VIEW 1: CỬA HÀNG GAME (SHOP VIEW) ================= -->
+  <main id="view-shop" class="max-w-6xl mx-auto px-4 py-6 space-y-8">
+
+    <!-- HERO PROMO CARD: MEGA COMBO 31 AAA GAMES -->
+    <section class="relative overflow-hidden rounded-2xl vtch-glass p-6 md:p-8 border border-amber-500/35 vip-glow pulse-vip">
+      <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-8 space-y-3.5">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+            🔥 SIÊU PHẨM COMBO ĐỘC QUYỀN • TIẾT KIỆM 95%
+          </div>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+            Gói Siêu Combo: <span class="text-amber-400">31 Game Bom Tấn AAA</span> Trong 1 Tài Khoản
+          </h1>
+          <p class="text-sm text-slate-300 leading-relaxed max-w-3xl">
+            Sở hữu trọn bộ 31 siêu phẩm đỉnh cao: <strong class="text-cyan-300">Phantom Blade Zero</strong>, <strong class="text-amber-300">Black Myth: Wukong</strong>, <strong class="text-yellow-300">Elden Ring</strong>, <strong>Baldur's Gate 3</strong>, <strong>The Last of Us I & II</strong>, <strong>Cyberpunk 2077</strong>, <strong>Resident Evil 2, 4, 7, 8 Village</strong>, <strong>Hitman</strong>, <strong>Hades</strong>... Tải trực tiếp từ Steam, chơi offline trọn đời.
+          </p>
+
+          <!-- Badges -->
+          <div class="flex flex-wrap gap-2 pt-1 text-xs text-slate-300">
+            <span class="px-2.5 py-1 rounded-md bg-[#0a1523]/80 border border-[#39516a]/80 flex items-center gap-1">
+              <span class="text-emerald-400 font-bold">✓</span> 31 Game Bom Tấn
+            </span>
+            <span class="px-2.5 py-1 rounded-md bg-[#0a1523]/80 border border-[#39516a]/80 flex items-center gap-1">
+              <span class="text-emerald-400 font-bold">✓</span> Có Phantom Blade Zero
+            </span>
+            <span class="px-2.5 py-1 rounded-md bg-[#0a1523]/80 border border-[#39516a]/80 flex items-center gap-1">
+              <span class="text-emerald-400 font-bold">✓</span> Lấy mã Steam Guard 1s
+            </span>
+            <span class="px-2.5 py-1 rounded-md bg-[#0a1523]/80 border border-[#39516a]/80 flex items-center gap-1">
+              <span class="text-emerald-400 font-bold">✓</span> Bảo hành đổi tài khoản
+            </span>
+          </div>
+
+          <!-- Price & Action CTA -->
+          <div class="flex flex-wrap items-center gap-4 pt-3">
+            <div>
+              <span class="text-xs text-slate-400 line-through">1.550.000đ</span>
+              <div class="text-3xl font-black text-amber-400 tracking-tight">
+                100.000đ <span class="text-xs font-normal text-slate-400">/ trọn gói 31 game</span>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button id="btn-buy-combo" onclick="openCheckout('combo_31', 'Gói Siêu Combo: 31 Game Bom Tấn AAA Trong 1 Tài Khoản', 100000)" class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-sm shadow-lg shadow-amber-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2">
+                <span>⚡</span> MUA NGAY SIÊU COMBO (100K)
+              </button>
+              <button onclick="openModal31Games()" class="px-4 py-3 rounded-xl bg-[#192a3e] hover:bg-[#253d5a] text-cyan-300 font-bold text-xs border border-cyan-500/40 transition-colors flex items-center gap-1.5">
+                <span>📋</span> Xem danh sách 31 game
+              </button>
+            </div>
+            <span id="combo-stock-tag" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              ● Sẵn 2 slot dự phòng
+            </span>
+          </div>
+        </div>
+
+        <!-- Banner Preview Thumbnail -->
+        <div class="lg:col-span-4 relative rounded-xl overflow-hidden border border-[#39516a]/80 shadow-2xl group cursor-pointer" onclick="openModal31Games()">
+          <img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg" alt="Black Myth Wukong" class="w-full h-48 sm:h-56 object-cover group-hover:scale-105 transition-transform duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent flex flex-col justify-end p-4">
+            <span class="text-[11px] font-bold text-amber-400 tracking-wider uppercase">Kho Thư Viện Steam</span>
+            <strong class="text-white text-base">Black Myth • Elden Ring • Phantom Blade</strong>
+            <span class="text-xs text-cyan-300 mt-1 flex items-center gap-1">Bấm xem đầy đủ 31 poster game →</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: SINGLE GAMES CATALOG -->
+    <section class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-[#39516a]/60 gap-3">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5">
+            <span>🎮</span> Danh Mục Game Lẻ Steam Offline
+            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+              Đồng giá 50.000đ
+            </span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">
+            Mỗi tài khoản gồm game bản quyền chính hãng Steam • Lấy mã Steam Guard 1 giây • Chơi Offline không lo giật lag
+          </p>
+        </div>
+        <div class="text-xs text-slate-400 flex items-center gap-2">
+          <span>Sẵn hàng:</span>
+          <span class="text-cyan-400 font-bold px-2 py-0.5 rounded bg-slate-900 border border-[#39516a]" id="game-count">12</span>
+          <span>tựa game</span>
+        </div>
+      </div>
+
+      <!-- Games Grid (Rendered via JS with rich banners, story, trailer buttons) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="games-grid">
+        <div class="col-span-full py-16 text-center text-slate-400">Đang tải danh mục game từ máy chủ...</div>
+      </div>
+    </section>
+
+    <!-- Help & FAQ Section -->
+    <section class="help grid grid-cols-1 md:grid-cols-12 gap-6 p-6 rounded-2xl vtch-glass border border-[#39516a]/60">
+      <div class="md:col-span-5 space-y-2">
+        <h3 class="text-xl font-bold text-white">Mua Rõ Ràng.<br>Chơi Game Thảnh Thơi.</h3>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Mỗi game đều được kiểm tra đăng nhập trước khi cấp. Hỗ trợ kích hoạt và hướng dẫn chuyển sang chế độ Offline (Go Offline) để không bao giờ bị gián đoạn.
+        </p>
+      </div>
+      <div class="md:col-span-7 space-y-2 text-xs text-slate-300">
+        <details class="bg-[#0a1523]/70 p-3 rounded-xl border border-[#39516a]/50 cursor-pointer">
+          <summary class="font-bold text-white">Tài khoản Steam Offline chơi như thế nào?</summary>
+          <p class="mt-2 text-slate-400 leading-relaxed">
+            Bạn đăng nhập tài khoản Steam được cấp trên ứng dụng Steam máy tính, tải game về 100%. Sau đó chuyển Steam sang chế độ <strong>"Go Offline"</strong> và trải nghiệm vĩnh viễn không bị ai làm phiền.
+          </p>
+        </details>
+        <details class="bg-[#0a1523]/70 p-3 rounded-xl border border-[#39516a]/50 cursor-pointer">
+          <summary class="font-bold text-white">Lấy mã Steam Guard như thế nào?</summary>
+          <p class="mt-2 text-slate-400 leading-relaxed">
+            Khi Steam yêu cầu mã xác nhận gửi về email, bạn chỉ cần mở trang đơn hàng và bấm nút <strong>"BẤM VÀO ĐÂY ĐỂ LẤY MÃ STEAM GUARD"</strong>. Hệ thống sẽ tự động quét và trả mã xác nhận dạng 5 chữ cái (ví dụ: <code>595YR</code>) trong 1 giây.
+          </p>
+        </details>
+        <details class="bg-[#0a1523]/70 p-3 rounded-xl border border-[#39516a]/50 cursor-pointer">
+          <summary class="font-bold text-white">Nếu tài khoản hết lượt lấy mã thì sao?</summary>
+          <p class="mt-2 text-slate-400 leading-relaxed">
+            Mỗi tài khoản có hạn mức 5 lần lấy mã mỗi ngày. Hệ thống sẽ tự động xoay vòng sang slot tài khoản dự phòng của cùng tựa game đó. Nếu tất cả slot trong ngày đều cạn, hệ thống sẽ báo tạm hết hàng và có nút liên hệ Admin hỗ trợ ngay.
+          </p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+
+  <!-- ================= VIEW 2: CHI TIẾT ĐƠN HÀNG & LẤY MÃ STEAM GUARD ================= -->
+  <main id="view-order" class="max-w-3xl mx-auto px-4 py-8 space-y-6" hidden>
+    
+    <div class="flex items-center justify-between pb-2 border-b border-[#39516a]/50">
+      <button onclick="switchView('shop')" class="text-xs font-semibold text-cyan-300 hover:text-white flex items-center gap-1.5 transition-colors">
+        ← Quay lại Cửa Hàng
+      </button>
+      <span class="text-xs text-slate-400">Trang Đơn Hàng Của Bạn</span>
+    </div>
+
+    <!-- Order Card Details -->
+    <div class="vtch-glass rounded-2xl p-6 sm:p-8 border border-[#39516a] relative overflow-hidden neon-border shadow-2xl">
+      
+      <!-- Order Header Row -->
+      <div class="flex flex-wrap items-start justify-between pb-4 border-b border-[#39516a]/60 gap-3">
+        <div>
+          <span class="text-xs text-slate-400">Mã đơn hàng:</span>
+          <div class="font-mono font-bold text-lg text-white tracking-wider" id="order-id">VTCH-OFF-88291</div>
+        </div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          ĐÃ THANH TOÁN
+        </div>
+      </div>
+
+      <!-- Item Row -->
+      <div class="py-4 border-b border-[#39516a]/60 flex items-center justify-between">
+        <div>
+          <span class="text-xs text-slate-400">Sản phẩm:</span>
+          <h3 class="text-base sm:text-lg font-black text-cyan-300" id="order-game-title">Gói Siêu Combo: 31 Game Bom Tấn AAA</h3>
+        </div>
+        <div class="text-right">
+          <span class="text-xs text-slate-400">Số tiền:</span>
+          <div class="text-xl font-black text-white" id="order-price">100.000đ</div>
+        </div>
+      </div>
+
+      <!-- Steam Credentials Box -->
+      <div class="my-5 bg-[#0a1523]/90 rounded-xl p-4 sm:p-5 border border-[#39516a]/80 space-y-3 shadow-inner">
+        <div class="text-xs font-bold text-slate-300 tracking-wider uppercase flex items-center justify-between">
+          <span>Thông Tin Tài Khoản Steam</span>
+          <span class="text-cyan-400 font-normal">Chính hãng • Bảo mật</span>
+        </div>
+
+        <!-- Account Row -->
+        <div class="flex items-center justify-between bg-slate-900/90 p-3 rounded-lg border border-[#39516a]/60">
+          <div>
+            <div class="text-[10px] text-slate-400 uppercase font-semibold">Tên tài khoản (Account)</div>
+            <div class="font-mono text-sm sm:text-base font-bold text-white select-all" id="steam-account">whkzw21078</div>
+          </div>
+          <button onclick="copyToClipboard('steam-account', 'Tài khoản')" class="px-3.5 py-1.5 rounded-lg bg-[#192a3e] hover:bg-[#253d5a] text-cyan-300 font-bold text-xs border border-cyan-500/30 transition-colors">
+            📋 Sao chép
+          </button>
+        </div>
+
+        <!-- Password Row -->
+        <div class="flex items-center justify-between bg-slate-900/90 p-3 rounded-lg border border-[#39516a]/60">
+          <div>
+            <div class="text-[10px] text-slate-400 uppercase font-semibold">Mật khẩu (Password)</div>
+            <div class="font-mono text-sm sm:text-base font-bold text-white select-all" id="steam-password">yamvd58819</div>
+          </div>
+          <button onclick="copyToClipboard('steam-password', 'Mật khẩu')" class="px-3.5 py-1.5 rounded-lg bg-[#192a3e] hover:bg-[#253d5a] text-cyan-300 font-bold text-xs border border-cyan-500/30 transition-colors">
+            📋 Sao chép
+          </button>
+        </div>
+      </div>
+
+      <!-- STEAM GUARD RETRIEVAL CORE BUTTON -->
+      <div class="my-6 p-6 rounded-2xl bg-gradient-to-b from-cyan-950/30 to-slate-950/90 border border-cyan-500/40 text-center space-y-3.5 shadow-xl">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+          ⚡ Hệ thống tự động lấy mã bảo mật Steam
+        </div>
+        
+        <h3 class="text-lg font-extrabold text-white">Mã Xác Nhận Đăng Nhập (Steam Guard Code)</h3>
+        <p class="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
+          Sau khi nhập tài khoản và mật khẩu vào Steam, nếu Steam hỏi mã xác nhận gửi về email, hãy bấm nút dưới đây để lấy mã ngay.
+        </p>
+
+        <!-- Big Trigger Button -->
+        <div class="pt-2">
+          <button id="fetch-code-btn" onclick="triggerSteamCode()" class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-base shadow-lg shadow-cyan-500/25 transition-all flex items-center justify-center gap-2 transform active:scale-[0.99] disabled:opacity-50 disabled:cursor-wait">
+            <span id="btn-icon">🔑</span>
+            <span id="btn-text">BẤM VÀO ĐÂY ĐỂ LẤY MÃ STEAM GUARD</span>
+          </button>
+        </div>
+
+        <!-- Code Result Box -->
+        <div id="code-result-box" class="pt-3" hidden>
+          <div class="bg-slate-900/90 border-2 border-emerald-500/60 rounded-xl p-5 space-y-2.5 shadow-xl shadow-emerald-500/10">
+            <span class="text-xs text-emerald-400 font-bold uppercase tracking-wider block">Mã Steam Guard của bạn:</span>
+            <div class="flex items-center justify-center gap-3">
+              <span id="steam-guard-code" class="font-mono text-4xl sm:text-5xl font-black tracking-widest text-emerald-300 bg-slate-950 px-6 py-2.5 rounded-xl border border-emerald-500/40 select-all">
+                595YR
+              </span>
+              <button onclick="copyToClipboard(document.getElementById('steam-guard-code').innerText, 'Mã Steam Guard')" class="px-4 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-colors shadow-md">
+                📋 Copy Mã
+              </button>
+            </div>
+            <p class="text-[11px] text-slate-400">Nhập mã này vào ô xác nhận trên ứng dụng Steam để hoàn tất đăng nhập.</p>
+          </div>
+        </div>
+
+        <!-- Daily Quota Usage Indicator -->
+        <div class="flex items-center justify-center gap-4 text-xs text-slate-400 pt-1">
+          <span>Hạn mức slot: <strong class="text-white" id="guard-quota-text">5 lần / ngày</strong></span>
+          <span>•</span>
+          <span id="cooldown-timer">Giãn cách: 3 giây / lần • Hồi chiêu: <strong class="text-cyan-300">Chờ 3s</strong></span>
+        </div>
+      </div>
+
+      <!-- Instructions: 3-Step Offline Setup -->
+      <div class="mt-6 pt-5 border-t border-[#39516a]/60 space-y-3">
+        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">
+          📖 Hướng Dẫn Kích Hoạt Game (3 Bước) Chơi Game Offline Không Lo Bị Thoát
+        </h4>
+        <ol class="list-decimal list-inside space-y-2 text-xs text-slate-300">
+          <li>Mở Steam trên PC, đăng nhập bằng <strong>Tài khoản & Mật khẩu</strong> được cấp.</li>
+          <li>Bấm nút <strong>Lấy mã Steam Guard</strong> ở trên rồi dán vào ô xác nhận Steam.</li>
+          <li>Tải game, chọn <code>Steam</code> → <code>Go Offline</code> (Chế độ ngắt kết nối) để chơi vĩnh viễn không sợ bị trùng hay đá văng.</li>
+        </ol>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-300">
+          <div class="bg-[#0a1523]/80 p-3.5 rounded-xl border border-[#39516a]/50 space-y-1">
+            <span class="text-cyan-400 font-bold text-sm block">Bước 1</span>
+            <strong>Đăng nhập tài khoản</strong>
+            <p class="text-slate-400 text-[11px]">Dùng tên và mật khẩu ở trên. Bấm nút lấy mã Steam Guard nếu được hỏi.</p>
+          </div>
+          <div class="bg-[#0a1523]/80 p-3.5 rounded-xl border border-[#39516a]/50 space-y-1">
+            <span class="text-cyan-400 font-bold text-sm block">Bước 2</span>
+            <strong>Tải game về máy</strong>
+            <p class="text-slate-400 text-[11px]">Vào Thư viện (Library) tìm game muốn chơi và bấm Cài đặt (Install) đến 100%.</p>
+          </div>
+          <div class="bg-[#0a1523]/80 p-3.5 rounded-xl border border-[#39516a]/50 space-y-1">
+            <span class="text-emerald-400 font-bold text-sm block">Bước 3</span>
+            <strong>Chuyển sang Go Offline</strong>
+            <p class="text-slate-400 text-[11px]">Góc trái trên chọn <code>Steam</code> → <code>Go Offline</code> (Ngắt kết nối mạng) rồi bắt đầu chơi thoải mái.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ================= MODAL 1: CHI TIẾT GAME (STORY, SPECS & TRAILER) ================= -->
+  <dialog id="modal-game-detail" class="bg-transparent p-4 max-w-3xl w-full backdrop:bg-slate-950/80">
+    <div class="vtch-glass rounded-2xl border border-cyan-500/40 p-6 sm:p-7 space-y-5 text-slate-100 shadow-2xl relative overflow-hidden">
+      <!-- Close Button -->
+      <button onclick="closeGameDetail()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl font-bold p-2 z-20">✕</button>
+
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between pr-8">
+        <div>
+          <span id="detail-category" class="text-xs px-2.5 py-1 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-semibold uppercase">Hành Động / Bắn Súng</span>
+          <h3 id="detail-title" class="text-xl sm:text-2xl font-black text-white mt-2 leading-tight">Call of Duty: Modern Warfare III</h3>
+          <p id="detail-tag" class="text-xs text-slate-400 mt-1">Chiến dịch Campaign Task Force 141</p>
+        </div>
+      </div>
+
+      <!-- Trailer Player / Banner -->
+      <div class="relative rounded-xl overflow-hidden aspect-video bg-slate-950 border border-[#39516a] shadow-inner">
+        <iframe id="detail-trailer-iframe" class="w-full h-full" src="" title="Game Trailer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+
+      <!-- Story Synopsis -->
+      <div class="space-y-1.5 bg-[#0a1523]/80 p-4 rounded-xl border border-[#39516a]/60">
+        <h4 class="text-xs font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+          <span>📖</span> Cốt Truyện Game (Story & Campaign)
+        </h4>
+        <p id="detail-story" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          Đại úy John Price cùng lực lượng đặc nhiệm Task Force 141 phải đối mặt với mối đe dọa tối thượng: trùm khủng bố Vladimir Makarov đang mở rộng bàn tay tội ác ra toàn cầu...
+        </p>
+      </div>
+
+      <!-- System Requirements Specs -->
+      <div class="space-y-2 bg-[#0a1523]/80 p-4 rounded-xl border border-[#39516a]/60 text-xs">
+        <h4 class="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+          <span>💻</span> Cấu Hình Máy Tính Yêu Cầu (PC Requirements)
+        </h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <div class="bg-slate-900/80 p-3 rounded-lg border border-[#39516a]/40 space-y-1">
+            <span class="text-slate-400 font-semibold block text-[11px] uppercase">Cấu hình tối thiểu:</span>
+            <p id="detail-specs-min" class="text-slate-300 text-[11px] leading-relaxed">HĐH: Windows 10 64-bit | CPU: Intel Core i5 | RAM: 8 GB | VGA: GTX 960 | Ổ cứng: 65 GB</p>
+          </div>
+          <div class="bg-slate-900/80 p-3 rounded-lg border border-[#39516a]/40 space-y-1">
+            <span class="text-cyan-400 font-semibold block text-[11px] uppercase">Cấu hình đề nghị:</span>
+            <p id="detail-specs-rec" class="text-slate-300 text-[11px] leading-relaxed">HĐH: Windows 10/11 | CPU: Intel Core i7 | RAM: 16 GB | VGA: RTX 3060 | Ổ cứng: SSD 149 GB</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer Action -->
+      <div class="flex items-center justify-between pt-2 border-t border-[#39516a]/60">
+        <div>
+          <span class="text-[11px] text-slate-400">Giá tài khoản Steam Offline:</span>
+          <div id="detail-price" class="text-2xl font-black text-white">50.000đ</div>
+        </div>
+        <button id="detail-buy-btn" onclick="buyCurrentDetailGame()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-sm shadow-lg shadow-cyan-500/25 transition-all">
+          ⚡ Mua Tài Khoản Này Ngay
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+
+  <!-- ================= MODAL 2: XEM DANH SÁCH 31 GAME BOM TẤN COMBO ================= -->
+  <dialog id="modal-31-games" class="bg-transparent p-4 max-w-4xl w-full backdrop:bg-slate-950/85">
+    <div class="vtch-glass rounded-2xl border border-amber-500/40 p-6 sm:p-7 space-y-4 text-slate-100 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-[#39516a]/60 pb-3">
+        <div>
+          <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Trọn bộ 31 Game Bom Tấn AAA</span>
+          <h3 class="text-lg sm:text-xl font-black text-white">Danh Sách Game Trong Tài Khoản Siêu Combo</h3>
+        </div>
+        <button onclick="document.getElementById('modal-31-games').close()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+      </div>
+
+      <p class="text-xs text-slate-300">
+        Khớp 100% theo thư viện Steam thực tế của tài khoản: Có đầy đủ <strong class="text-cyan-300">Phantom Blade Zero</strong>, <strong class="text-amber-300">Black Myth: Wukong</strong>, <strong class="text-yellow-300">Elden Ring</strong>, <strong>Resident Evil</strong>, <strong>The Last of Us</strong>, v.v.
+      </p>
+
+      <!-- 31 Games List Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 max-h-[60vh] overflow-y-auto pr-2" id="modal-31-games-list">
+        <!-- Injected via JS -->
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-[#39516a]/60">
+        <div class="text-xs text-slate-400">Trọn bộ 31 game: <strong class="text-amber-400 text-base">100.000đ</strong></div>
+        <button onclick="document.getElementById('modal-31-games').close(); openCheckout('combo_31', 'Gói Siêu Combo: 31 Game Bom Tấn AAA Trong 1 Tài Khoản', 100000)" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-md transition-all">
+          ⚡ Mua Trọn Gói 31 Game (100k)
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+
+  <!-- ================= MODAL 3: CHECKOUT THANH TOÁN DEMO ================= -->
+  <dialog id="modal-checkout" class="bg-transparent p-4 max-w-md w-full backdrop:bg-slate-950/85">
+    <div class="vtch-glass rounded-2xl border border-cyan-500/40 p-6 space-y-4 text-slate-100 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-[#39516a]/60 pb-3">
+        <h3 class="font-bold text-base text-white">Xác Nhận Đơn Hàng Demo</h3>
+        <button onclick="document.getElementById('modal-checkout').close()" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+      </div>
+
+      <div class="space-y-2 bg-[#0a1523]/80 p-3.5 rounded-xl border border-[#39516a]/50 text-xs">
+        <div class="flex justify-between"><span class="text-slate-400">Sản phẩm:</span><strong id="chk-game-title" class="text-cyan-300 text-right">Game Title</strong></div>
+        <div class="flex justify-between"><span class="text-slate-400">Giá thanh toán:</span><strong id="chk-game-price" class="text-white font-bold text-sm">50.000đ</strong></div>
+        <div class="flex justify-between"><span class="text-slate-400">Loại tài khoản:</span><span>Steam Offline Chính Hãng</span></div>
+      </div>
+
+      <!-- VietQR Simulation Box -->
+      <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 text-center space-y-2">
+        <div class="text-[10px] text-slate-400 font-semibold uppercase">MÔ PHỎNG VIETQR SIMULATION</div>
+        <div class="w-36 h-36 bg-white mx-auto rounded-lg p-2 flex items-center justify-center text-slate-900 font-mono text-xs shadow-inner">
+          [ VietQR Code Demo ]
+        </div>
+        <span class="text-[11px] text-slate-400 block">MB Bank • VUA TRO CHOI DEMO</span>
+      </div>
+
+      <!-- Action Button -->
+      <button onclick="confirmCheckout()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-sm shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-1.5">
+        <span>✓</span> Thanh toán Demo 1-Click (Nhận Acc Ngay)
+      </button>
+    </div>
+  </dialog>
+
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-3 rounded-xl bg-[#82d4ff] text-[#071c2b] font-bold text-xs shadow-2xl z-50 transition-all pointer-events-none opacity-0 translate-y-3">
+    Thông báo
+  </div>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    let catalogData = null;
+    let currentOrder = null;
+    let selectedGameForDetail = null;
+
+    // View switcher
+    function switchView(viewName) {
+      const viewShop = document.getElementById('view-shop');
+      const viewOrder = document.getElementById('view-order');
+      const tabShopBtn = document.getElementById('tab-shop-btn');
+      const tabOrderBtn = document.getElementById('tab-order-btn');
+
+      if (viewName === 'order') {
+        viewShop.hidden = true;
+        viewOrder.hidden = false;
+        tabOrderBtn.className = "px-3.5 py-1.5 rounded-lg bg-[#82d4ff] text-[#071c2b] font-bold transition-all shadow-md";
+        tabShopBtn.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all";
+      } else {
+        viewOrder.hidden = true;
+        viewShop.hidden = false;
+        tabShopBtn.className = "px-3.5 py-1.5 rounded-lg bg-[#82d4ff] text-[#071c2b] font-bold transition-all shadow-md";
+        tabOrderBtn.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all";
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Load Catalog on Startup
+    async function initCatalog() {
+      try {
+        const res = await fetch('/api/steam/catalog');
+        const data = await res.json();
+        catalogData = data;
+        renderCatalog(data);
+      } catch (err) {
+        console.error('Lỗi tải danh mục:', err);
+        document.getElementById('games-grid').innerHTML = `
+          <div class="col-span-full py-12 text-center text-amber-300">
+            Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối.
+          </div>
+        `;
+      }
+    }
+
+    // Render Catalog Items
+    function renderCatalog(data) {
+      if (!data) return;
+
+      // Update 31 games modal list
+      const comboGames = data.combo?.games || [];
+      const modalList = document.getElementById('modal-31-games-list');
+      if (modalList) {
+        modalList.innerHTML = comboGames.map((g, idx) => `
+          <div class="bg-[#0a1523]/80 p-2.5 rounded-lg border border-[#39516a]/50 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-md bg-amber-500/20 text-amber-300 text-xs font-bold flex items-center justify-center shrink-0">${idx + 1}</span>
+            <span class="text-xs text-slate-200 font-semibold truncate ${g.includes('Phantom Blade') ? 'text-amber-300 font-bold' : ''}">${g}</span>
+          </div>
+        `).join('');
+      }
+
+      // Render single games
+      const singles = data.singles || [];
+      document.getElementById('game-count').innerText = singles.length;
+      const grid = document.getElementById('games-grid');
+
+      grid.innerHTML = singles.map(g => {
+        const inStock = g.inStock;
+        const bannerUrl = g.banner || 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1938090/header.jpg';
+        const isCOD = g.id === 'cod_mw';
+
+        return `
+          <div class="game-card vtch-glass rounded-xl overflow-hidden border ${isCOD ? 'border-amber-500/50' : 'border-[#39516a]/60'} flex flex-col justify-between group hover:border-cyan-400/60 transition-all shadow-lg hover:shadow-cyan-500/10">
+            <!-- Game Banner Thumbnail -->
+            <div class="relative overflow-hidden aspect-[16/9] bg-slate-950 cursor-pointer" onclick="openGameDetail('${g.id}')">
+              <img src="${bannerUrl}" alt="${g.title}" class="game-card-img w-full h-full object-cover">
+              <div class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-[#0a1523]/90 border border-[#39516a]/80 text-[10px] font-bold text-cyan-300">
+                ${g.category || 'Steam Game'}
+              </div>
+              ${isCOD ? '<div class="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-amber-500 text-slate-950 text-[10px] font-black">HOT HIT</div>' : ''}
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2.5">
+                <span class="text-[11px] text-cyan-300 font-bold flex items-center gap-1">▶ Bấm xem cốt truyện & trailer</span>
+              </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="p-3.5 space-y-2 flex-1 flex flex-col justify-between">
+              <div>
+                <h4 class="font-bold text-white text-sm line-clamp-1 group-hover:text-cyan-300 transition-colors" title="${g.title}">
+                  ${g.title}
+                </h4>
+                <p class="text-[11px] text-slate-400 line-clamp-1 mt-0.5">${g.tag || ''}</p>
+              </div>
+
+              <!-- Price & Status -->
+              <div class="pt-2 border-t border-[#39516a]/40 flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] text-slate-400 line-through">${(g.originalPrice || 1200000).toLocaleString('vi-VN')}đ</span>
+                  <div class="text-sm font-black text-cyan-300">50.000đ</div>
+                </div>
+                ${inStock 
+                  ? `<span class="text-[10px] text-emerald-400 font-semibold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">Còn ${g.availableSlots} slot</span>`
+                  : `<span class="text-[10px] text-amber-400 font-semibold px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">Tạm hết</span>`
+                }
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="grid grid-cols-2 gap-1.5 pt-1">
+                <button onclick="openGameDetail('${g.id}')" class="py-1.5 px-2 rounded-lg bg-[#0a1523] hover:bg-[#192a3e] text-cyan-300 text-[11px] font-bold border border-cyan-500/30 transition-colors">
+                  🔍 Chi Tiết
+                </button>
+                ${inStock 
+                  ? `<button onclick="openCheckout('${g.id}', '${g.title.replace(/'/g, "\\'")}', ${g.price})" class="py-1.5 px-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-[11px] font-black transition-colors">
+                       ⚡ Mua 50k
+                     </button>`
+                  : `<button disabled class="py-1.5 px-2 rounded-lg bg-slate-800 text-slate-500 text-[11px] font-bold cursor-not-allowed">
+                       Hết lượt
+                     </button>`
+                }
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Modal 31 Games List
+    function openModal31Games() {
+      document.getElementById('modal-31-games').showModal();
+    }
+
+    // Modal Game Detail (Story, Specs & Trailer)
+    function openGameDetail(gameId) {
+      if (!catalogData) return;
+      const game = catalogData.singles.find(s => s.id === gameId);
+      if (!game) return;
+
+      selectedGameForDetail = game;
+      document.getElementById('detail-title').innerText = game.title;
+      document.getElementById('detail-category').innerText = game.category || 'Steam Game';
+      document.getElementById('detail-tag').innerText = game.tag || '';
+      document.getElementById('detail-story').innerText = game.story || 'Tựa game hành động đồ họa đỉnh cao với cốt truyện điện ảnh kịch tính và gameplay hấp dẫn.';
+      
+      if (game.specs) {
+        document.getElementById('detail-specs-min').innerText = game.specs.min || 'HĐH: Windows 10 64-bit | RAM: 8 GB | VGA: Đồ họa rời tương thích DirectX 11';
+        document.getElementById('detail-specs-rec').innerText = game.specs.rec || 'HĐH: Windows 10/11 64-bit | RAM: 16 GB | VGA: GTX 1660 / RTX 2060';
+      }
+
+      document.getElementById('detail-price').innerText = (game.price || 50000).toLocaleString('vi-VN') + 'đ';
+
+      // Setup trailer embed
+      const trailerIframe = document.getElementById('detail-trailer-iframe');
+      if (game.trailer) {
+        trailerIframe.src = `https://www.youtube.com/embed/${game.trailer}?autoplay=0&rel=0`;
+      } else {
+        trailerIframe.src = `https://www.youtube.com/embed/mHDEDDrGYvo?autoplay=0&rel=0`;
+      }
+
+      document.getElementById('modal-game-detail').showModal();
+    }
+
+    function closeGameDetail() {
+      const trailerIframe = document.getElementById('detail-trailer-iframe');
+      trailerIframe.src = ''; // stop playback
+      document.getElementById('modal-game-detail').close();
+    }
+
+    function buyCurrentDetailGame() {
+      if (!selectedGameForDetail) return;
+      closeGameDetail();
+      openCheckout(selectedGameForDetail.id, selectedGameForDetail.title, selectedGameForDetail.price || 50000);
+    }
+
+    // Checkout Flow
+    let checkoutTarget = null;
+    function openCheckout(gameId, title, price) {
+      checkoutTarget = { gameId, title, price };
+      document.getElementById('chk-game-title').innerText = title;
+      document.getElementById('chk-game-price').innerText = Number(price).toLocaleString('vi-VN') + 'đ';
+      document.getElementById('modal-checkout').showModal();
+    }
+
+    async function confirmCheckout() {
+      if (!checkoutTarget) return;
+      document.getElementById('modal-checkout').close();
+      showToast('Đang tạo đơn hàng và cấp tài khoản Steam...');
+
+      try {
+        const res = await fetch('/api/steam/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            gameId: checkoutTarget.gameId,
+            customerName: 'Khách Xem Thử'
+          })
+        });
+
+        const data = await res.json();
+        if (data.ok && data.order) {
+          currentOrder = data.order;
+          displayOrder(data.order);
+          switchView('order');
+          showToast('Tạo đơn thành công! Đã cấp tài khoản Steam.');
+        } else if (data.error === 'OUT_OF_STOCK') {
+          document.getElementById('out-of-stock-alert').hidden = false;
+          showToast('Tất cả slot của game này đã hết lượt trong 24H!');
+        } else {
+          showToast(data.message || 'Lỗi tạo đơn hàng');
+        }
+      } catch (err) {
+        console.error('Checkout error:', err);
+        showToast('Lỗi kết nối máy chủ');
+      }
+    }
+
+    // Display order in View 2
+    function displayOrder(order) {
+      document.getElementById('order-id').innerText = order.orderId;
+      document.getElementById('order-game-title').innerText = order.gameTitle || 'Tài khoản Steam Offline';
+      document.getElementById('order-price').innerText = Number(order.price).toLocaleString('vi-VN') + 'đ';
+      document.getElementById('steam-account').innerText = order.account || 'whkzw21078';
+      document.getElementById('steam-password').innerText = order.password || 'yamvd58819';
+      document.getElementById('code-result-box').hidden = true;
+      document.getElementById('fetch-code-btn').disabled = false;
+      document.getElementById('btn-text').innerText = 'BẤM VÀO ĐÂY ĐỂ LẤY MÃ STEAM GUARD';
+      document.getElementById('btn-icon').innerText = '🔑';
+
+      if (order.rotated) {
+        document.getElementById('slot-rotated-alert').hidden = false;
+      } else {
+        document.getElementById('slot-rotated-alert').hidden = true;
+      }
+    }
+
+    // Trigger Steam Code Fetch
+    async function triggerSteamCode() {
+      const btn = document.getElementById('fetch-code-btn');
+      const btnText = document.getElementById('btn-text');
+      const btnIcon = document.getElementById('btn-icon');
+      const codeBox = document.getElementById('code-result-box');
+      const codeSpan = document.getElementById('steam-guard-code');
+
+      if (!currentOrder || !currentOrder.orderId) {
+        // Fallback demo order
+        currentOrder = { orderId: 'VTCH-OFF-88291' };
+      }
+
+      btn.disabled = true;
+      btnIcon.innerText = '⏳';
+      btnText.innerText = 'Đang liên hệ máy chủ Steam lấy mã...';
+
+      try {
+        const res = await fetch('/api/steam/guard', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: currentOrder.orderId })
+        });
+
+        const data = await res.json();
+
+        if (data.ok && data.code) {
+          codeSpan.innerText = data.code;
+          codeBox.hidden = false;
+          showToast('Đã nhận mã Steam Guard thành công: ' + data.code);
+          
+          if (data.quota) {
+            document.getElementById('guard-quota-text').innerText = `${data.quota.usedToday}/${data.quota.limit} lần (còn ${data.quota.remainingToday} lần)`;
+          }
+
+          // Run active 3s cooldown
+          let seconds = 3;
+          btnText.innerText = `Chờ ${seconds}s...`;
+          const timer = setInterval(() => {
+            seconds--;
+            if (seconds > 0) {
+              btnText.innerText = `Chờ ${seconds}s...`;
+            } else {
+              clearInterval(timer);
+              btn.disabled = false;
+              btnIcon.innerText = '🔄';
+              btnText.innerText = 'LẤY LẠI MÃ STEAM GUARD KHÁC';
+            }
+          }, 1000);
+
+        } else if (data.error === 'COOLDOWN_ACTIVE') {
+          showToast(data.message || 'Thao tác quá nhanh, vui lòng đợi 3 giây.');
+          btn.disabled = false;
+          btnText.innerText = 'BẤM VÀO ĐÂY ĐỂ LẤY MÃ STEAM GUARD';
+        } else if (data.error === 'OUT_OF_QUOTA') {
+          document.getElementById('out-of-stock-alert').hidden = false;
+          showToast('Tài khoản đã hết lượt lấy mã trong 24H. Vui lòng liên hệ Admin!');
+          btn.disabled = true;
+          btnText.innerText = 'TẠM HẾT LƯỢT TRONG 24H';
+        } else {
+          showToast(data.message || 'Chưa nhận được mã từ Steam, vui lòng thử lại');
+          btn.disabled = false;
+          btnText.innerText = 'THỬ LẠI LẤY MÃ STEAM GUARD';
+        }
+      } catch (err) {
+        console.error('Fetch guard error:', err);
+        // Fallback simulation for offline testing
+        codeSpan.innerText = '595YR';
+        codeBox.hidden = false;
+        btn.disabled = false;
+        btnText.innerText = 'LẤY LẠI MÃ STEAM GUARD KHÁC';
+      }
+    }
+
+    // Helper: Copy to clipboard
+    function copyToClipboard(elementIdOrText, label) {
+      const el = document.getElementById(elementIdOrText);
+      const text = el ? el.innerText : elementIdOrText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(`Đã sao chép ${label || 'nội dung'}!`);
+      }).catch(() => {
+        showToast('Sao chép thất bại');
+      });
+    }
+
+    // Helper: Toast message
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.style.opacity = '1';
+      toast.style.transform = 'translate(-50%, 0)';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translate(-50%, 12px)';
+      }, 3000);
+    }
+
+    // Start on DOM ready
+    window.addEventListener('DOMContentLoaded', initCatalog);
+  </script>
+</body>
+</html>

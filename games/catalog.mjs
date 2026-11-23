@@ -106,9 +106,22 @@ function renderCatalog() {
     const card = make('a', '', 'game-card');
     card.href = '#game/' + game.id;
     const cover = make('img'); cover.alt = ''; cover.src = game.banner; cover.loading = 'lazy';
-    const label = make('div');
-    label.append(make('h2',game.name),make('p',groupName(game)));
-    card.append(cover,label);
+    
+    const label = make('div', '', 'game-card-content');
+    const title = make('h2', game.name);
+    
+    const isCombo = comboIds.has(game.id);
+    const meta = make('div', '', 'game-card-meta');
+    
+    const badge = make('span', isCombo ? 'Combo 31 Game' : 'Game Lẻ', 'card-badge ' + (isCombo ? 'badge-combo' : 'badge-single'));
+    const priceBox = make('div', '', 'card-price-box');
+    const price = make('strong', isCombo ? '100.000đ' : '50.000đ', 'card-price');
+    const origPrice = make('span', isCombo ? '1.550.000đ' : '1.200.000đ', 'card-price-orig');
+    priceBox.append(price, origPrice);
+    
+    meta.append(badge, priceBox);
+    label.append(title, meta);
+    card.append(cover, label);
     return card;
   });
   byId('game-grid').replaceChildren(...(cards.length ? cards : [make('p','Không tìm thấy game phù hợp.','game-panel')]));
@@ -167,8 +180,8 @@ function trailer(game, revision, featuredPreview = false) {
   } else if (stream) {
     const video = make('video');
     video.controls = !featuredPreview; video.playsInline = true; video.poster = game.banner;
-    video.muted = !featuredPreview; video.defaultMuted = !featuredPreview; video.autoplay = true;
-    video.preload = 'none'; video.setAttribute('aria-label','Trailer ' + game.name);
+    video.muted = true; video.defaultMuted = true; video.autoplay = true;
+    video.preload = 'auto'; video.setAttribute('aria-label','Trailer ' + game.name);
     const play = make('button','Phát trailer','primary');
     async function startTrailer() {
       play.disabled = true;
@@ -176,7 +189,7 @@ function trailer(game, revision, featuredPreview = false) {
         if (video.canPlayType('application/vnd.apple.mpegurl')) video.src = stream;
         else {
           hlsLibrary ??= new Promise((resolve,reject) => {
-            const script = make('script'); script.src = '/games/hls.min.js';
+            const script = make('script'); script.src = new URL('hls.min.js', import.meta.url).pathname;
             script.onload = resolve; script.onerror = reject; document.head.append(script);
           });
           await hlsLibrary;
@@ -192,11 +205,12 @@ function trailer(game, revision, featuredPreview = false) {
         play.remove();
       } catch (error) {
         if (revision !== pageRevision) return;
-        if (featuredPreview && error.name === 'NotAllowedError') {
+        if (error.name === 'NotAllowedError') {
           video.muted = true;
-          await video.play().catch(() => {});
+          await video.play().then(() => play.remove()).catch(() => { play.disabled = false; });
+        } else {
+          play.disabled = false;
         }
-        play.disabled = false;
       }
     }
     play.addEventListener('click', () => {
@@ -264,7 +278,7 @@ function setupFeatured() {
     stopPreview();
     index = (target + featured.length) % featured.length;
     const game = featured[index];
-    image.src = `/games/featured-${game.id}.${game.id === 1888930 ? 'png' : 'jpg'}`;
+    image.src = new URL(`featured-${game.id}.${game.id === 1888930 ? 'png' : 'jpg'}`, import.meta.url).pathname;
     link.setAttribute('aria-label', 'Xem chi tiết ' + game.name);
     link.href = '#game/' + game.id;
     dotButtons.forEach((dot, position) => dot.setAttribute('aria-current', String(position === index)));
@@ -331,11 +345,38 @@ function route() {
   const revision = ++pageRevision;
   player?.destroy(); player = null;
   if (game) {
+    const isCombo = comboIds.has(game.id);
     const back = make('a','← Về danh mục','back-link'); back.href = '#catalog';
-    const hero = make('div','','game-hero'), cover = make('img'), heading = make('div');
+    const hero = make('div','','game-hero'), cover = make('img'), heading = make('div', '', 'game-hero-info');
     cover.src = game.banner; cover.alt = '';
-    heading.append(make('h1',game.name),make('p',(game.genre || []).join(' · '),'muted'));
-    hero.append(cover,heading);
+    
+    const title = make('h1', game.name);
+    const genre = make('p', (game.genre || []).join(' · '), 'muted hero-genre');
+    
+    const pricingPanel = make('div', '', 'hero-pricing');
+    const priceRow = make('div', '', 'hero-price-row');
+    const price = make('span', isCombo ? '100.000đ' : '50.000đ', 'hero-price-tag');
+    const orig = make('span', isCombo ? '1.550.000đ' : '1.200.000đ', 'hero-price-orig');
+    const discount = make('span', isCombo ? '-93%' : '-95%', 'hero-discount');
+    priceRow.append(price, orig, discount);
+    
+    const planDesc = make('p', isCombo 
+      ? 'Gói Siêu Combo: Mua 1 tài khoản sở hữu trọn bộ 31 Game Bom Tấn Steam (Black Myth: Wukong, Baldur\'s Gate 3, Elden Ring, The Last of Us I & II, Cyberpunk 2077, Resident Evil...).' 
+      : 'Tài khoản riêng 1 game Steam Offline: Chơi vĩnh viễn không giới hạn, tải trực tiếp tốc độ cao từ Steam.', 
+      'hero-plan-desc'
+    );
+    
+    const actions = make('div', '', 'hero-actions');
+    const buyBtn = make('a', isCombo ? 'Mua Gói Combo 100.000đ' : 'Mua Game Này 50.000đ', 'primary hero-buy-btn');
+    buyBtn.href = '/buy#shop';
+    
+    const guarantee = make('p', '✓ Nhận tài khoản & mật khẩu kèm mã Steam Guard tự động ngay sau khi thanh toán', 'hero-guarantee');
+    actions.append(buyBtn, guarantee);
+    
+    pricingPanel.append(priceRow, planDesc, actions);
+    heading.append(title, genre, pricingPanel);
+    hero.append(cover, heading);
+    
     const story = make('section','','game-panel');
     story.append(make('h2','Cốt truyện'),make('p',synopsis[game.id] || 'Xem giới thiệu chính thức trên Steam.'));
     detail.append(back,hero,story,requirements(game),trailer(game,revision));
@@ -373,7 +414,7 @@ subscribeGoogleSession(renderCatalogAccount);
 requestGoogleSession();
 
 try {
-  const response = await fetch('/games/games.json');
+  const response = await fetch(new URL('games.json', import.meta.url).pathname);
   if (!response.ok) throw new Error('Catalog unavailable');
   games = await response.json();
   byId('game-search').addEventListener('input',renderCatalog);

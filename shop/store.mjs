@@ -355,12 +355,46 @@ function account() {
   }
   $('buy').textContent=creating?'Đang tạo đơn…':user?'Tiếp tục thanh toán':'Đăng nhập để mua';
   $('buy').disabled=loading||creating;
-  $('buy-note').textContent=user?'Đơn hàng được lưu trong tài khoản này. Bạn có thể quay lại bất cứ lúc nào.':'Đăng nhập để giữ đơn hàng và xem lại key trên các thiết bị của bạn.';
+  updateCheckoutSummary();
 }
+
+function updateCheckoutSummary() {
+  if (!selected) return;
+  const isGame = selected.isGame;
+  const titleEl = $('checkout-sidebar-title');
+  const labelName = $('label-selected-name');
+  const labelQty = $('label-selected-qty');
+  const valQty = $('selected-qty');
+  const rowDuration = $('row-selected-duration');
+  const buyNote = $('buy-note');
+
+  if (isGame) {
+    if (titleEl) titleEl.textContent = 'Thông tin tài khoản';
+    if (labelName) labelName.textContent = 'Tên game';
+    const cleanTitle = (selected.gameTitle || selected.name || '').replace(/^Tài khoản Steam:\s*/i, '');
+    if ($('selected-name')) $('selected-name').textContent = cleanTitle;
+    if (labelQty) labelQty.textContent = 'Hình thức';
+    if (valQty) valQty.textContent = 'Tài khoản Steam Offline';
+    if (rowDuration) rowDuration.hidden = false;
+    if (buyNote) buyNote.textContent = '✓ Tự động nhả tài khoản, mật khẩu và mã Steam Guard ngay sau khi thanh toán.';
+  } else {
+    if (titleEl) titleEl.textContent = 'Gói của bạn';
+    if (labelName) labelName.textContent = 'Thời hạn';
+    if ($('selected-name')) $('selected-name').textContent = selected.name;
+    if (labelQty) labelQty.textContent = 'Số lượng';
+    if (valQty) valQty.textContent = '1 bản quyền';
+    if (rowDuration) rowDuration.hidden = true;
+    if (buyNote) buyNote.textContent = user ? 'Đơn hàng được lưu trong tài khoản này. Bạn có thể quay lại bất cứ lúc nào.' : 'Đăng nhập để giữ đơn hàng và xem lại key trên các thiết bị của bạn.';
+  }
+
+  if ($('selected-price')) $('selected-price').textContent = money(selected.price);
+  if ($('buy')) $('buy').textContent = creating ? 'Đang tạo đơn…' : (user ? 'Tiếp tục thanh toán' : 'Đăng nhập để mua');
+}
+
 function select(plan) {
   selected=plan;
   for(const node of $('plans').children) {const active=node.dataset.plan===plan.id;node.classList.toggle('selected',active);node.setAttribute('aria-pressed',String(active));}
-  $('selected-name').textContent=plan.name;$('selected-price').textContent=money(plan.price);
+  updateCheckoutSummary();
 }
 
 function renderGameCheckoutCard(info) {
@@ -396,9 +430,7 @@ function renderGameCheckoutCard(info) {
   card.append(badge, title, priceRow, featBox, back);
   plansBox.append(card);
 
-  $('selected-name').textContent = selected.name;
-  $('selected-price').textContent = money(selected.price);
-  $('buy').textContent = creating ? 'Đang tạo đơn…' : (user ? 'Tiếp tục thanh toán' : 'Đăng nhập để mua');
+  updateCheckoutSummary();
 }
 
 function renderStandardPlans() {
@@ -422,14 +454,15 @@ async function initShop() {
   if (itemParam === 'combo_31' || itemParam === 'combo') {
     selected = {
       id: 'combo_31',
-      name: 'Gói Siêu Combo (Trọn Bộ 31 Game Steam AAA)',
+      name: 'Gói Siêu Combo: 31 Game Bom Tấn Steam',
+      gameTitle: 'Gói Siêu Combo: 31 Game Bom Tấn Steam',
       price: 100000,
       isGame: true,
       type: 'combo'
     };
     renderGameCheckoutCard({
       badge: 'TRỌN BỘ 31 GAME BOM TẤN • TIẾT KIỆM 93%',
-      title: 'Gói Siêu Combo (Trọn Bộ 31 Game Bom Tấn Steam)',
+      title: 'Gói Siêu Combo: 31 Game Bom Tấn Steam',
       price: 100000,
       origPrice: 1550000,
       discount: '-93%',
@@ -461,17 +494,17 @@ async function initShop() {
 
     selected = {
       id: `game_${gameParam}`,
-      name: `Tài khoản Steam: ${gameTitle}`,
+      name: gameTitle,
+      gameTitle: gameTitle,
       price: 50000,
       isGame: true,
       gameId: gameParam,
-      gameTitle,
       banner: gameBanner
     };
 
     renderGameCheckoutCard({
       badge: 'TÀI KHOẢN STEAM OFFLINE CHÍNH HÃNG • 50.000đ',
-      title: `Tài khoản Steam: ${gameTitle}`,
+      title: gameTitle,
       banner: gameBanner,
       price: 50000,
       origPrice: 1200000,
@@ -683,22 +716,76 @@ function displayOrder(order) {
     if(!bank||typeof bank.account!=='string'||!/^\d{6,30}$/.test(bank.account)||typeof bank.bank!=='string'||!/^[A-Za-z0-9]{2,20}$/.test(bank.bank)||typeof bank.name!=='string') {
       box.append(el('p','Chưa lấy được thông tin thanh toán. Vui lòng kiểm tra lại đơn.'));return;
     }
-    const grid=el('div',undefined,'payment-grid');
+
+    // Centered Order Header
+    box.replaceChildren();
+    const orderTitle = isGameOrder ? (order.title || (order.amount === 100000 ? 'Gói Siêu Combo: 31 Game Steam AAA' : planInfo.name)) : planInfo.name;
+    const headerBox = el('div', undefined, 'order-pending-header');
+    headerBox.append(
+      el('span', states[order.status], `badge ${order.status}`),
+      el('h2', orderTitle),
+      el('p', `Mã đơn hàng: ${order.id}`, 'muted order-id-text')
+    );
+    box.append(headerBox);
+
+    // Centered QR Section (QR Code right in the middle of the web)
+    const qrSection = el('div', undefined, 'qr-centered-section');
     if(!order.demo) {
-      const img=el('img',undefined,'qr');img.alt=`Mã QR thanh toán đơn ${order.id}`;
-      img.src=`https://img.vietqr.io/image/${encodeURIComponent(bank.bank)}-${encodeURIComponent(bank.account)}-compact2.png?amount=${order.amount}&addInfo=${encodeURIComponent(order.id)}&accountName=${encodeURIComponent(bank.name)}`;
-      img.addEventListener('error',()=>{img.hidden=true;toast('Không tải được QR. Thông tin chuyển khoản vẫn ở bên dưới.');});grid.append(img);
-    } else grid.append(el('div','QR minh họa đã tắt để tránh chuyển nhầm tiền.','notice'));
-    const rows=el('div');
-    for(const [label,value] of [['Ngân hàng',bank.bank],['Chủ tài khoản',bank.name],['Số tài khoản',bank.account],['Số tiền',money(order.amount)],['Nội dung chuyển khoản',order.id]]) {const row=el('div',undefined,'bank-row');row.append(el('small',label),el('strong',value));rows.append(row);}
-    grid.append(rows);box.append(grid,button('Sao chép nội dung chuyển khoản',()=>copy(order.id)),el('p','Chuyển đúng số tiền và nội dung. Bạn có thể đóng trang này rồi quay lại từ “Đơn hàng của tôi”.','fine'));
-  } else {box.append(el('p',order.status==='UNDERPAID'?'Số tiền chưa đủ theo đơn. Giữ mã đơn và biên lai để nhờ shop đối soát; không thanh toán lại toàn bộ.':'Đơn này không còn chờ thanh toán. Nếu bạn đã chuyển tiền, giữ mã đơn và biên lai để nhờ shop đối soát.'));}
-  const actions=el('div',undefined,'detail-actions');
-  actions.append(button('Kiểm tra thanh toán',()=>loadDetail(order.id)));
-  if (order.status==='PENDING') {
+      const qrWrap = el('div', undefined, 'qr-img-wrapper');
+      const img = el('img', undefined, 'qr qr-centered');
+      img.alt = `Mã VietQR thanh toán đơn ${order.id}`;
+      img.src = `https://img.vietqr.io/image/${encodeURIComponent(bank.bank)}-${encodeURIComponent(bank.account)}-compact2.png?amount=${order.amount}&addInfo=${encodeURIComponent(order.id)}&accountName=${encodeURIComponent(bank.name)}`;
+      img.addEventListener('error', () => {
+        img.hidden = true;
+        toast('Không tải được QR. Thông tin chuyển khoản vẫn ở bên dưới.');
+      });
+      qrWrap.append(img);
+      const hint = el('p', 'Quét mã VietQR bằng ứng dụng ngân hàng bất kỳ để thanh toán tự động', 'qr-hint-text');
+      qrSection.append(qrWrap, hint);
+    } else {
+      qrSection.append(el('div', 'QR minh họa đã tắt để tránh chuyển nhầm tiền.', 'notice'));
+    }
+    box.append(qrSection);
+
+    // Centered Bank Details Card
+    const bankCard = el('div', undefined, 'bank-details-card');
+    bankCard.append(el('div', 'Thông tin chuyển khoản chính xác:', 'bank-details-title'));
+
+    const bankNameFormatted = bank.bank === 'MB' ? 'MB Bank (Quân Đội)' : bank.bank;
+    const rowsData = [
+      ['Ngân hàng', bankNameFormatted, bank.bank, false, false],
+      ['Chủ tài khoản', bank.name, bank.name, false, false],
+      ['Số tài khoản', bank.account, bank.account, true, false],
+      ['Số tiền', money(order.amount), String(order.amount), true, true],
+      ['Nội dung chuyển khoản', order.id, order.id, true, true]
+    ];
+
+    const rowsList = el('div', undefined, 'bank-rows-list');
+    for (const [label, displayVal, copyVal, hasCopy, isHighlight] of rowsData) {
+      const row = el('div', undefined, `bank-info-row ${isHighlight ? 'highlight' : ''}`);
+      const labelCol = el('div', undefined, 'bank-row-label');
+      labelCol.append(el('small', label));
+      
+      const valCol = el('div', undefined, 'bank-row-value');
+      valCol.append(el('strong', displayVal));
+      if (hasCopy) {
+        const copyBtn = button('Sao chép', () => {
+          copy(copyVal);
+          toast(`Đã sao chép ${label.toLowerCase()}!`);
+        }, 'btn-copy-small');
+        valCol.append(copyBtn);
+      }
+      row.append(labelCol, valCol);
+      rowsList.append(row);
+    }
+    bankCard.append(rowsList);
+    box.append(bankCard);
+
+    // Centered Action Buttons
+    const actions = el('div', undefined, 'detail-actions centered');
     const simBtn = button('⚡ Giả lập thanh toán thành công', async () => {
       simBtn.disabled = true;
-      simBtn.textContent = 'Đang xử lý...';
+      simBtn.textContent = 'Đang kích hoạt tài khoản...';
       let fulfilled = false;
       try {
         const res = await fetch('/api/steam/simulate-payment', {
@@ -730,10 +817,22 @@ function displayOrder(order) {
         toast('Giả lập thanh toán thành công!');
         displayOrder(order);
       }
-    }, 'primary');
-    actions.append(simBtn);
+    }, 'btn-simulate-pay');
+    simBtn.style.maxWidth = '360px';
+
+    const checkBtn = button('Kiểm tra thanh toán', () => loadDetail(order.id));
+    actions.append(simBtn, checkBtn);
+    box.append(actions);
+
+    const note = el('p', 'Chuyển đúng số tiền và nội dung. Hệ thống sẽ tự động cấp tài khoản & mật khẩu sau khi nhận tiền.', 'fine order-note-centered');
+    box.append(note);
+    return;
+  } else {
+    box.append(el('p',order.status==='UNDERPAID'?'Số tiền chưa đủ theo đơn. Giữ mã đơn và biên lai để nhờ shop đối soát; không thanh toán lại toàn bộ.':'Đơn này không còn chờ thanh toán. Nếu bạn đã chuyển tiền, giữ mã đơn và biên lai để nhờ shop đối soát.'));
+    const actions=el('div',undefined,'detail-actions');
+    actions.append(button('Kiểm tra thanh toán',()=>loadDetail(order.id)));
+    box.append(actions);
   }
-  box.append(actions);
 }
 async function loadDetail(id,quiet=false) {
   clearTimeout(timer); const version=revision;

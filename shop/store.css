@@ -600,4 +600,144 @@ body::before {
   background: #2a4360;
 }
 
+/* Centered QR & Checkout Detail Layout */
+.checkout-detail {
+  max-width: 580px;
+  margin: 0 auto 60px;
+  padding: 32px 28px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.order-pending-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.order-pending-header h2 {
+  font-size: 24px;
+  margin: 12px 0 6px;
+  color: #fff;
+}
+.order-id-text {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.qr-centered-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 20px auto 24px;
+  text-align: center;
+}
+.qr-img-wrapper {
+  background: #ffffff;
+  padding: 10px;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+.qr-centered {
+  width: 240px;
+  height: 240px;
+  min-height: 240px;
+  object-fit: contain;
+  display: block;
+  border-radius: 8px;
+}
+.qr-hint-text {
+  font-size: 14px;
+  color: #cbd5e1;
+  margin-top: 12px;
+  margin-bottom: 0;
+  max-width: 340px;
+  line-height: 1.45;
+}
+
+.bank-details-card {
+  background: #111a26;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 22px;
+  text-align: left;
+}
+.bank-details-title {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.bank-rows-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bank-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.bank-info-row:last-child {
+  border-bottom: none;
+}
+.bank-info-row.highlight strong {
+  color: #4ade80;
+  font-size: 17px;
+  font-weight: 750;
+}
+.bank-row-label small {
+  color: var(--muted);
+  font-size: 13px;
+}
+.bank-row-value {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bank-row-value strong {
+  font-size: 15px;
+  color: #f1f5f9;
+  word-break: break-all;
+}
+.btn-copy-small {
+  padding: 4px 10px;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--line);
+  color: #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-copy-small:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.detail-actions.centered {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.order-note-centered {
+  text-align: center;
+  margin-top: 16px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+
 

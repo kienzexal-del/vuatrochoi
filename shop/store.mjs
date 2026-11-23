@@ -360,32 +360,19 @@ function account() {
 
 function updateCheckoutSummary() {
   if (!selected) return;
-  const isGame = selected.isGame;
   const titleEl = $('checkout-sidebar-title');
+  if (titleEl) titleEl.textContent = 'Gói của bạn';
   const labelName = $('label-selected-name');
+  if (labelName) labelName.textContent = 'Thời hạn';
+  if ($('selected-name')) $('selected-name').textContent = selected.name;
   const labelQty = $('label-selected-qty');
+  if (labelQty) labelQty.textContent = 'Số lượng';
   const valQty = $('selected-qty');
+  if (valQty) valQty.textContent = '1 bản quyền';
   const rowDuration = $('row-selected-duration');
+  if (rowDuration) rowDuration.hidden = true;
   const buyNote = $('buy-note');
-
-  if (isGame) {
-    if (titleEl) titleEl.textContent = 'Thông tin tài khoản';
-    if (labelName) labelName.textContent = 'Tên game';
-    const cleanTitle = (selected.gameTitle || selected.name || '').replace(/^Tài khoản Steam:\s*/i, '');
-    if ($('selected-name')) $('selected-name').textContent = cleanTitle;
-    if (labelQty) labelQty.textContent = 'Hình thức';
-    if (valQty) valQty.textContent = 'Tài khoản Steam Offline';
-    if (rowDuration) rowDuration.hidden = false;
-    if (buyNote) buyNote.textContent = '✓ Tự động nhả tài khoản, mật khẩu và mã Steam Guard ngay sau khi thanh toán.';
-  } else {
-    if (titleEl) titleEl.textContent = 'Gói của bạn';
-    if (labelName) labelName.textContent = 'Thời hạn';
-    if ($('selected-name')) $('selected-name').textContent = selected.name;
-    if (labelQty) labelQty.textContent = 'Số lượng';
-    if (valQty) valQty.textContent = '1 bản quyền';
-    if (rowDuration) rowDuration.hidden = true;
-    if (buyNote) buyNote.textContent = user ? 'Đơn hàng được lưu trong tài khoản này. Bạn có thể quay lại bất cứ lúc nào.' : 'Đăng nhập để giữ đơn hàng và xem lại key trên các thiết bị của bạn.';
-  }
+  if (buyNote) buyNote.textContent = user ? 'Đơn hàng được lưu trong tài khoản này. Bạn có thể quay lại bất cứ lúc nào.' : 'Đăng nhập để giữ đơn hàng và xem lại key trên các thiết bị của bạn.';
 
   if ($('selected-price')) $('selected-price').textContent = money(selected.price);
   if ($('buy')) $('buy').textContent = creating ? 'Đang tạo đơn…' : (user ? 'Tiếp tục thanh toán' : 'Đăng nhập để mua');
@@ -397,42 +384,6 @@ function select(plan) {
   updateCheckoutSummary();
 }
 
-function renderGameCheckoutCard(info) {
-  const introH1 = document.querySelector('#shop-view .intro h1');
-  if (introH1) introH1.textContent = 'Thanh toán tài khoản Steam Offline';
-  const introP = document.querySelector('#shop-view .intro p');
-  if (introP) introP.textContent = 'Nhận tài khoản, mật khẩu & mã Steam Guard tự động ngay sau khi thanh toán.';
-
-  const plansBox = $('plans');
-  plansBox.replaceChildren();
-
-  const card = el('div', undefined, 'game-checkout-card');
-  if (info.banner) {
-    const img = el('img', undefined, 'game-checkout-cover');
-    img.src = info.banner;
-    img.alt = info.title;
-    card.append(img);
-  }
-  const badge = el('span', info.badge, info.banner ? 'game-checkout-badge single' : 'game-checkout-badge');
-  const title = el('h2', info.title, 'game-checkout-title');
-  const priceRow = el('div', undefined, 'game-checkout-price-row');
-  priceRow.append(
-    el('span', money(info.price), 'game-checkout-price'),
-    el('span', money(info.origPrice), 'game-checkout-orig'),
-    el('span', info.discount, 'hero-discount')
-  );
-  const featBox = el('div', undefined, 'game-checkout-features');
-  for (const f of info.features) {
-    featBox.append(el('div', '✓ ' + f));
-  }
-  const back = el('a', '← Xem danh mục game khác', 'game-checkout-back');
-  back.href = '/games/';
-  card.append(badge, title, priceRow, featBox, back);
-  plansBox.append(card);
-
-  updateCheckoutSummary();
-}
-
 function renderStandardPlans() {
   const plansBox = $('plans');
   plansBox.replaceChildren();
@@ -440,7 +391,7 @@ function renderStandardPlans() {
     const b=button('',()=>select(plan),'plan');b.dataset.plan=plan.id;
     const radio=el('span',undefined,'radio');radio.setAttribute('aria-hidden','true');
     const name=el('span');const strong=el('strong',plan.name);
-    if(plan.id==='lifetime'||plan.id==='combo_31') strong.append(el('span','Thanh toán một lần','plan-tag'));
+    if(plan.id==='lifetime') strong.append(el('span','Thanh toán một lần','plan-tag'));
     name.append(strong,el('small',plan.description));b.append(radio,name,el('span',money(plan.price),'price'));plansBox.append(b);
   }
   select(selected);
@@ -452,71 +403,11 @@ async function initShop() {
   const gameParam = searchParams.get('game');
 
   if (itemParam === 'combo_31' || itemParam === 'combo') {
-    selected = {
-      id: 'combo_31',
-      name: 'Gói Siêu Combo: 31 Game Bom Tấn Steam',
-      gameTitle: 'Gói Siêu Combo: 31 Game Bom Tấn Steam',
-      price: 100000,
-      isGame: true,
-      type: 'combo'
-    };
-    renderGameCheckoutCard({
-      badge: 'TRỌN BỘ 31 GAME BOM TẤN • TIẾT KIỆM 93%',
-      title: 'Gói Siêu Combo: 31 Game Bom Tấn Steam',
-      price: 100000,
-      origPrice: 1550000,
-      discount: '-93%',
-      features: [
-        'Sở hữu vĩnh viễn 1 tài khoản Steam Offline trọn bộ 31 Game AAA (Black Myth: Wukong, Baldur\'s Gate 3, Elden Ring, The Last of Us I & II, Cyberpunk 2077...).',
-        'Chơi offline không giới hạn thời gian, lưu save game trên máy của bạn.',
-        'Tải game trực tiếp tốc độ cao từ máy chủ Steam chính hãng.',
-        'Tự động cấp tài khoản, mật khẩu và mã Steam Guard 24/7.',
-        'Bảo hành 1 đổi 1 và hỗ trợ trọn đời.'
-      ]
-    });
+    location.replace('/games/');
     return;
   }
-
   if (gameParam) {
-    let gameTitle = 'Game Lẻ Steam Offline';
-    let gameBanner = '';
-    try {
-      const res = await fetch('/games/games.json');
-      if (res.ok) {
-        const list = await res.json();
-        const found = list.find(g => String(g.id) === String(gameParam));
-        if (found) {
-          gameTitle = found.name;
-          gameBanner = found.banner;
-        }
-      }
-    } catch(e) {}
-
-    selected = {
-      id: `game_${gameParam}`,
-      name: gameTitle,
-      gameTitle: gameTitle,
-      price: 50000,
-      isGame: true,
-      gameId: gameParam,
-      banner: gameBanner
-    };
-
-    renderGameCheckoutCard({
-      badge: 'TÀI KHOẢN STEAM OFFLINE CHÍNH HÃNG • 50.000đ',
-      title: gameTitle,
-      banner: gameBanner,
-      price: 50000,
-      origPrice: 1200000,
-      discount: '-95%',
-      features: [
-        `1 tài khoản Steam riêng chơi game ${gameTitle} vĩnh viễn.`,
-        'Chơi offline không giới hạn thời gian, lưu save game trên máy của bạn.',
-        'Tải game trực tiếp tốc độ cao từ máy chủ Steam chính hãng.',
-        'Tự động cấp tài khoản, mật khẩu và mã Steam Guard 24/7.',
-        'Bảo hành 1 đổi 1 và hỗ trợ trọn đời.'
-      ]
-    });
+    location.replace('/games/#game/' + encodeURIComponent(gameParam));
     return;
   }
 

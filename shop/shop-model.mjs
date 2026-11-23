@@ -1,6 +1,4 @@
 export const plans = [
-  {id:'combo_31', name:'Gói Siêu Combo (31 Game Steam AAA)', price:100000, description:'Trọn bộ 31 Game Bom Tấn Steam trong 1 tài khoản, chơi vĩnh viễn.'},
-  {id:'single_game', name:'Game Lẻ Steam Offline', price:50000, description:'Tài khoản riêng 1 game Steam Offline tự chọn, chơi vĩnh viễn.'},
   {id:'trial_1', name:'1 ngày', price:10000, description:'Trải nghiệm trước khi chọn gói dài hạn.'},
   {id:'trial_3', name:'3 ngày', price:20000, description:'Một cuối tuần dành cho những trận game.'},
   {id:'trial_7', name:'7 ngày', price:50000, description:'Thêm thời gian trải nghiệm trên thiết bị của bạn.'},

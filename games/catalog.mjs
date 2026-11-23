@@ -251,8 +251,8 @@ function createComboShowcase(showDrawerByDefault = false, customComboMatches = n
   priceGroup.append(price, priceOrig, discountBadge);
 
   const actions = make('div', '', 'combo-actions');
-  const buyBtn = make('a', 'Mua Gói Combo 100k', 'primary combo-buy-btn');
-  buyBtn.href = '/buy?item=combo_31';
+  const buyBtn = make('button', 'Mua Gói Combo 100k', 'primary combo-buy-btn');
+  buyBtn.type = 'button';
   buyBtn.addEventListener('click', (e) => {
     e.preventDefault();
     openDirectPaymentModal({
@@ -635,8 +635,8 @@ function route() {
     );
     
     const actions = make('div', '', 'hero-actions');
-    const buyBtn = make('a', isCombo ? 'Mua Gói Combo 100.000đ' : 'Mua Game Này 50.000đ', 'primary hero-buy-btn');
-    buyBtn.href = isCombo ? '/buy?item=combo_31' : `/buy?game=${encodeURIComponent(game.id)}`;
+    const buyBtn = make('button', isCombo ? 'Mua Gói Combo 100.000đ' : 'Mua Game Này 50.000đ', 'primary hero-buy-btn');
+    buyBtn.type = 'button';
     buyBtn.addEventListener('click', (e) => {
       e.preventDefault();
       openDirectPaymentModal({

@@ -1,8 +1,22 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "vuatrochoi",
+  "main": "shop/production-worker.mjs",
+  "d1_databases": [
+    {
+      "binding": "STEAM_DB",
+      "database_name": "gamegiare-steam-orders",
+      "database_id": "62102cd1-1e84-48c8-abe6-d2bece77c770"
+    }
+  ],
+  "vars": {
+    "GOOGLE_CLIENT_ID": "934644417883-72iujt055o25snvt6i1cr9egomvvgm2l.apps.googleusercontent.com",
+    "PAYMENT_ACCOUNT": "0000125042003"
+  },
   "compatibility_date": "2026-11-23",
   "assets": {
-    "directory": "."
+    "directory": ".",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/steam/*"]
   }
 }

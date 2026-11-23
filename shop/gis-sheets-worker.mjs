@@ -6,7 +6,7 @@ function decodeBase64Url(segment) {
   return Uint8Array.from(atob(segment.replaceAll('-', '+').replaceAll('_', '/')), char => char.charCodeAt(0));
 }
 
-async function verifyGoogle(token, audience) {
+export async function verifyGoogle(token, audience) {
   if (!audience || !/^[\w-]+\.[\w-]+\.[\w-]+$/.test(token) || token.length > 8192) return null;
   const [headerPart, payloadPart, signature] = token.split('.');
   const decode = part => JSON.parse(new TextDecoder().decode(decodeBase64Url(part)));

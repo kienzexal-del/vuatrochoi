@@ -839,8 +839,8 @@ export async function openDirectPaymentModal({ gameId, title, price, isCombo }) 
   try {
     const res = await fetch('/api/steam/checkout', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ gameId, pending: true, customerName: 'Khách mua game' })
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + readGoogleSession() },
+      body: JSON.stringify({ gameId, requestId: crypto.randomUUID() })
     });
     if (res.ok) {
       const data = await res.json();
@@ -911,7 +911,11 @@ function renderPendingModalView(dialog, body, order, meta) {
   if (activePaymentPoll) clearInterval(activePaymentPoll);
   activePaymentPoll = setInterval(async () => {
     try {
-      const res = await fetch(`/api/steam/orders/${order.orderId}`);
+      const res = await fetch('/api/steam/order', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + readGoogleSession()},
+        body: JSON.stringify({orderId: order.orderId})
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.ok && data.order && data.order.status === 'PAID') {

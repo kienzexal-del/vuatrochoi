@@ -1,4 +1,4 @@
-# ===========================================================================
+﻿# ===========================================================================
 #  VUA TRO CHOI - BO CAI DAT TU DONG STEAM TOC DO CAO (POWERSHELL 1-LINER)
 #  Phan phoi ban quyen tu dong | Xac thuc qua Google Sheets 0d
 # ===========================================================================
@@ -191,6 +191,7 @@ $authObj = @{
     apiUrl = $API_URL
     isTrial = ($resp.isTrial -eq $true)
     expiresTimestamp = $(if ($resp.expiresTimestamp) { [int64]$resp.expiresTimestamp } else { 0 })
+    lastCheck = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 }
 $authJson = $authObj | ConvertTo-Json -Compress
 $authB64 = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($authJson))
@@ -288,29 +289,188 @@ if (-not (Test-Path (Join-Path $installDir "files"))) {
 }
 Set-Content -Path $excludePath -Value $excludeContent -Encoding UTF8 -Force
 
-# 9. Cai dat tac vu khoi dong ngam Windows Task Scheduler (Chay 24/7)
-Write-Host " [+] Dang dang ky dich vu toi uu mang (Task Scheduler)..." -ForegroundColor Cyan
+# 9. Cai dat bao ve ban quyen thong minh & tac vu khoi dong ngam Task Scheduler
+Write-Host " [+] Dang dang ky dich vu toi uu mang (Task Scheduler & Guard)..." -ForegroundColor Cyan
+
+# 9.1 Tao script bao ve & dong bo ban quyen thong minh (vtch_guard.ps1)
+$guardPath = Join-Path $installDir "vtch_guard.ps1"
+$guardContent = @'
+param([switch]$OnBoot)
+
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12 -bor [System.Net.SecurityProtocolType]::Tls13
+
+$appDir = "C:\ProgramData\VuaTroChoi"
+$authFile = Join-Path $appDir "net_auth.dat"
+
+function Stop-And-Reset {
+    param([string]$Reason = "")
+    Get-Process -Name "GameNetworkService" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    taskkill.exe /f /im GameNetworkService.exe 2>$null | Out-Null
+    sc.exe stop WinDivert 2>$null | Out-Null
+    sc.exe stop WinDivert1.4 2>$null | Out-Null
+    net stop WinDivert 2>$null | Out-Null
+
+    Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq 'Up' -or $_.HardwareInterface -eq $true } | ForEach-Object {
+        Set-DnsClientServerAddress -InterfaceAlias $_.Name -ResetServerAddresses -ErrorAction SilentlyContinue
+    }
+    Clear-DnsClientCache
+    # Tu dong xoa file auth tren may khach de vo hieu hoa triet de (Fail-Closed)
+    Remove-Item $authFile -Force -ErrorAction SilentlyContinue
+}
+
+# 1. BẢO MẬT CHẶN ĐỨNG: Khong co file auth -> Khong co quyen chay
+if (-not (Test-Path $authFile)) {
+    Stop-And-Reset -Reason "MissingAuthFile"
+    exit 99
+}
+
+try {
+    $rawB64 = Get-Content -Path $authFile -Raw -ErrorAction Stop
+    $jsonStr = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($rawB64.Trim()))
+    $auth = $jsonStr | ConvertFrom-Json
+} catch {
+    Stop-And-Reset -Reason "CorruptAuthFile"
+    exit 99
+}
+
+$key = $auth.key
+$hwid = $auth.hwid
+$apiUrl = $auth.apiUrl
+$isTrial = ($auth.isTrial -eq $true)
+$expiresTimestamp = $(if ($auth.expiresTimestamp) { [int64]$auth.expiresTimestamp } else { 0 })
+$lastCheck = $(if ($auth.lastCheck) { [int64]$auth.lastCheck } else { 0 })
+
+if ([string]::IsNullOrWhiteSpace($key)) {
+    Stop-And-Reset -Reason "EmptyKey"
+    exit 99
+}
+
+# 2. KIỂM TRA HẾT HẠN OFFLINE CỤC BỘ (Key ngày / Dùng thử - 0 tốn request)
+$nowUnix = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+if ($isTrial -and $expiresTimestamp -gt 0 -and $nowUnix -ge $expiresTimestamp) {
+    # Key ngay da het han su dung!
+    Stop-And-Reset -Reason "TrialExpiredLocally"
+    exit 99
+}
+
+# 3. XÁC ĐỊNH CÓ CẦN GỌI MÁY CHỦ GOOGLE APPS SCRIPT KHÔNG
+$needServerCheck = $false
+if ($OnBoot) {
+    # Khi mo may / dang nhap Windows: kiem tra ngay 1 lan
+    $needServerCheck = $true
+} elseif ($isTrial -and ($nowUnix - $lastCheck -ge 43200)) {
+    # Key ngay dang chay 24/7: sau 12h (43200 giay) moi dong bo 1 lan
+    $needServerCheck = $true
+} elseif ($lastCheck -eq 0) {
+    $needServerCheck = $true
+}
+
+# Neu chua den gio kiem tra online -> Cho phep tiep tuc ngay, khong ton request
+if (-not $needServerCheck) {
+    exit 0
+}
+
+# 4. GỌI MÁY CHỦ GOOGLE APPS SCRIPT XÁC THỰC
+if ($apiUrl -and $apiUrl -ne "__GOOGLE_SCRIPT_WEBHOOK_URL__") {
+    try {
+        $checkUrl = "{0}?action=verify&key={1}&hwid={2}" -f $apiUrl, [Uri]::EscapeDataString($key), [Uri]::EscapeDataString($hwid)
+        $resp = Invoke-RestMethod -Uri $checkUrl -Method Get -TimeoutSec 10
+
+        if ($resp.success -ne $true) {
+            # ADMIN DA KHOA (Locked) HOAC KEY DA BI VO HIEU HOA / HET HAN TREN SHEET!
+            Stop-And-Reset -Reason "ServerDenied: $($resp.message)"
+            exit 99
+        }
+
+        # May chu chap thuan -> Dong bo lai moc thoi gian
+        $auth.lastCheck = $nowUnix
+        if ($resp.expiresTimestamp) {
+            $auth.expiresTimestamp = [int64]$resp.expiresTimestamp
+        }
+        $updatedJson = $auth | ConvertTo-Json -Compress
+        $updatedB64 = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($updatedJson))
+        Set-Content -Path $authFile -Value $updatedB64 -Force
+    } catch {
+        # Mat mang hoac loi ket noi tam thoi:
+        if ($isTrial -and $expiresTimestamp -gt 0 -and $nowUnix -ge $expiresTimestamp) {
+            Stop-And-Reset -Reason "NetworkErrorAndExpired"
+            exit 99
+        }
+        # Con lai: cho phep offline tiep tuc (Grace period)
+    }
+}
+
+exit 0
+'@
+Set-Content -Path $guardPath -Value $guardContent -Encoding UTF8 -Force
+
+# 9.2 Tao trinh quan ly khoi chay ngam (vtch_runner.vbs)
 $taskName = "Game_Network_Optimizer"
 $vbsPath = Join-Path $installDir "vtch_runner.vbs"
 $vbsLines = @(
     'Set WshShell = CreateObject("WScript.Shell")',
     'Set fso = CreateObject("Scripting.FileSystemObject")',
-    'WshShell.CurrentDirectory = "C:\ProgramData\VuaTroChoi"',
-    'Set objWMIService = GetObject("winmgmts:\\.\root\cimv2")',
-    'Set colProcesses = objWMIService.ExecQuery("Select * from Win32_Process Where Name = ''GameNetworkService.exe''")',
+    'appDir = "C:\ProgramData\VuaTroChoi"',
+    'WshShell.CurrentDirectory = appDir',
     '',
-    'coreExe = "C:\ProgramData\VuaTroChoi\GameNetworkService.exe"',
-    'ownedRunning = False',
-    'For Each candidate In colProcesses',
-    '    If Not IsNull(candidate.ExecutablePath) Then',
-    '        If LCase(candidate.ExecutablePath) = LCase(coreExe) Then ownedRunning = True',
+    'guardScript = appDir & "\vtch_guard.ps1"',
+    'coreExe = appDir & "\GameNetworkService.exe"',
+    'authFile = appDir & "\net_auth.dat"',
+    '',
+    'args = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"',
+    '',
+    "' 1. KHI KHOI DONG: Kiem tra ban quyen truoc (che do -OnBoot)",
+    'If fso.FileExists(guardScript) Then',
+    '    bootRet = WshShell.Run("powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File """ & guardScript & """ -OnBoot", 0, True)',
+    '    If bootRet = 99 Then',
+    '        WScript.Quit',
+    '    End If',
+    'Else',
+    '    WScript.Quit',
+    'End If',
+    '',
+    'Set objWMIService = GetObject("winmgmts:\\.\root\cimv2")',
+    '',
+    "' 2. Khoi chay GameNetworkService neu chua chay",
+    'Set colProcesses = objWMIService.ExecQuery("Select * from Win32_Process Where Name = ''GameNetworkService.exe''")',
+    'coreRunning = False',
+    'For Each p In colProcesses',
+    '    If Not IsNull(p.ExecutablePath) Then',
+    '        If LCase(p.ExecutablePath) = LCase(coreExe) Then coreRunning = True',
     '    End If',
     'Next',
     '',
-    'If Not ownedRunning Then',
-    '    args = "--wf-tcp=80,443 --filter-tcp=80 --filter-l7=http --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-cutoff=d4 --new --filter-tcp=443 --filter-l7=tls --hostlist=""files\list-steam.txt"" --hostlist-exclude=""files\exclude-games.txt"" --dpi-desync=fake,split --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-cutoff=d4"',
+    'If Not coreRunning Then',
     '    WshShell.Run """" & coreExe & """ " & args, 0, False',
-    'End If'
+    'End If',
+    '',
+    "' 3. Vong lap giam sat ngam (5 phut kiem tra local 1 lan; Online cap nhat sau 12h)",
+    'Do',
+    '    If fso.FileExists(guardScript) And fso.FileExists(authFile) Then',
+    '        retCode = WshShell.Run("powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File """ & guardScript & """", 0, True)',
+    '        If retCode = 99 Then',
+    '            WScript.Quit',
+    '        End If',
+    '    Else',
+    '        WshShell.Run "taskkill.exe /f /im GameNetworkService.exe", 0, True',
+    '        WScript.Quit',
+    '    End If',
+    '',
+    '    Set colProcesses = objWMIService.ExecQuery("Select * from Win32_Process Where Name = ''GameNetworkService.exe''")',
+    '    coreRunning = False',
+    '    For Each p In colProcesses',
+    '        If Not IsNull(p.ExecutablePath) Then',
+    '            If LCase(p.ExecutablePath) = LCase(coreExe) Then coreRunning = True',
+    '        End If',
+    '    Next',
+    '',
+    '    If Not coreRunning Then',
+    '        WshShell.Run """" & coreExe & """ " & args, 0, False',
+    '    End If',
+    '',
+    '    WScript.Sleep 300000',
+    'Loop'
 )
 [System.IO.File]::WriteAllLines($vbsPath, $vbsLines, [System.Text.Encoding]::ASCII)
 

@@ -707,6 +707,13 @@ try {
   games = await response.json();
   byId('game-search').addEventListener('input',renderCatalog);
   byId('game-group').addEventListener('change',renderCatalog);
+  document.querySelector('.catalog-brand')?.addEventListener('click', (e) => {
+    if (location.hash) {
+      e.preventDefault();
+      location.hash = '';
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
   window.addEventListener('hashchange',route);
   renderCatalog();
   setupFeatured();

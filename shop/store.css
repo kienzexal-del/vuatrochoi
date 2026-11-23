@@ -194,3 +194,87 @@ body::before {
 }
 .catalog-wordmark > span { color: var(--accent, #82d4ff); }
 
+/* Game Checkout Card (Steam Offline) */
+.game-checkout-card {
+  padding: clamp(20px, 3.5vw, 32px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.game-checkout-cover {
+  width: 100%;
+  aspect-ratio: 460/215;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #0f1824;
+}
+.game-checkout-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 750;
+  padding: 4px 10px;
+  border-radius: 6px;
+  width: fit-content;
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  letter-spacing: .02em;
+}
+.game-checkout-badge.single {
+  background: rgba(130, 212, 255, 0.15);
+  color: #82d4ff;
+  border: 1px solid rgba(130, 212, 255, 0.3);
+}
+.game-checkout-title {
+  margin: 0;
+  font-size: clamp(20px, 2.8vw, 26px);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.25;
+}
+.game-checkout-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.game-checkout-price {
+  font-size: clamp(24px, 3.2vw, 30px);
+  font-weight: 850;
+  color: #82d4ff;
+  letter-spacing: -0.02em;
+}
+.game-checkout-orig {
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: line-through;
+}
+.game-checkout-features {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #121c29;
+  border: 1px solid var(--line);
+  font-size: 13.5px;
+  color: #d8e6f5;
+  line-height: 1.5;
+}
+.game-checkout-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+  margin-top: 4px;
+}
+.game-checkout-back:hover {
+  text-decoration: underline;
+}
+

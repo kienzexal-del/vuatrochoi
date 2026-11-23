@@ -1,5 +1,5 @@
 import {GOOGLE_CLIENT_ID, googleClaims, googleProfile, readGoogleSession, requestGoogleSession, saveGoogleSession, subscribeGoogleSession} from './google-session.mjs';
-import {plans,money,states,normalizeOrders,validOrder,request} from './shop-model.mjs';
+import {plans,money,states,normalizeOrders,validOrder,request,getPlan} from './shop-model.mjs';
 const $ = id => document.getElementById(id);
 let user = null, selected = plans[0], orders = [], loading = true, creating = false, timer, revision = 0;
 const el = (tag,text,cls) => {const node = document.createElement(tag); if(text !== undefined) node.textContent = text; if(cls) node.className = cls; return node;};
@@ -50,7 +50,7 @@ function safeOrder(o) {
   if (!o || typeof o !== 'object') return null;
   const id = typeof o.id === 'string' ? o.id : (typeof o.orderId === 'string' ? o.orderId : '');
   if (!/^[A-Z0-9-]{6,64}$/.test(id)) return null;
-  const matchedPlan = plans.find(p => p.id === o.plan || p.name === o.plan || p.id === o.tier || p.name === o.tier || p.price === o.amount);
+  const matchedPlan = getPlan(o.plan || o.tier, o.amount);
   const plan = matchedPlan ? matchedPlan.id : 'lifetime';
   const amount = Number.isSafeInteger(o.amount) && o.amount > 0 ? o.amount : (matchedPlan ? matchedPlan.price : 100000);
   const status = Object.hasOwn(states, o.status) ? o.status : 'PENDING';
@@ -345,21 +345,142 @@ function select(plan) {
   for(const node of $('plans').children) {const active=node.dataset.plan===plan.id;node.classList.toggle('selected',active);node.setAttribute('aria-pressed',String(active));}
   $('selected-name').textContent=plan.name;$('selected-price').textContent=money(plan.price);
 }
-for(const plan of plans) {
-  const b=button('',()=>select(plan),'plan');b.dataset.plan=plan.id;
-  const radio=el('span',undefined,'radio');radio.setAttribute('aria-hidden','true');
-  const name=el('span');const strong=el('strong',plan.name);
-  if(plan.id==='lifetime') strong.append(el('span','Thanh toán một lần','plan-tag'));
-  name.append(strong,el('small',plan.description));b.append(radio,name,el('span',money(plan.price),'price'));$('plans').append(b);
+
+function renderGameCheckoutCard(info) {
+  const introH1 = document.querySelector('#shop-view .intro h1');
+  if (introH1) introH1.textContent = 'Thanh toán tài khoản Steam Offline';
+  const introP = document.querySelector('#shop-view .intro p');
+  if (introP) introP.textContent = 'Nhận tài khoản, mật khẩu & mã Steam Guard tự động ngay sau khi thanh toán.';
+
+  const plansBox = $('plans');
+  plansBox.replaceChildren();
+
+  const card = el('div', undefined, 'game-checkout-card');
+  if (info.banner) {
+    const img = el('img', undefined, 'game-checkout-cover');
+    img.src = info.banner;
+    img.alt = info.title;
+    card.append(img);
+  }
+  const badge = el('span', info.badge, info.banner ? 'game-checkout-badge single' : 'game-checkout-badge');
+  const title = el('h2', info.title, 'game-checkout-title');
+  const priceRow = el('div', undefined, 'game-checkout-price-row');
+  priceRow.append(
+    el('span', money(info.price), 'game-checkout-price'),
+    el('span', money(info.origPrice), 'game-checkout-orig'),
+    el('span', info.discount, 'hero-discount')
+  );
+  const featBox = el('div', undefined, 'game-checkout-features');
+  for (const f of info.features) {
+    featBox.append(el('div', '✓ ' + f));
+  }
+  const back = el('a', '← Xem danh mục game khác', 'game-checkout-back');
+  back.href = '/games/';
+  card.append(badge, title, priceRow, featBox, back);
+  plansBox.append(card);
+
+  $('selected-name').textContent = selected.name;
+  $('selected-price').textContent = money(selected.price);
+  $('buy').textContent = creating ? 'Đang tạo đơn…' : (user ? 'Tiếp tục thanh toán' : 'Đăng nhập để mua');
 }
-select(selected);
+
+function renderStandardPlans() {
+  const plansBox = $('plans');
+  plansBox.replaceChildren();
+  for(const plan of plans) {
+    const b=button('',()=>select(plan),'plan');b.dataset.plan=plan.id;
+    const radio=el('span',undefined,'radio');radio.setAttribute('aria-hidden','true');
+    const name=el('span');const strong=el('strong',plan.name);
+    if(plan.id==='lifetime'||plan.id==='combo_31') strong.append(el('span','Thanh toán một lần','plan-tag'));
+    name.append(strong,el('small',plan.description));b.append(radio,name,el('span',money(plan.price),'price'));plansBox.append(b);
+  }
+  select(selected);
+}
+
+async function initShop() {
+  const searchParams = new URLSearchParams(location.search);
+  const itemParam = searchParams.get('item');
+  const gameParam = searchParams.get('game');
+
+  if (itemParam === 'combo_31' || itemParam === 'combo') {
+    selected = {
+      id: 'combo_31',
+      name: 'Gói Siêu Combo (Trọn Bộ 31 Game Steam AAA)',
+      price: 100000,
+      isGame: true,
+      type: 'combo'
+    };
+    renderGameCheckoutCard({
+      badge: 'TRỌN BỘ 31 GAME BOM TẤN • TIẾT KIỆM 93%',
+      title: 'Gói Siêu Combo (Trọn Bộ 31 Game Bom Tấn Steam)',
+      price: 100000,
+      origPrice: 1550000,
+      discount: '-93%',
+      features: [
+        'Sở hữu vĩnh viễn 1 tài khoản Steam Offline trọn bộ 31 Game AAA (Black Myth: Wukong, Baldur\'s Gate 3, Elden Ring, The Last of Us I & II, Cyberpunk 2077...).',
+        'Chơi offline không giới hạn thời gian, lưu save game trên máy của bạn.',
+        'Tải game trực tiếp tốc độ cao từ máy chủ Steam chính hãng.',
+        'Tự động cấp tài khoản, mật khẩu và mã Steam Guard 24/7.',
+        'Bảo hành 1 đổi 1 và hỗ trợ trọn đời.'
+      ]
+    });
+    return;
+  }
+
+  if (gameParam) {
+    let gameTitle = 'Game Lẻ Steam Offline';
+    let gameBanner = '';
+    try {
+      const res = await fetch('/games/games.json');
+      if (res.ok) {
+        const list = await res.json();
+        const found = list.find(g => String(g.id) === String(gameParam));
+        if (found) {
+          gameTitle = found.name;
+          gameBanner = found.banner;
+        }
+      }
+    } catch(e) {}
+
+    selected = {
+      id: `game_${gameParam}`,
+      name: `Tài khoản Steam: ${gameTitle}`,
+      price: 50000,
+      isGame: true,
+      gameId: gameParam,
+      gameTitle,
+      banner: gameBanner
+    };
+
+    renderGameCheckoutCard({
+      badge: 'TÀI KHOẢN STEAM OFFLINE CHÍNH HÃNG • 50.000đ',
+      title: `Tài khoản Steam: ${gameTitle}`,
+      banner: gameBanner,
+      price: 50000,
+      origPrice: 1200000,
+      discount: '-95%',
+      features: [
+        `1 tài khoản Steam riêng chơi game ${gameTitle} vĩnh viễn.`,
+        'Chơi offline không giới hạn thời gian, lưu save game trên máy của bạn.',
+        'Tải game trực tiếp tốc độ cao từ máy chủ Steam chính hãng.',
+        'Tự động cấp tài khoản, mật khẩu và mã Steam Guard 24/7.',
+        'Bảo hành 1 đổi 1 và hỗ trợ trọn đời.'
+      ]
+    });
+    return;
+  }
+
+  renderStandardPlans();
+}
+initShop();
+
 function empty(title,description,action,label) {const box=el('div',undefined,'empty');box.append(el('h2',title),el('p',description));if(action)box.append(button(label,action,'primary'));return box;}
 function showOrders() {
   const list=$('orders');list.replaceChildren();
   if(!orders.length){list.append(empty('Chưa có đơn hàng','Khi bạn mua bản quyền, đơn hàng sẽ xuất hiện tại đây.',()=>location.hash='shop','Chọn gói bản quyền'));return;}
   const container=el('div',undefined,'orders');
   for(const order of orders) {
-    const row=el('article',undefined,'order');const name=el('div');name.append(el('h3',plans.find(p=>p.id===order.plan).name),el('small',order.id));
+    const row=el('article',undefined,'order');const name=el('div');name.append(el('h3',getPlan(order.plan, order.amount).name),el('small',order.id));
     const status=el('div');status.append(el('span',states[order.status],`badge ${order.status}`),el('small',new Date(order.createdAt).toLocaleString('vi-VN')));
     row.append(name,status,el('strong',money(order.amount),'order-amount'),button(order.status==='PAID'?'Xem key':'Xem đơn',()=>location.hash=`order/${order.id}`));container.append(row);
   }
@@ -418,10 +539,12 @@ async function loadOrders() {
 }
 function displayOrder(order) {
   if (order?.id) saveSavedOrder(order);
-  const box=$('detail');box.replaceChildren();box.append(el('span',states[order.status],`badge ${order.status}`),el('h2',`Bản quyền ${plans.find(p=>p.id===order.plan).name}`),el('p',`Mã đơn: ${order.id}`,'muted'));
+  const planInfo = getPlan(order.plan, order.amount);
+  const isGameOrder = order.plan === 'combo_31' || String(order.plan).startsWith('game_') || order.amount === 50000 || (order.amount === 100000 && String(order.plan).includes('combo'));
+  const box=$('detail');box.replaceChildren();box.append(el('span',states[order.status],`badge ${order.status}`),el('h2',planInfo.name),el('p',`Mã đơn: ${order.id}`,'muted'));
   if(order.status==='PAID') {
-    if(typeof order.key!=='string'||!order.key){box.append(el('p','Thanh toán đã xác nhận. Key đang được xử lý; hãy kiểm tra lại sau ít phút.'));}
-    else {box.append(el('p','Key của bạn được lưu tại đây. Chỉ chia sẻ với người bạn tin tưởng.'),el('code',order.key,'key'),button('Sao chép key',()=>copy(order.key),'primary'));}
+    if(typeof order.key!=='string'||!order.key){box.append(el('p', isGameOrder ? 'Thanh toán đã xác nhận. Tài khoản Steam đang được cấp; hãy kiểm tra lại sau ít phút.' : 'Thanh toán đã xác nhận. Key đang được xử lý; hãy kiểm tra lại sau ít phút.'));}
+    else {box.append(el('p', isGameOrder ? 'Tài khoản & mã Steam Guard của bạn:' : 'Key của bạn được lưu tại đây. Chỉ chia sẻ với người bạn tin tưởng.'),el('code',order.key,'key'),button(isGameOrder ? 'Sao chép thông tin' : 'Sao chép key',()=>copy(order.key),'primary'));}
   } else if(order.status==='PENDING') {
     const bank=order.payment;
     if(!bank||typeof bank.account!=='string'||!/^\d{6,30}$/.test(bank.account)||typeof bank.bank!=='string'||!/^[A-Za-z0-9]{2,20}$/.test(bank.bank)||typeof bank.name!=='string') {

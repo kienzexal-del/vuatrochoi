@@ -252,7 +252,7 @@ function createComboShowcase(showDrawerByDefault = false, customComboMatches = n
 
   const actions = make('div', '', 'combo-actions');
   const buyBtn = make('a', 'Mua Gói Combo 100k', 'primary combo-buy-btn');
-  buyBtn.href = '/buy#shop';
+  buyBtn.href = '/buy?item=combo_31';
 
   const toggleBtn = make('button', '', 'combo-toggle-list-btn');
   toggleBtn.type = 'button';
@@ -627,7 +627,7 @@ function route() {
     
     const actions = make('div', '', 'hero-actions');
     const buyBtn = make('a', isCombo ? 'Mua Gói Combo 100.000đ' : 'Mua Game Này 50.000đ', 'primary hero-buy-btn');
-    buyBtn.href = '/buy#shop';
+    buyBtn.href = isCombo ? '/buy?item=combo_31' : `/buy?game=${encodeURIComponent(game.id)}`;
     
     const guarantee = make('p', '✓ Nhận tài khoản & mật khẩu kèm mã Steam Guard tự động ngay sau khi thanh toán', 'hero-guarantee');
     actions.append(buyBtn, guarantee);

@@ -1,3 +1,4 @@
+import {googleProfile, readGoogleSession, requestGoogleSession, saveGoogleSession, subscribeGoogleSession} from '/shop/google-session.mjs';
 const byId = id => document.getElementById(id);
 const make = (tag, text, className) => {
   const node = document.createElement(tag);
@@ -341,6 +342,35 @@ function route() {
   }
   window.scrollTo(0,0);
 }
+
+function renderCatalogAccount(credential) {
+  const account = byId('catalog-account');
+  const profile = googleProfile(credential);
+  if (!profile) {
+    const signIn = make('a', 'Đăng nhập', 'catalog-login');
+    signIn.href = '/buy?signin=catalog';
+    account.replaceChildren(signIn);
+    return;
+  }
+  const menu = make('details', '', 'profile-menu');
+  const trigger = make('summary', 'Tài khoản', 'catalog-login');
+  trigger.setAttribute('aria-label', 'Menu tài khoản');
+  const actions = make('div', '', 'profile-panel');
+  const orders = make('a', 'Đơn hàng của tôi');
+  orders.href = '/buy#orders';
+  const signOut = make('button', 'Đăng xuất');
+  signOut.addEventListener('click', () => {
+    saveGoogleSession('');
+    renderCatalogAccount('');
+  });
+  actions.append(orders, signOut);
+  menu.append(trigger, actions);
+  account.replaceChildren(menu);
+}
+
+renderCatalogAccount(readGoogleSession());
+subscribeGoogleSession(renderCatalogAccount);
+requestGoogleSession();
 
 try {
   const response = await fetch('/games/games.json');

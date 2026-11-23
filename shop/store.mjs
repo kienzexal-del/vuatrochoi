@@ -1,3 +1,4 @@
+import {GOOGLE_CLIENT_ID, googleClaims, googleProfile, readGoogleSession, requestGoogleSession, saveGoogleSession, subscribeGoogleSession} from './google-session.mjs';
 import {plans,money,states,normalizeOrders,validOrder,request} from './shop-model.mjs';
 const $ = id => document.getElementById(id);
 let user = null, selected = plans[0], orders = [], loading = true, creating = false, timer, revision = 0;
@@ -6,7 +7,7 @@ function button(text,action,cls='') {const b=el('button',text,cls); b.addEventLi
 function error(message) {$('alert').textContent=message; $('alert').hidden=!message;}
 function toast(message) {$('toast').textContent=message; $('toast').hidden=false; setTimeout(()=>$('toast').hidden=true,3000);}
 let gisReady = false, credential = '';
-const SESSION_KEY = 'vtch.google.tab-session';
+const signInSource = new URLSearchParams(location.search).get('signin');
 let loginOpening = false;
 async function login() {
   if (!$('demo').hidden) {
@@ -41,62 +42,12 @@ async function login() {
     width:Math.min(360, Math.floor(slot.getBoundingClientRect().width))
   });
 }
-const GOOGLE_CLIENT_ID = '934644417883-72iujt055o25snvt6i1cr9egomvvgm2l.apps.googleusercontent.com';
 const API_URL = 'https://script.google.com/macros/s/AKfycbzsJ4SvFtnCRROeB3SZHNcq65oReT-wlBQJlwF9eG4WUsDI9cJT4JuXLLuH9Y6TYZdRJg/exec';
 const BANK_CONFIG = { bank: 'MB', account: '0000125042003', name: 'NGUYEN VAN KIEN' };
 
-function parseJwt(token) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-    return JSON.parse(jsonPayload);
-  } catch(e) {
-    return null;
-  }
-}
-
-function currentGoogleProfile(token) {
-  const profile = parseJwt(token);
-  if (profile?.aud !== GOOGLE_CLIENT_ID || !Number.isSafeInteger(profile?.exp) ||
-      profile.exp <= Math.floor(Date.now() / 1000)) return null;
-  return {
-    name: profile.name || 'Tài khoản Google',
-    picture: profile.picture
-  };
-}
-
-function saveTabSession(token) {
-  try {
-    if (token) sessionStorage.setItem(SESSION_KEY, token);
-    else sessionStorage.removeItem(SESSION_KEY);
-  } catch {
-    // Sign-in still works if the browser blocks session storage.
-  }
-}
-
-function restoreTabSession() {
-  try {
-    const saved = sessionStorage.getItem(SESSION_KEY);
-    if (!saved) return;
-    const profile = currentGoogleProfile(saved);
-    if (!profile) {
-      saveTabSession('');
-      return;
-    }
-    // Used only for UI. The backend still verifies the token on order requests.
-    credential = saved;
-    user = profile;
-  } catch {
-    // Stay signed out when session storage is unavailable.
-  }
-}
-
 async function directGasRequest(action, fields = {}) {
   if (action === 'me') {
-    const payload = parseJwt(credential);
+    const payload = googleClaims(credential);
     return { user: { name: payload ? (payload.name || payload.email.split('@')[0]) : 'Tài khoản Google' } };
   }
 
@@ -187,11 +138,11 @@ async function directGasRequest(action, fields = {}) {
 }
 
 async function accountRequest(action, fields = {}) {
-  if (!currentGoogleProfile(credential)) {
+  if (!googleProfile(credential)) {
     credential = '';
     user = null;
     orders = [];
-    saveTabSession('');
+    saveGoogleSession('');
     account();
     route();
     const message = 'Phiên Google đã hết hạn. Vui lòng đăng nhập lại.';
@@ -245,7 +196,7 @@ function account() {
     try {
       if(credential) {
         credential='';
-        saveTabSession('');
+        saveGoogleSession('');
         window.google?.accounts?.id?.disableAutoSelect();
       }
       else await request('/api/logout',{method:'POST'});
@@ -390,14 +341,18 @@ async function startGoogleSignIn() {
       try {
         credential = result.credential;
         const profile = (await accountRequest('me')).user;
-        user = {...profile, picture: profile?.picture || parseJwt(credential)?.picture};
-        saveTabSession(credential);
+        user = {...profile, picture: profile?.picture || googleClaims(credential)?.picture};
+        saveGoogleSession(credential);
         document.querySelector('.login-dialog[open]')?.close();
+        if (signInSource === 'catalog') {
+          location.replace('/games/');
+          return;
+        }
         account();
         route();
       } catch {
         credential = '';
-        saveTabSession('');
+        saveGoogleSession('');
         error('Không xác nhận được tài khoản Google. Vui lòng thử lại.');
       }
     }
@@ -416,8 +371,25 @@ if (['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) {
     // A local static preview can still display the store.
   }
 }
-if ($('demo').hidden) restoreTabSession();
+if ($('demo').hidden) {
+  credential = readGoogleSession();
+  user = googleProfile(credential);
+  subscribeGoogleSession(value => {
+    credential = value;
+    user = googleProfile(value);
+    orders = [];
+    if (user) document.querySelector('.login-dialog[open]')?.close();
+    if (user && signInSource === 'catalog') {
+      location.replace('/games/');
+      return;
+    }
+    account();
+    route();
+  });
+  requestGoogleSession();
+}
 loading = false;
 account();
 route();
-if (!user && new URLSearchParams(location.search).get('signin') === '1') void login();
+if (signInSource === 'catalog' && user) location.replace('/games/');
+else if (!user && (signInSource === 'catalog' || signInSource === '1')) void login();

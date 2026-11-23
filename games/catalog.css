@@ -206,6 +206,15 @@
   background: #a7b9cc5c;
 }
 .featured-dot:hover::before, .featured-dot[aria-current="true"]::before { background: #f5faff; }
+.featured-dot:hover, .featured-dot:active {
+  background: transparent;
+  box-shadow: none;
+}
+@media (max-width: 780px), (hover: none) and (pointer: coarse) {
+  .featured-frame { margin-inline: 0; }
+  .featured-button.featured-arrow { display: none; }
+  .featured-stage { touch-action: pan-y pinch-zoom; }
+}
 @media (hover: hover) and (pointer: fine) {
   .featured-preview:not(:focus-visible) { position: absolute; opacity: 0; pointer-events: none; }
 }

@@ -597,6 +597,32 @@ function setupFeatured() {
   });
   previous.addEventListener('click', () => select(index - 1, 'previous'));
   next.addEventListener('click', () => select(index + 1, 'next'));
+  let swipeStart = null;
+  let suppressClickUntil = 0;
+  stage.addEventListener('touchstart', event => {
+    if (event.touches.length !== 1) { swipeStart = null; return; }
+    const touch = event.touches[0];
+    swipeStart = {x: touch.clientX, y: touch.clientY};
+    clearTimeout(timer);
+  }, {passive: true});
+  stage.addEventListener('touchend', event => {
+    if (!swipeStart) return;
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - swipeStart.x;
+    const dy = touch.clientY - swipeStart.y;
+    swipeStart = null;
+    if (Math.abs(dx) >= 40 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+      suppressClickUntil = Date.now() + 500;
+      select(index + (dx < 0 ? 1 : -1), dx < 0 ? 'next' : 'previous');
+    } else schedule();
+  }, {passive: true});
+  stage.addEventListener('touchcancel', () => { swipeStart = null; schedule(); }, {passive: true});
+  stage.addEventListener('click', event => {
+    if (Date.now() < suppressClickUntil) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }, true);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) stopPreview();
     schedule();

@@ -2,3 +2,8 @@
 .translation-tools label{width:100%;max-width:480px;min-width:0}.translation-tools input{display:block;min-width:0;min-height:46px;padding:12px 14px;color:var(--text);background:#0b1522;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:16px}.translation-tools input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}@media(max-width:560px){.translation-tools{width:100%;grid-template-columns:minmax(0,1fr)}}
 
 .translation-download{align-self:center;justify-content:center;min-width:160px;text-align:center}
+
+.translation-card{background:var(--glass-fill);border-color:var(--glass-edge);box-shadow:var(--glass-shadow);-webkit-backdrop-filter:blur(16px) saturate(115%);backdrop-filter:blur(16px) saturate(115%)}
+@media(max-width:780px){.translation-card{-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.translation-card{background:rgba(15,29,45,.94)}}
+@media(prefers-reduced-transparency:reduce){.translation-card{background:#152638;-webkit-backdrop-filter:none;backdrop-filter:none}}

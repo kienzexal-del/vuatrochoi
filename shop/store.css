@@ -825,3 +825,14 @@ body::before {
 .guide-tabs{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 28px}.guide-tabs a{padding:10px 14px;border:1px solid var(--line);border-radius:8px;text-decoration:none}.guide-panel{scroll-margin-top:20px;background:var(--surface);padding:24px;border:1px solid var(--line);border-radius:16px;margin-bottom:28px}.guide-panel video{display:block;width:100%;aspect-ratio:16/9;background:#0b1522;border-radius:10px;margin:18px 0}.guide-panel details{margin-block:20px}.guide-panel li{margin-bottom:18px}.guide-panel p{overflow-wrap:anywhere}.guide-panel summary{cursor:pointer}@media(max-width:600px){.guide-panel{padding:14px}.guide-tabs a{font-size:14px}}
 
 .install-command{border:1px solid var(--line);border-radius:10px;padding:14px;background:#0b1522}.install-command pre{white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 14px}.install-command code{font-family:Consolas,monospace;font-size:14px}.install-command button{min-height:42px}
+
+/* Frosted sales surfaces: keep background artwork visible behind readable content. */
+:root{--glass-fill:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.015) 48%),rgba(12,24,38,.56);--glass-edge:rgba(224,239,255,.25);--glass-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(255,255,255,.035),0 12px 32px rgba(0,0,0,.16)}
+.plans,.checkout,.checkout-detail,.orders,.help,.game-checkout-card{
+ background:var(--glass-fill);border-color:var(--glass-edge);box-shadow:var(--glass-shadow);
+ -webkit-backdrop-filter:blur(16px) saturate(115%);backdrop-filter:blur(16px) saturate(115%);
+}
+.plan.selected{background:rgba(130,212,255,.15)}.plan:hover{background:rgba(255,255,255,.06)}
+@media(max-width:780px){.plans,.checkout,.checkout-detail,.orders,.help,.game-checkout-card{-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.plans,.checkout,.checkout-detail,.orders,.help,.game-checkout-card{background:rgba(15,29,45,.94)}}
+@media(prefers-reduced-transparency:reduce){.plans,.checkout,.checkout-detail,.orders,.help,.game-checkout-card{background:#152638;-webkit-backdrop-filter:none;backdrop-filter:none}}

@@ -93,15 +93,15 @@ function translateUpstreamError(rawMsg) {
 
 // Map of exhausted slots: key -> expiry timestamp (24h)
 const exhaustedSlots = new Map();
-let initialized = false;
 
 export function ensureInitialExhausted() {
-  if (!initialized) {
-    const expireTime = Date.now() + 24 * 3600 * 1000;
-    if (!exhaustedSlots.has('1636440')) exhaustedSlots.set('1636440', expireTime);
-    if (!exhaustedSlots.has('Qingning0115')) exhaustedSlots.set('Qingning0115', expireTime);
-    if (!exhaustedSlots.has('silent_hill')) exhaustedSlots.set('silent_hill', expireTime);
-    initialized = true;
+  const now = Date.now();
+  const expireTime = now + 24 * 3600 * 1000;
+  const current = exhaustedSlots.get('1636440') || 0;
+  if (current <= now) {
+    exhaustedSlots.set('1636440', expireTime);
+    exhaustedSlots.set('Qingning0115', expireTime);
+    exhaustedSlots.set('silent_hill', expireTime);
   }
 }
 

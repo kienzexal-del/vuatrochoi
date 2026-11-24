@@ -27,11 +27,15 @@ BEGIN
   UPDATE steam_orders SET status = 'PAID'
     WHERE id = NEW.order_id AND amount = NEW.amount AND status = 'PENDING';
 END;
-CREATE TRIGGER IF NOT EXISTS steam_release_account
+DROP TRIGGER IF EXISTS steam_release_account;
+CREATE TRIGGER steam_release_account
 AFTER UPDATE OF status ON steam_orders
 WHEN NEW.status = 'PAID' AND OLD.status = 'PENDING'
 BEGIN
   UPDATE steam_stock SET order_id = NEW.id
-    WHERE id = (SELECT id FROM steam_stock
-      WHERE product_id = NEW.product_id AND order_id IS NULL ORDER BY id LIMIT 1);
+    WHERE id = (SELECT s.id FROM steam_stock s
+      WHERE s.product_id = NEW.product_id AND s.order_id IS NULL
+      AND NOT EXISTS (SELECT 1 FROM steam_stock used
+        WHERE used.username=s.username AND used.order_id IS NOT NULL)
+      ORDER BY s.id LIMIT 1);
 END;

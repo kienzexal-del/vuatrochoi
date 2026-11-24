@@ -46,7 +46,7 @@ export async function steamPaymentRoute(request, env) {
       return reply({ok: false, error: 'INVALID_PRODUCT'}, 400);
     }
     const stock = await env.STEAM_DB.prepare(
-      'SELECT id FROM steam_stock WHERE product_id = ? AND order_id IS NULL LIMIT 1'
+      'SELECT s.id FROM steam_stock s WHERE s.product_id = ? AND s.order_id IS NULL AND NOT EXISTS (SELECT 1 FROM steam_stock used WHERE used.username=s.username AND used.order_id IS NOT NULL) LIMIT 1'
     ).bind(String(body.gameId)).first();
     if (!stock) return reply({ok: false, error: 'OUT_OF_STOCK'}, 409);
     const pending = await env.STEAM_DB.prepare(

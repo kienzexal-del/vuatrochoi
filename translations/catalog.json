@@ -1,0 +1,62 @@
+[
+  {
+    "id": "wukong",
+    "name": "Black Myth: Wukong",
+    "file": "BlackMythWukong_VietHoa_HGAC_Full_Fix.rar",
+    "steamId": 2358720,
+    "bytes": 3042494546,
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg?t=1760601605",
+    "downloadUrl": "https://drive.google.com/file/d/1VU8k-31qYE9sOX841pZ3LXziNTOoGlWQ/view",
+    "status": "available"
+  },
+  {
+    "id": "cod-mw4",
+    "name": "Call of Duty: Modern Warfare 4",
+    "file": "GGR_VietHoa_CODMW4.rar",
+    "steamId": 1938090,
+    "bytes": 25699766,
+    "banner": "/games/modern-warfare-4-vault.png",
+    "downloadUrl": "https://drive.google.com/file/d/1_xqmT5O8HW9vP7aHQEfUhCzdkmyYIz2M/view",
+    "status": "available"
+  },
+  {
+    "id": "mortal-shell-2",
+    "name": "Mortal Shell II",
+    "file": "MortalShell2_VietHoaFULL.rar",
+    "steamId": 2584270,
+    "bytes": 14696228,
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/0a4c23b70ced29fac344186ea564dae67c80cfd6/header.jpg",
+    "downloadUrl": "https://drive.google.com/file/d/13iM55epztaFi1hmViNYOjSa7kWDk16X2/view",
+    "status": "available"
+  },
+  {
+    "id": "onimusha",
+    "name": "Onimusha: Way of the Sword",
+    "file": "OnimushaWotS_VH.rar",
+    "steamId": 2638890,
+    "bytes": 76400314,
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2638890/ce31174fea86d0bafa21b26e853dcd0b7326e36f/header.jpg?t=1794985748",
+    "downloadUrl": "https://drive.google.com/file/d/1TbuZF01QVxMg--tnQ6go2ybjwC17DOXu/view",
+    "status": "available"
+  },
+  {
+    "id": "phantom-blade-zero",
+    "name": "Phantom Blade Zero",
+    "file": "PBZ.rar",
+    "steamId": 4115450,
+    "bytes": 185772,
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4115450/7f882f889630270d3d3fb93825ac6f55b55e7a6c/header.jpg?t=1793261976",
+    "downloadUrl": null,
+    "status": "restricted"
+  },
+  {
+    "id": "stalker-2-cost-of-hope",
+    "name": "S.T.A.L.K.E.R. 2: Cost of Hope",
+    "file": "S2VH_250826.rar",
+    "steamId": 3765020,
+    "bytes": 47959090,
+    "banner": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3765020/518ac9999d93e450764a3d85b148c47cc80fffb7/header.jpg",
+    "downloadUrl": "https://drive.google.com/file/d/1gwzz030KQEWBsTGhnp-qGGhm_VPkvx27/view",
+    "status": "available"
+  }
+]

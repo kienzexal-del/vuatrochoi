@@ -835,4 +835,3 @@ body::before {
 .plan.selected{background:rgba(130,212,255,.15)}.plan:hover{background:rgba(255,255,255,.06)}
 @media(max-width:780px){.plans,.checkout,.checkout-detail,.orders,.help,.game-checkout-card{-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.plans,.checkout,.checkout-detail,.orders,.help,.game-checkout-card{background:rgba(15,29,45,.94)}}
-@media(prefers-reduced-transparency:reduce){.plans,.checkout,.checkout-detail,.orders,.help,.game-checkout-card{background:#152638;-webkit-backdrop-filter:none;backdrop-filter:none}}

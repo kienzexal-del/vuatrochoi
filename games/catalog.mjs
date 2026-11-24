@@ -84,12 +84,10 @@ let stopComboSlider = () => {};
 
 let exhaustedGames = new Set([
   '1636440', 'Qingning0115', 'silent_hill', '9746',
-  'combo_31', 'combo', 'whkzw21078', 'whkzw21078_b', '28951', '9041', '1659040',
   '2322010', 'Aereww111', 'god_of_war', '18159'
 ]);
 let exhaustedDetails = new Map([
   ['1636440', { id: '1636440', account: 'Qingning0115', remainingHours: 24 }],
-  ['combo_31', { id: 'combo_31', account: 'whkzw21078', remainingHours: 24 }],
   ['2322010', { id: '2322010', account: 'Aereww111', remainingHours: 24 }]
 ]);
 

@@ -25,11 +25,13 @@ const ACCOUNT_TO_YZID = {
   'Aereww111': '18159',
   '2322010': '18159',
   'god_of_war': '18159',
-  'whkzw21078': '28951',
+  'whkzw21078': '33285',
   'whkzw21078_b': '9041',
-  'combo_31': '28951',
-  '1659040': '28951',
-  'hitman_woa': '28951',
+  'combo_31': '33285',
+  '1659040': '33285',
+  'hitman_woa': '33285',
+  '33285': '33285',
+  '28951': '28951',
   'shuaihua20251001': '28715',
   '1091500': '28715',
   'cyberpunk_2077': '28715',
@@ -119,44 +121,52 @@ export async function scanUpstreamStock(force = false) {
     const html = await res.text();
     const regex = /id=["']textToCopy(\d+)["']\s+value=["']([^"']+)["'][\s\S]*?id=["']span_\1["']>(\d+)<\/span>/g;
 
-    const comboRemaining = [];
+    const accountMaxRemaining = new Map();
+    const yzidRemaining = new Map();
     let m;
     while ((m = regex.exec(html)) !== null) {
       const yzid = m[1];
       const account = m[2];
       const remaining = parseInt(m[3], 10);
-      const expireTime = now + 24 * 3600 * 1000;
-
-      if (remaining <= 0) {
-        exhaustedSlots.set(yzid, expireTime);
-        exhaustedSlots.set(account, expireTime);
-        for (const [k, v] of Object.entries(ACCOUNT_TO_YZID)) {
-          if (v === yzid) exhaustedSlots.set(k, expireTime);
-        }
-      } else {
-        exhaustedSlots.delete(yzid);
-        exhaustedSlots.delete(account);
-        for (const [k, v] of Object.entries(ACCOUNT_TO_YZID)) {
-          if (v === yzid && k !== 'whkzw21078' && k !== 'whkzw21078_b') {
-            exhaustedSlots.delete(k);
-          }
-        }
-      }
-
-      if (account === 'whkzw21078' || yzid === '28951' || yzid === '9041') {
-        comboRemaining.push(remaining);
+      yzidRemaining.set(yzid, remaining);
+      const prev = accountMaxRemaining.get(account) ?? -1;
+      if (remaining > prev) {
+        accountMaxRemaining.set(account, remaining);
       }
     }
 
-    if (comboRemaining.length > 0 && comboRemaining.every(r => r <= 0)) {
+    for (const [yzid, remaining] of yzidRemaining.entries()) {
+      const expireTime = now + 24 * 3600 * 1000;
+      if (remaining <= 0) {
+        exhaustedSlots.set(yzid, expireTime);
+      } else {
+        exhaustedSlots.delete(yzid);
+      }
+    }
+
+    for (const [account, maxRemaining] of accountMaxRemaining.entries()) {
+      const expireTime = now + 24 * 3600 * 1000;
+      if (maxRemaining <= 0) {
+        exhaustedSlots.set(account, expireTime);
+      } else {
+        exhaustedSlots.delete(account);
+      }
+    }
+
+    const whkRemaining = accountMaxRemaining.get('whkzw21078') ?? 0;
+    if (whkRemaining > 0) {
+      exhaustedSlots.delete('combo_31');
+      exhaustedSlots.delete('combo');
+      exhaustedSlots.delete('whkzw21078');
+      exhaustedSlots.delete('1659040');
+      exhaustedSlots.delete('hitman_woa');
+      exhaustedSlots.delete('33285');
+    } else {
       const expireTime = now + 24 * 3600 * 1000;
       exhaustedSlots.set('combo_31', expireTime);
       exhaustedSlots.set('combo', expireTime);
+      exhaustedSlots.set('whkzw21078', expireTime);
       exhaustedSlots.set('1659040', expireTime);
-    } else if (comboRemaining.some(r => r > 0)) {
-      exhaustedSlots.delete('combo_31');
-      exhaustedSlots.delete('combo');
-      exhaustedSlots.delete('1659040');
     }
   } catch (err) {
     // Upstream network hiccup, fallback to memory
@@ -166,18 +176,6 @@ export async function scanUpstreamStock(force = false) {
 export function ensureInitialExhausted() {
   const now = Date.now();
   const expireTime = now + 24 * 3600 * 1000;
-
-  // Gói Siêu Combo (31 Game Steam AAA) - whkzw21078 (cả slot chính 28951 và slot phụ 9041 đều 0 lượt)
-  const currentCombo = exhaustedSlots.get('combo_31') || 0;
-  if (currentCombo <= now) {
-    exhaustedSlots.set('combo_31', expireTime);
-    exhaustedSlots.set('combo', expireTime);
-    exhaustedSlots.set('whkzw21078', expireTime);
-    exhaustedSlots.set('whkzw21078_b', expireTime);
-    exhaustedSlots.set('28951', expireTime);
-    exhaustedSlots.set('9041', expireTime);
-    exhaustedSlots.set('1659040', expireTime);
-  }
 
   // Silent Hill: Townfall (1636440) - Qingning0115 (9746: 0 lượt)
   const currentSilent = exhaustedSlots.get('1636440') || 0;
@@ -396,6 +394,11 @@ export async function steamPaymentRoute(request, env) {
         ).run();
         const now = Date.now();
         await env.STEAM_DB.prepare('DELETE FROM steam_exhausted WHERE expire_time <= ?').bind(now).run();
+        if (!exhaustedSlots.has('combo_31')) {
+          await env.STEAM_DB.prepare(
+            'DELETE FROM steam_exhausted WHERE key IN (?, ?, ?, ?, ?)'
+          ).bind('combo_31', 'combo', 'whkzw21078', '1659040', '33285').run();
+        }
         const { results } = await env.STEAM_DB.prepare('SELECT key, expire_time FROM steam_exhausted').all();
         if (results && results.length) {
           for (const row of results) {
@@ -421,6 +424,15 @@ export async function steamPaymentRoute(request, env) {
 
   if (url.pathname === '/api/steam/scan-stock') {
     await scanUpstreamStock(true).catch(() => {});
+    if (env?.STEAM_DB) {
+      try {
+        if (!exhaustedSlots.has('combo_31')) {
+          await env.STEAM_DB.prepare(
+            'DELETE FROM steam_exhausted WHERE key IN (?, ?, ?, ?, ?)'
+          ).bind('combo_31', 'combo', 'whkzw21078', '1659040', '33285').run();
+        }
+      } catch {}
+    }
     const list = getExhaustedList();
     return Response.json({
       ok: true,

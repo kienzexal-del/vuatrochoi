@@ -836,21 +836,28 @@ export async function openDirectPaymentModal({ gameId, title, price, isCombo }) 
 
   // Call API to create pending order
   let order;
+  let checkoutError = 'Chưa tạo được đơn hàng. Vui lòng liên hệ shop trước khi chuyển tiền.';
   try {
     const res = await fetch('/api/steam/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + readGoogleSession() },
       body: JSON.stringify({ gameId, requestId: crypto.randomUUID() })
     });
+    const data = await res.json();
     if (res.ok) {
-      const data = await res.json();
       if (data && data.ok) {
         order = data.order;
       }
+    } else if (data?.error === 'OUT_OF_STOCK') {
+      checkoutError = 'Game này hiện chưa có tài khoản sẵn trong kho. Vui lòng liên hệ shop để bổ sung hàng trước khi thanh toán.';
+    } else if (res.status === 401) {
+      checkoutError = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để mua game.';
+    } else if (data?.error === 'TOO_MANY_PENDING_ORDERS') {
+      checkoutError = 'Bạn có quá nhiều đơn đang chờ thanh toán. Vui lòng liên hệ shop để kiểm tra các đơn trước đó.';
     }
   } catch (err) {}
 
-  if (!order) { body.replaceChildren(make("p", "Chưa tạo được đơn hàng. Vui lòng liên hệ shop trước khi chuyển tiền.")); return; }
+  if (!order) { body.replaceChildren(make('p', checkoutError)); return; }
 
   renderPendingModalView(dialog, body, order, { gameId, title, price, isCombo });
 }

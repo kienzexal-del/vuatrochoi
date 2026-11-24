@@ -27,3 +27,5 @@ shop/shop-worker.mjs
 shop/auth-preview-worker.mjs
 shop/google-auth.mjs
 shop/account-orders.mjs
+
+/guides/**

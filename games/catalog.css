@@ -976,3 +976,8 @@
 @media(min-width:1000px){.featured-frame{width:88%;max-width:1400px;margin-inline:auto}}
 
 @media(min-width:1000px){.featured-games>h2{width:88%;max-width:1400px;margin-inline:auto}}
+
+.rental-banner{display:grid;grid-template-columns:minmax(240px,.8fr) minmax(0,1.2fr);align-items:center;overflow:hidden;margin:24px 0 32px;border:1px solid var(--glass-edge);border-radius:20px;background:var(--glass-fill);box-shadow:var(--glass-shadow);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.rental-banner>img{width:100%;height:100%;min-height:260px;object-fit:cover}
+.rental-content{padding:28px 32px}.rental-label{color:#80d8ff;font-size:12px;font-weight:800;letter-spacing:.08em}.rental-content h2{font-size:clamp(24px,2.2vw,34px);line-height:1.2;margin:12px 0}.rental-content p{line-height:1.6}.rental-contact{display:inline-flex;justify-content:center;align-items:center;padding:14px 22px;border-radius:12px;text-decoration:none;font-weight:750;margin-top:8px}
+@media(max-width:780px){.rental-banner{grid-template-columns:1fr}.rental-banner>img{min-height:0;height:auto;aspect-ratio:460/215}.rental-content{padding:22px}.rental-contact{box-sizing:border-box;width:100%}}

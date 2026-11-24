@@ -93,7 +93,8 @@ let exhaustedDetails = new Map([
 
 async function fetchStockStatus() {
   try {
-    const res = await fetch('/api/steam/stock-status');
+    const before = [...exhaustedGames].sort().join(',');
+    const res = await fetch('/api/steam/stock-status', {signal: AbortSignal.timeout(20000)});
     if (res.ok) {
       const data = await res.json().catch(() => null);
       if (data && data.ok && Array.isArray(data.exhausted)) {
@@ -101,6 +102,7 @@ async function fetchStockStatus() {
         if (Array.isArray(data.details)) {
           data.details.forEach(d => exhaustedDetails.set(String(d.id), d));
         }
+        return before !== [...exhaustedGames].sort().join(',');
       }
     }
   } catch {}
@@ -567,6 +569,8 @@ function setupFeatured() {
   const slide = make('div', '', 'featured-slide');
   const image = make('img');
   image.alt = '';
+  image.fetchPriority = 'high';
+  image.decoding = 'async';
   const media = make('div', '', 'featured-media');
   const controls = make('div', '', 'featured-controls');
   const link = make('a', '', 'featured-link');
@@ -1263,7 +1267,7 @@ subscribeGoogleSession(renderCatalogAccount);
 requestGoogleSession();
 
 try {
-  await fetchStockStatus();
+  const stockRefresh = fetchStockStatus();
   const response = await fetch(new URL('games.json', import.meta.url).pathname);
   if (!response.ok) throw new Error('Catalog unavailable');
   games = await response.json();
@@ -1280,6 +1284,9 @@ try {
   renderCatalog();
   setupFeatured();
   route();
+  void stockRefresh.then(changed => {
+    if (changed) renderCatalog();
+  });
 } catch {
   // Catalog load failed
 }

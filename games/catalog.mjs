@@ -755,7 +755,7 @@ function route() {
     
     const story = make('section','','game-panel');
     story.append(make('h2','Cốt truyện'),make('p',synopsis[game.id] || 'Xem giới thiệu chính thức trên Steam.'));
-    detail.append(back,hero,story,requirements(game),trailer(game,revision));
+    detail.append(back,hero,trailer(game,revision),story,requirements(game));
   } else {
     renderCatalog();
   }

@@ -974,3 +974,5 @@
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.game-card,.combo-showcase,.game-hero{background:rgba(15,29,45,.94)}}
 
 @media(min-width:1000px){.featured-frame{width:88%;max-width:1400px;margin-inline:auto}}
+
+@media(min-width:1000px){.featured-games>h2{width:88%;max-width:1400px;margin-inline:auto}}

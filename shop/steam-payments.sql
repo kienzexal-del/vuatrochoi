@@ -5,6 +5,18 @@ CREATE TABLE IF NOT EXISTS steam_stock (
   password TEXT NOT NULL,
   order_id TEXT UNIQUE
 );
+CREATE TABLE IF NOT EXISTS license_platforms (
+  owner TEXT NOT NULL,
+  order_id TEXT NOT NULL,
+  platform TEXT NOT NULL CHECK(platform IN ('windows','macos','steam-deck','linux')),
+  PRIMARY KEY(owner, order_id)
+);
+CREATE TABLE IF NOT EXISTS license_platforms (
+  owner TEXT NOT NULL,
+  order_id TEXT NOT NULL,
+  platform TEXT NOT NULL CHECK(platform IN ('windows','macos','steam-deck','linux')),
+  PRIMARY KEY(owner, order_id)
+);
 CREATE TABLE IF NOT EXISTS steam_orders (
   id TEXT PRIMARY KEY,
   owner TEXT NOT NULL,

@@ -478,6 +478,22 @@ export async function steamPaymentRoute(request, env) {
   const owner = await verifyGoogle(auth.startsWith('Bearer ') ? auth.slice(7) : '', env.GOOGLE_CLIENT_ID);
   if (!owner) return reply({ok: false}, 401);
   const body = await request.json();
+  if (url.pathname === '/api/steam/license-platforms') {
+    if (body.orderId !== undefined) {
+      if (!/^VTCH-[A-Z0-9-]{1,58}$/.test(body.orderId) ||
+          !['windows','macos','steam-deck','linux'].includes(body.platform)) {
+        return reply({ok: false}, 400);
+      }
+      // Instruction preferences cannot grant access to a license or change payment status.
+      await env.STEAM_DB.prepare(
+        'INSERT INTO license_platforms(owner,order_id,platform) VALUES(?,?,?) ON CONFLICT(owner,order_id) DO NOTHING'
+      ).bind(owner, body.orderId, body.platform).run();
+    }
+    const {results} = await env.STEAM_DB.prepare(
+      'SELECT order_id AS orderId,platform FROM license_platforms WHERE owner=?'
+    ).bind(owner).all();
+    return reply({ok: true, platforms: results});
+  }
   if (url.pathname === '/api/steam/orders') {
     const {results} = await env.STEAM_DB.prepare(
       'SELECT id AS orderId,product_id AS gameId,amount AS price,status,created_at AS createdAt FROM steam_orders WHERE owner=? ORDER BY created_at DESC'

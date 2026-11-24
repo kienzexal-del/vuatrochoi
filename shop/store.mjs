@@ -1,3 +1,4 @@
+import {platformNames, mountPlatformGuide} from '/shop/platform-guides.mjs';
 import {GOOGLE_CLIENT_ID, googleClaims, googleProfile, readGoogleSession, requestGoogleSession, saveGoogleSession, subscribeGoogleSession} from './google-session.mjs';
 import {plans,money,states,normalizeOrders,validOrder,request,getPlan} from './shop-model.mjs';
 const $ = id => document.getElementById(id);
@@ -7,6 +8,7 @@ function button(text,action,cls='') {const b=el('button',text,cls); b.addEventLi
 function error(message) {$('alert').textContent=message; $('alert').hidden=!message;}
 function toast(message) {$('toast').textContent=message; $('toast').hidden=false; setTimeout(()=>$('toast').hidden=true,3000);}
 let gisReady = false, credential = '';
+const purchasePlatform = /^\/buy\/(windows|macos|steam-deck|linux)(?:\/|$)/.exec(location.pathname)?.[1] || 'windows';
 const signInSource = new URLSearchParams(location.search).get('signin');
 let loginOpening = false;
 async function login() {
@@ -104,13 +106,20 @@ async function accountRequest(action, fields = {}) {
     route();
     throw new Error('Yêu cầu đăng nhập tài khoản');
   }
+  let result;
   try {
-    return await request('/api/shop-account', {
-      method:'POST', body:JSON.stringify({action, credential, ...fields})
-    });
-  } catch (err) {
-    return await directGasRequest(action, fields);
+    result = await request('/api/shop-account', {method:'POST',body:JSON.stringify({action,credential,...fields})});
+  } catch (err) { result = await directGasRequest(action,fields); }
+  if (action === 'create') {
+    await steamRequest('license-platforms',{orderId:result.order.id,platform:purchasePlatform});
+    result.order.platform=purchasePlatform;
+  } else if (action === 'list' || action === 'detail') {
+    const metadata = await steamRequest('license-platforms');
+    const platforms = new Map(metadata.platforms.map(item=>[item.orderId,item.platform]));
+    if(result.orders)result.orders=result.orders.map(order=>({...order,platform:platforms.get(order.id)}));
+    if(result.order)result.order.platform=platforms.get(result.order.id);
   }
+  return result;
 }
 async function copy(value) {try {await navigator.clipboard.writeText(value); toast('Đã sao chép.');} catch {toast('Chưa sao chép được. Bạn có thể chọn và sao chép nội dung trực tiếp.');}}
 function userIcon() {
@@ -225,6 +234,8 @@ async function initShop() {
   }
 
   renderStandardPlans();
+  const instructions=el('div');instructions.id='instructions';mountPlatformGuide(instructions,purchasePlatform);$('shop-view').append(instructions);
+  const title=$('shop-view').querySelector('h1');if(title)title.textContent='Vua Trò Chơi cho '+platformNames[purchasePlatform];
 }
 initShop();
 
@@ -234,7 +245,7 @@ function showOrders() {
   if(!orders.length){list.append(empty('Chưa có đơn hàng','Khi bạn mua bản quyền, đơn hàng sẽ xuất hiện tại đây.',()=>location.hash='shop','Chọn gói bản quyền'));return;}
   const container=el('div',undefined,'orders');
   for(const order of orders) {
-    const row=el('article',undefined,'order');const name=el('div');name.append(el('h3',order.title || getPlan(order.plan, order.amount).name),el('small',order.id));
+    const row=el('article',undefined,'order');const name=el('div');name.append(el('h3',order.title || (getPlan(order.plan, order.amount).name + (platformNames[order.platform] ? ' · ' + platformNames[order.platform] : ''))),el('small',order.id));
     const status=el('div');status.append(el('span',states[order.status],`badge ${order.status}`),el('small',new Date(order.createdAt).toLocaleString('vi-VN')));
     row.append(name,status,el('strong',money(order.amount),'order-amount'),button(order.status==='PAID'?'Xem key':'Xem đơn',()=>location.hash=`order/${order.id}`));container.append(row);
   }
@@ -271,7 +282,7 @@ async function loadOrders() {
 }
 function displayOrder(order) {
   const planInfo = getPlan(order.plan, order.amount);
-  const isGameOrder = order.plan === 'combo_31' || String(order.plan).startsWith('game_') || order.amount === 50000 || (order.amount === 100000 && String(order.plan).includes('combo'));
+  const isGameOrder = order.plan === 'combo_31' || String(order.plan).startsWith('game_');
   const box=$('detail');box.replaceChildren();box.append(el('span',states[order.status],`badge ${order.status}`),el('h2',planInfo.name),el('p',`Mã đơn: ${order.id}`,'muted'));
   if(order.status==='PAID') {
     const isGame = isGameOrder || Boolean(order.account && order.password) || Boolean(order.slotId);
@@ -438,6 +449,7 @@ function displayOrder(order) {
       box.append(el('p', 'Thanh toán đã xác nhận. Key đang được xử lý; hãy kiểm tra lại sau ít phút.'));
     } else {
       box.append(el('p', 'Key của bạn được lưu tại đây. Chỉ chia sẻ với người bạn tin tưởng.'),el('code',order.key,'key'),button('Sao chép key',()=>copy(order.key),'primary'));
+      const instructions=el('div');mountPlatformGuide(instructions,order.platform);box.append(instructions);
     }
   } else if(order.status==='PENDING') {
     const bank=order.payment;

@@ -24,7 +24,7 @@ test('history and credentials belong to the verified Google account across clien
       .run('stock-test', '1817190', 'test-account', 'test-password', 'SG111111111111111111111111');
     const env = {GOOGLE_CLIENT_ID: 'test-client', PAYMENT_ACCOUNT: 'test-bank', SEPAY_WEBHOOK_SECRET: 'test-secret',
       STEAM_DB: {prepare(sql) {return {bind(...args) {const stmt = db.prepare(sql); return {
-        first: async () => stmt.get(...args), all: async () => ({results: stmt.all(...args)})
+        first: async () => stmt.get(...args), all: async () => ({results: stmt.all(...args)}), run: async () => stmt.run(...args)
       };}};}}};
     const token = sub => {
       const h = Buffer.from(JSON.stringify({alg: 'RS256', kid: 'test'})).toString('base64url');
@@ -34,6 +34,13 @@ test('history and credentials belong to the verified Google account across clien
     const call = (sub, path, body = {}) => steamPaymentRoute(new Request('https://gamegiare.com/api/steam/'+path, {
       method: 'POST', headers: {Origin: 'https://gamegiare.com', Authorization: 'Bearer '+token(sub)}, body: JSON.stringify(body)
     }), env);
+    await call('111','license-platforms',{orderId:'VTCH-TEST123',platform:'macos'});
+    const platformList=await (await call('111','license-platforms')).json();
+    assert.deepEqual(platformList.platforms,[{orderId:'VTCH-TEST123',platform:'macos'}]);
+    assert.deepEqual((await (await call('222','license-platforms')).json()).platforms,[]);
+    assert.equal((await call('111','license-platforms',{orderId:'VTCH-TEST123',platform:'invalid'})).status,400);
+    await call('111','license-platforms',{orderId:'VTCH-TEST123',platform:'windows'});
+    assert.equal((await (await call('111','license-platforms')).json()).platforms[0].platform,'macos');
     const first = await (await call('111', 'orders')).json();
     const secondClient = await (await call('111', 'orders')).json();
     assert.deepEqual(first, secondClient);

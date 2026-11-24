@@ -1048,10 +1048,11 @@ function renderFulfilledModalView(dialog, body, order, meta) {
   guideBox.innerHTML = `
     <h4>📖 Hướng Dẫn 3 Bước Kích Hoạt:</h4>
     <ol>
-      <li>Mở Steam trên PC, đăng nhập bằng tài khoản và mật khẩu ở trên.</li>
-      <li>Bấm nút <strong>Lấy mã đăng nhập</strong> để nhận mã xác thực Steam Guard.</li>
-      <li>Tải game xong, chọn <code>Steam</code> → <code>Go Offline</code> để chơi vĩnh viễn không lo bị thoát.</li>
+      <li>Mở Steam trên PC, điền tài khoản và mật khẩu ở trên rồi bấm nút <strong>Đăng nhập</strong> trên Steam (để Steam bắt đầu kích hoạt gửi mã).</li>
+      <li>Chờ 3 - 5 giây, sau đó bấm nút <strong>🔑 Lấy mã đăng nhập</strong> ở trên để nhận mã xác thực mới nhất.</li>
+      <li>Nhập mã vào Steam để đăng nhập. Tải game xong, chọn <code>Steam</code> → <code>Go Offline</code> để chơi vĩnh viễn không lo bị thoát.</li>
     </ol>
+    <p style="margin: 8px 0 0; font-size: 12px; color: #f59e0b;">⚠️ <em>Lưu ý: Luôn bấm "Đăng nhập" trên Steam trước khi bấm lấy mã trên web để không bị lấy nhầm mã cũ và tránh hết lượt lấy mã trong ngày.</em></p>
   `;
 
   body.append(banner, credCard, guardCard, guideBox, ordersLink);

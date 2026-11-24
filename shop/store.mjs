@@ -388,10 +388,11 @@ function displayOrder(order) {
       guideBox.innerHTML = `
         <h4>📖 Hướng Dẫn 3 Bước Kích Hoạt & Chơi Game Offline:</h4>
         <ol>
-          <li><strong>Bước 1:</strong> Mở ứng dụng Steam PC, nhập <strong>Tài khoản & Mật khẩu</strong> ở trên.</li>
-          <li><strong>Bước 2:</strong> Nếu Steam hỏi mã xác thực, bấm nút <strong>Lấy mã đăng nhập</strong> ở trên để nhận mã 5 ký tự.</li>
+          <li><strong>Bước 1:</strong> Mở ứng dụng Steam PC, nhập <strong>Tài khoản & Mật khẩu</strong> ở trên và bấm <strong>Đăng nhập</strong> trên Steam.</li>
+          <li><strong>Bước 2:</strong> Chờ 3-5s khi Steam yêu cầu mã xác thực, bấm nút <strong>LẤY LẠI MÃ STEAM GUARD KHÁC</strong> ở trên để nhận mã mới nhất.</li>
           <li><strong>Bước 3:</strong> Vào Thư viện tải game, sau đó chọn <code>Steam</code> → <code>Go Offline</code> để chơi vĩnh viễn không lo bị đá văng.</li>
         </ol>
+        <p style="margin: 8px 0 0; font-size: 12px; color: #f59e0b;">⚠️ <em>Lưu ý: Luôn bấm "Đăng nhập" trên Steam trước khi bấm lấy mã trên web để không bị lấy nhầm mã cũ và tránh hết lượt lấy mã trong ngày.</em></p>
       `;
       box.append(guideBox);
     } else if(typeof order.key!=='string'||!order.key){

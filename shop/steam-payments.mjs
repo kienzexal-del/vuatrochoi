@@ -91,6 +91,8 @@ function translateUpstreamError(rawMsg) {
   return rawMsg;
 }
 
+const guardCache = new Map(); // key: yzid, value: { code, timestamp }
+
 async function handleSteamGuard(request, env) {
   try {
     const body = await request.json().catch(() => ({}));
@@ -117,6 +119,26 @@ async function handleSteamGuard(request, env) {
       yzid = '9746';
     }
 
+    // Anti-burn quota protection: Reuse code retrieved within 60 seconds without calling upstream
+    const yzidKey = String(yzid);
+    const cached = guardCache.get(yzidKey);
+    const now = Date.now();
+    if (cached && (now - cached.timestamp < 60000)) {
+      return Response.json({
+        ok: true,
+        code: cached.code,
+        source: 'cache',
+        account,
+        remainingSec: Math.ceil((60000 - (now - cached.timestamp)) / 1000)
+      }, {
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-store'
+        }
+      });
+    }
+
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 15000);
 
@@ -128,15 +150,17 @@ async function handleSteamGuard(request, env) {
         'Cookie': `userCard=${USER_CARD}`,
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
       },
-      body: new URLSearchParams({ yzid: String(yzid) }).toString()
+      body: new URLSearchParams({ yzid: yzidKey }).toString()
     });
     clearTimeout(timer);
 
     const data = await upstreamRes.json().catch(() => null);
     if (data && data.code === 1 && data.data) {
+      const code = String(data.data).trim();
+      guardCache.set(yzidKey, { code, timestamp: Date.now() });
       return Response.json({
         ok: true,
-        code: String(data.data).trim(),
+        code,
         source: 'upstream',
         account
       }, {

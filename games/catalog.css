@@ -972,3 +972,5 @@
 .hero-pricing{background:rgba(6,17,29,.42);border-color:rgba(224,239,255,.18)}
 @media(max-width:780px){.game-card,.combo-showcase,.game-hero{-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.game-card,.combo-showcase,.game-hero{background:rgba(15,29,45,.94)}}
+
+@media(min-width:1000px){.featured-frame{width:88%;max-width:1400px;margin-inline:auto}}

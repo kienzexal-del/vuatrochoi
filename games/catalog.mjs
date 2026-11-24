@@ -940,32 +940,6 @@ function renderPendingModalView(dialog, body, order, meta) {
 function renderFulfilledModalView(dialog, body, order, meta) {
   body.replaceChildren();
 
-  // Save order to localStorage vtch_saved_orders
-  try {
-    const raw = localStorage.getItem('vtch_saved_orders');
-    const list = raw ? JSON.parse(raw) : [];
-    const savedItem = {
-      id: order.orderId,
-      orderId: order.orderId,
-      gameId: order.gameId || meta.gameId,
-      plan: meta.isCombo ? 'combo_31' : 'game_' + (order.gameId || meta.gameId),
-      title: order.title || meta.title,
-      status: 'PAID',
-      amount: order.price || meta.price,
-      account: order.account,
-      password: order.password,
-      slotId: order.slotId,
-      key: `Account: ${order.account} | Password: ${order.password}`,
-      createdAt: new Date().toISOString(),
-      payment: order.paymentInfo || { bank: 'MB', account: '0000125042003', name: 'NGUYEN VAN KIEN' }
-    };
-    const filtered = list.filter(x => (x.id || x.orderId) !== order.orderId);
-    filtered.unshift(savedItem);
-    localStorage.setItem('vtch_saved_orders', JSON.stringify(filtered));
-  } catch (e) {
-    console.warn('Failed saving order:', e);
-  }
-
   // Success Banner
   const banner = make('div', '✓ Thanh toán thành công! Tài khoản Steam của bạn đã sẵn sàng.', 'modal-success-banner');
 

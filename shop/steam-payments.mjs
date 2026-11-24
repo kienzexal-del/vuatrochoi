@@ -4,6 +4,16 @@ import games from '../games/games.json';
 const reply = (data, status = 200) => Response.json(data, {
   status, headers: {'Cache-Control': 'no-store'}
 });
+export function publicSteamOrder(row) {
+  return {
+    ...row, id: row.orderId,
+    plan: row.gameId === 'combo_31' ? 'combo_31' : 'game_' + row.gameId,
+    amount: row.price,
+    title: row.gameId === 'combo_31' ? 'Gói Siêu Combo (31 Game Steam AAA)' :
+      games.find(game => String(game.id) === String(row.gameId))?.name || 'Game Steam Offline',
+    createdAt: row.createdAt?.includes('T') ? row.createdAt : row.createdAt?.replace(' ', 'T') + 'Z'
+  };
+}
 
 export async function steamPaymentRoute(request, env) {
   const url = new URL(request.url);
@@ -38,6 +48,12 @@ export async function steamPaymentRoute(request, env) {
   const owner = await verifyGoogle(auth.startsWith('Bearer ') ? auth.slice(7) : '', env.GOOGLE_CLIENT_ID);
   if (!owner) return reply({ok: false}, 401);
   const body = await request.json();
+  if (url.pathname === '/api/steam/orders') {
+    const {results} = await env.STEAM_DB.prepare(
+      'SELECT id AS orderId,product_id AS gameId,amount AS price,status,created_at AS createdAt FROM steam_orders WHERE owner=? ORDER BY created_at DESC'
+    ).bind(owner).all();
+    return reply({ok: true, orders: results.map(publicSteamOrder)});
+  }
   if (url.pathname === '/api/steam/checkout') {
     const product = body.gameId === 'combo_31' ? {price: 100000} :
       games.some(game => String(game.id) === String(body.gameId)) ? {price: 50000} : null;
@@ -64,7 +80,7 @@ export async function steamPaymentRoute(request, env) {
   }
   if (url.pathname === '/api/steam/order') {
     const order = await env.STEAM_DB.prepare(
-      'SELECT id AS orderId,product_id AS gameId,amount AS price,status FROM steam_orders WHERE id=? AND owner=?'
+      'SELECT id AS orderId,product_id AS gameId,amount AS price,status,created_at AS createdAt FROM steam_orders WHERE id=? AND owner=?'
     ).bind(String(body.orderId || ''), owner).first();
     if (!order) return reply({ok: false}, 404);
     if (order.status === 'PAID') {
@@ -74,7 +90,7 @@ export async function steamPaymentRoute(request, env) {
       if (stock) Object.assign(order, stock);
       else order.status = 'AWAITING_STOCK';
     }
-    return reply({ok: true, order});
+    return reply({ok: true, order: publicSteamOrder(order)});
   }
   return reply({ok: false}, 404);
 }

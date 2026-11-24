@@ -5,7 +5,7 @@ export const plans = [
   {id:'lifetime', name:'Vĩnh viễn', price:100000, description:'Thanh toán một lần cho bản quyền vĩnh viễn.'}
 ];
 export const money = value => new Intl.NumberFormat('vi-VN', {style:'currency', currency:'VND'}).format(value);
-export const states = {PENDING:'Chờ thanh toán', PAID:'Đã thanh toán', UNDERPAID:'Cần hỗ trợ', EXPIRED:'Đã hết hạn', CANCELLED:'Đã hủy'};
+export const states = {PENDING:'Chờ thanh toán', PAID:'Đã thanh toán', AWAITING_STOCK:'Đã nhận tiền, chờ cấp tài khoản', UNDERPAID:'Cần hỗ trợ', EXPIRED:'Đã hết hạn', CANCELLED:'Đã hủy'};
 
 export function getPlan(planId, amount) {
   const p = plans.find(p => p.id === planId || p.name === planId);

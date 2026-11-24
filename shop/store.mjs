@@ -44,135 +44,6 @@ async function login() {
 }
 const API_URL = 'https://script.google.com/macros/s/AKfycbzsJ4SvFtnCRROeB3SZHNcq65oReT-wlBQJlwF9eG4WUsDI9cJT4JuXLLuH9Y6TYZdRJg/exec';
 const BANK_CONFIG = { bank: 'MB', account: '0000125042003', name: 'NGUYEN VAN KIEN' };
-const SAVED_ORDERS_KEY = 'vtch_saved_orders';
-
-function safeOrder(o) {
-  if (!o || typeof o !== 'object') return null;
-  const id = typeof o.id === 'string' ? o.id : (typeof o.orderId === 'string' ? o.orderId : '');
-  if (!/^[A-Z0-9-]{6,64}$/.test(id)) return null;
-  const matchedPlan = getPlan(o.plan || o.tier, o.amount);
-  const plan = matchedPlan ? matchedPlan.id : 'lifetime';
-  const amount = Number.isSafeInteger(o.amount) && o.amount > 0 ? o.amount : (matchedPlan ? matchedPlan.price : 100000);
-  const status = Object.hasOwn(states, o.status) ? o.status : 'PENDING';
-  const createdAt = Number.isFinite(Date.parse(o.createdAt)) ? o.createdAt : new Date().toISOString();
-
-  // Extract or preserve Steam credentials
-  let account = typeof o.account === 'string' ? o.account : '';
-  let password = typeof o.password === 'string' ? o.password : '';
-  if ((!account || !password) && typeof o.key === 'string') {
-    const accMatch = o.key.match(/Account:\s*([^\s|]+)/i) || o.key.match(/Tài khoản:\s*([^\s|]+)/i);
-    const pwdMatch = o.key.match(/Password:\s*([^\s|]+)/i) || o.key.match(/Mật khẩu:\s*([^\s|]+)/i);
-    if (accMatch && !account) account = accMatch[1].trim();
-    if (pwdMatch && !password) password = pwdMatch[1].trim();
-  }
-
-  return {
-    id,
-    orderId: id,
-    plan,
-    amount,
-    status,
-    createdAt,
-    key: typeof o.key === 'string' ? o.key : (account ? `Account: ${account} | Password: ${password}` : ''),
-    account,
-    password,
-    slotId: typeof o.slotId === 'string' ? o.slotId : '',
-    gameId: typeof o.gameId === 'string' ? o.gameId : (typeof o.gameId === 'number' ? String(o.gameId) : ''),
-    title: typeof o.title === 'string' ? o.title : '',
-    secretToken: typeof o.secretToken === 'string' ? o.secretToken : (localStorage.getItem(`vtch_token_${id}`) || ''),
-    payment: o.payment || BANK_CONFIG
-  };
-}
-
-function getSavedOrders() {
-  try {
-    const raw = localStorage.getItem(SAVED_ORDERS_KEY);
-    const list = raw ? JSON.parse(raw) : [];
-    return (Array.isArray(list) ? list : []).map(safeOrder).filter(Boolean);
-  } catch {
-    return [];
-  }
-}
-
-function syncSavedOrders(list) {
-  try {
-    const sanitized = (Array.isArray(list) ? list : []).map(safeOrder).filter(Boolean);
-    localStorage.setItem(SAVED_ORDERS_KEY, JSON.stringify(sanitized));
-  } catch {}
-}
-
-function saveSavedOrder(order, secretToken = '') {
-  try {
-    const safe = safeOrder(order);
-    if (!safe) return;
-    if (secretToken) safe.secretToken = secretToken;
-    const list = getSavedOrders();
-    const index = list.findIndex(o => o.id === safe.id);
-    if (index >= 0) {
-      list[index] = {
-        ...list[index],
-        ...safe,
-        key: safe.key || list[index].key || '',
-        secretToken: safe.secretToken || list[index].secretToken || ''
-      };
-    } else {
-      list.unshift(safe);
-    }
-    syncSavedOrders(list);
-  } catch {}
-}
-
-function mergeOrders(apiOrders = [], localOrders = []) {
-  const map = new Map();
-  for (const raw of localOrders) {
-    const o = safeOrder(raw);
-    if (o) map.set(o.id, o);
-  }
-  for (const raw of apiOrders) {
-    const o = safeOrder(raw);
-    if (!o) continue;
-    const existing = map.get(o.id);
-    if (existing) {
-      map.set(o.id, {
-        ...existing,
-        ...o,
-        key: o.key || existing.key || '',
-        secretToken: existing.secretToken || o.secretToken || ''
-      });
-    } else {
-      map.set(o.id, o);
-    }
-  }
-  const merged = Array.from(map.values());
-  merged.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
-  return merged;
-}
-
-async function refreshLocalOrders(localList) {
-  const list = (Array.isArray(localList) ? localList : []).map(safeOrder).filter(Boolean);
-  await Promise.allSettled(list.map(async item => {
-    const token = item.secretToken || localStorage.getItem(`vtch_token_${item.id}`) || '';
-    if (!token) return;
-    try {
-      const res = await fetch(`${API_URL}?action=check_order&orderId=${encodeURIComponent(item.id)}&token=${encodeURIComponent(token)}`, {
-        signal: AbortSignal.timeout(5000)
-      });
-      const data = await res.json();
-      if (data && (data.status === 'PAID' || data.status === 'PENDING' || data.status === 'UNDERPAID')) {
-        item.status = data.status;
-        if (data.key) item.key = data.key;
-        if (data.amount && Number.isSafeInteger(data.amount)) item.amount = data.amount;
-        if (data.tier) {
-          const matched = plans.find(p => p.id === data.tier || p.name === data.tier);
-          if (matched) item.plan = matched.id;
-        }
-      }
-    } catch {}
-  }));
-  syncSavedOrders(list);
-  return list;
-}
-
 async function directGasRequest(action, fields = {}) {
   if (action === 'me') {
     const payload = googleClaims(credential);
@@ -209,73 +80,15 @@ async function directGasRequest(action, fields = {}) {
     };
     try {
       localStorage.setItem(`vtch_token_${data.orderId}`, data.secretToken);
-      saveSavedOrder(order, data.secretToken);
     } catch(e) {}
     return { order };
   }
 
   if (action === 'detail') {
-    const orderId = fields.orderId;
-    let token = '';
-    try {
-      token = localStorage.getItem(`vtch_token_${orderId}`) || '';
-    } catch(e) {}
-    if (!token) {
-      const local = getSavedOrders().find(o => o.id === orderId);
-      if (local?.secretToken) token = local.secretToken;
-    }
-
-    let order = null;
-    if (token) {
-      try {
-        const res = await fetch(`${API_URL}?action=check_order&orderId=${encodeURIComponent(orderId)}&token=${encodeURIComponent(token)}`);
-        const data = await res.json();
-        if (data && (data.status === 'PAID' || data.status === 'PENDING' || data.status === 'UNDERPAID')) {
-          order = {
-            id: orderId,
-            plan: plans.find(p => p.price === data.amount || p.name === data.tier)?.id || selected.id,
-            amount: data.amount || selected.price,
-            status: data.status,
-            createdAt: new Date().toISOString(),
-            key: data.key || '',
-            payment: BANK_CONFIG
-          };
-          saveSavedOrder(order, token);
-        }
-      } catch(e) {}
-    }
-
-    if (!order && credential) {
-      try {
-        const res = await fetch(`${API_URL}?action=my_orders&id_token=${encodeURIComponent(credential)}`);
-        const data = await res.json();
-        if (data && data.success && Array.isArray(data.orders)) {
-          const found = data.orders.find(o => o.orderId === orderId);
-          if (found) {
-            order = {
-              id: found.orderId,
-              plan: plans.find(p => p.id === found.tier || p.name === found.tier || p.price === found.amount)?.id || 'lifetime',
-              amount: found.amount,
-              status: found.status,
-              createdAt: found.createdAt || new Date().toISOString(),
-              key: found.key || '',
-              payment: BANK_CONFIG
-            };
-            saveSavedOrder(order);
-          }
-        }
-      } catch(e) {}
-    }
-
-    if (!order) {
-      const saved = getSavedOrders().find(o => o.id === orderId);
-      if (saved) {
-        order = safeOrder(saved);
-      }
-    }
-
-    if (!order) throw new Error('Không tìm thấy đơn hàng.');
-    return { order };
+    const result = await directGasRequest('list');
+    const order = result.orders.find(item => item.id === fields.orderId);
+    if (!order) throw new Error('Không tìm thấy đơn hàng trong tài khoản này.');
+    return {order: {...order, payment: BANK_CONFIG}};
   }
 
   throw new Error('Hành động không hợp lệ');
@@ -421,65 +234,42 @@ function showOrders() {
   if(!orders.length){list.append(empty('Chưa có đơn hàng','Khi bạn mua bản quyền, đơn hàng sẽ xuất hiện tại đây.',()=>location.hash='shop','Chọn gói bản quyền'));return;}
   const container=el('div',undefined,'orders');
   for(const order of orders) {
-    const row=el('article',undefined,'order');const name=el('div');name.append(el('h3',getPlan(order.plan, order.amount).name),el('small',order.id));
+    const row=el('article',undefined,'order');const name=el('div');name.append(el('h3',order.title || getPlan(order.plan, order.amount).name),el('small',order.id));
     const status=el('div');status.append(el('span',states[order.status],`badge ${order.status}`),el('small',new Date(order.createdAt).toLocaleString('vi-VN')));
     row.append(name,status,el('strong',money(order.amount),'order-amount'),button(order.status==='PAID'?'Xem key':'Xem đơn',()=>location.hash=`order/${order.id}`));container.append(row);
   }
   list.append(container);
 }
+async function steamRequest(path, fields = {}) {
+  return request('/api/steam/' + path, {
+    method: 'POST', headers: {Authorization: 'Bearer ' + readGoogleSession()},
+    body: JSON.stringify(fields)
+  });
+}
 async function loadOrders() {
   const version = revision;
   $('orders').replaceChildren(el('p', 'Đang tải đơn hàng…', 'loading'));
   $('refresh').disabled = true;
-
   try {
-    let apiOrders = [];
-    if (credential) {
-      try {
-        const result = await accountRequest('list');
-        apiOrders = result.orders || [];
-      } catch (err) {
-        // Quietly fallback to local orders without displaying warning
-      }
-    } else {
-      try {
-        const result = await request('/api/orders');
-        apiOrders = result.orders || [];
-      } catch (err) {
-        // Quietly fallback
-      }
-    }
-
+    const results = await Promise.allSettled([
+      accountRequest('list'), steamRequest('orders')
+    ]);
     if (version !== revision) return;
-
-    let localOrders = getSavedOrders();
-    if (localOrders.some(o => o.status !== 'PAID' || !o.key)) {
-      localOrders = await refreshLocalOrders(localOrders);
-    }
-    if (version !== revision) return;
-
-    const merged = mergeOrders(apiOrders, localOrders);
-    syncSavedOrders(merged);
-    orders = normalizeOrders(merged);
+    const failures = results.filter(result => result.status === 'rejected');
+    if (failures.length === results.length) throw failures[0].reason;
+    orders = normalizeOrders(results.flatMap(result => result.status === 'fulfilled' ? result.value.orders || [] : []));
     showOrders();
-    error('');
+    error(failures.length ? 'Chưa tải đủ lịch sử từ máy chủ. Vui lòng làm mới hoặc đăng nhập lại.' : '');
   } catch (e) {
     if (version !== revision) return;
-    let localOrders = getSavedOrders();
-    if (localOrders.length > 0) {
-      localOrders = await refreshLocalOrders(localOrders);
-      if (version !== revision) return;
-      orders = normalizeOrders(localOrders);
-      showOrders();
-    } else {
-      showOrders();
-    }
+    orders = [];
+    $('orders').replaceChildren(empty('Chưa tải được lịch sử', e.message, loadOrders, 'Thử lại'));
+    error(e.message);
   } finally {
     $('refresh').disabled = false;
   }
 }
 function displayOrder(order) {
-  if (order?.id) saveSavedOrder(order);
   const planInfo = getPlan(order.plan, order.amount);
   const isGameOrder = order.plan === 'combo_31' || String(order.plan).startsWith('game_') || order.amount === 50000 || (order.amount === 100000 && String(order.plan).includes('combo'));
   const box=$('detail');box.replaceChildren();box.append(el('span',states[order.status],`badge ${order.status}`),el('h2',planInfo.name),el('p',`Mã đơn: ${order.id}`,'muted'));
@@ -575,7 +365,6 @@ function displayOrder(order) {
               toast('Đã tự động đổi sang slot tài khoản dự phòng mới!');
               if (data.account) { order.account = data.account; accVal.textContent = data.account; }
               if (data.password) { order.password = data.password; pwdVal.textContent = data.password; }
-              saveSavedOrder(order);
             }
           }
         } catch (err) {}
@@ -700,7 +489,7 @@ async function loadDetail(id,quiet=false) {
   clearTimeout(timer); const version=revision;
   if(!quiet)$('detail').replaceChildren(el('p','Đang tải đơn hàng…','loading'));
   try {
-    const result=await (credential ? accountRequest('detail',{orderId:id}) : request(`/api/orders/${encodeURIComponent(id)}`));
+    const result=await (/^SG[A-F0-9]{24}$/.test(id) ? steamRequest('order', {orderId: id}) : credential ? accountRequest('detail',{orderId:id}) : request(`/api/orders/${encodeURIComponent(id)}`));
     if(version!==revision||location.hash!==`#order/${id}`)return;
     if(!validOrder(result.order))throw new Error('Dữ liệu đơn hàng chưa hợp lệ. Vui lòng thử lại.');
     displayOrder(result.order);error('');

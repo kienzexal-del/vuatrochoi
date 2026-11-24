@@ -93,14 +93,20 @@ function translateUpstreamError(rawMsg) {
 
 // Map of exhausted slots: key -> expiry timestamp (24h)
 const exhaustedSlots = new Map();
+let initialized = false;
 
-// Initialize Silent Hill (1636440 / Qingning0115) which is currently exhausted
-const initialExhaustTime = Date.now() + 24 * 3600 * 1000;
-exhaustedSlots.set('1636440', initialExhaustTime);
-exhaustedSlots.set('Qingning0115', initialExhaustTime);
-exhaustedSlots.set('silent_hill', initialExhaustTime);
+export function ensureInitialExhausted() {
+  if (!initialized) {
+    const expireTime = Date.now() + 24 * 3600 * 1000;
+    if (!exhaustedSlots.has('1636440')) exhaustedSlots.set('1636440', expireTime);
+    if (!exhaustedSlots.has('Qingning0115')) exhaustedSlots.set('Qingning0115', expireTime);
+    if (!exhaustedSlots.has('silent_hill')) exhaustedSlots.set('silent_hill', expireTime);
+    initialized = true;
+  }
+}
 
 export function getExhaustedList() {
+  ensureInitialExhausted();
   const now = Date.now();
   const list = [];
   for (const [key, expireTime] of exhaustedSlots.entries()) {
@@ -301,6 +307,14 @@ export async function steamPaymentRoute(request, env) {
           for (const row of results) {
             exhaustedSlots.set(row.key, row.expire_time);
           }
+        } else {
+          const expireTime = now + 24 * 3600 * 1000;
+          await env.STEAM_DB.prepare(
+            'INSERT OR REPLACE INTO steam_exhausted (key, expire_time) VALUES (?, ?), (?, ?), (?, ?)'
+          ).bind('1636440', expireTime, 'Qingning0115', expireTime, 'silent_hill', expireTime).run();
+          exhaustedSlots.set('1636440', expireTime);
+          exhaustedSlots.set('Qingning0115', expireTime);
+          exhaustedSlots.set('silent_hill', expireTime);
         }
       } catch {}
     }

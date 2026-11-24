@@ -823,3 +823,5 @@ body::before {
 @media(max-width:360px){.header .catalog-wordmark{font-size:14px}.header-actions{gap:3px}.social-link{width:30px}}
 
 .guide-tabs{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 28px}.guide-tabs a{padding:10px 14px;border:1px solid var(--line);border-radius:8px;text-decoration:none}.guide-panel{scroll-margin-top:20px;background:var(--surface);padding:24px;border:1px solid var(--line);border-radius:16px;margin-bottom:28px}.guide-panel video{display:block;width:100%;aspect-ratio:16/9;background:#0b1522;border-radius:10px;margin:18px 0}.guide-panel details{margin-block:20px}.guide-panel li{margin-bottom:18px}.guide-panel p{overflow-wrap:anywhere}.guide-panel summary{cursor:pointer}@media(max-width:600px){.guide-panel{padding:14px}.guide-tabs a{font-size:14px}}
+
+.install-command{border:1px solid var(--line);border-radius:10px;padding:14px;background:#0b1522}.install-command pre{white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 14px}.install-command code{font-family:Consolas,monospace;font-size:14px}.install-command button{min-height:42px}

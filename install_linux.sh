@@ -59,26 +59,22 @@ fi
 KEY=$(echo "$KEY" | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')
 
 # 4. Kiem tra ban quyen voi Google Apps Script API
-if [ "$KEY" = "VTCH@ADMIN#2026" ] || [ "$KEY" = "TEST" ]; then
-    echo " [OK] Dang nhap bang Master Admin Key thanh cong!"
+echo " [*] Dang xac thuc ban quyen voi may chu dam may..."
+KEY_ENC=$(printf '%s' "$KEY" | sed 's/#/%23/g')
+HWID_ENC=$(printf '%s' "$HWID" | sed 's/#/%23/g')
+QUERY_URL="${API_URL}?action=activate&key=${KEY_ENC}&hwid=${HWID_ENC}"
+RESPONSE=$(curl -sSL "$QUERY_URL" 2>/dev/null || true)
+
+if echo "$RESPONSE" | grep -q '"success":true' || echo "$RESPONSE" | grep -q '"success": true'; then
+    echo " [OK] Kich hoat ban quyen thanh cong!"
 else
-    echo " [*] Dang xac thuc ban quyen voi may chu dam may..."
-    KEY_ENC=$(printf '%s' "$KEY" | sed 's/#/%23/g')
-    HWID_ENC=$(printf '%s' "$HWID" | sed 's/#/%23/g')
-    QUERY_URL="${API_URL}?action=activate&key=${KEY_ENC}&hwid=${HWID_ENC}"
-    RESPONSE=$(curl -sSL "$QUERY_URL" 2>/dev/null || true)
-    
-    if echo "$RESPONSE" | grep -q '"success":true' || echo "$RESPONSE" | grep -q '"success": true'; then
-        echo " [OK] Kich hoat ban quyen thanh cong!"
-    else
-        ERR_MSG=$(echo "$RESPONSE" | grep -o '"message":"[^"]*"' | cut -d'"' -f4)
-        if [ -z "$ERR_MSG" ]; then
-            ERR_MSG="Khong the ket noi den may chu xac thuc hoac Key khong hop le."
-        fi
-        echo ""
-        echo " [-] KICH HOAT THAT BAI: $ERR_MSG"
-        exit 1
+    ERR_MSG=$(echo "$RESPONSE" | grep -o '"message":"[^"]*"' | cut -d'"' -f4)
+    if [ -z "$ERR_MSG" ]; then
+        ERR_MSG="Khong the ket noi den may chu xac thuc hoac Key khong hop le."
     fi
+    echo ""
+    echo " [-] KICH HOAT THAT BAI: $ERR_MSG"
+    exit 1
 fi
 
 # 5. Trien khai goi ung dung vao /opt/vuatrochoi

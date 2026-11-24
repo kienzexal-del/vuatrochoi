@@ -104,13 +104,8 @@ if ($API_URL -ne "__GOOGLE_SCRIPT_WEBHOOK_URL__" -and -not [string]::IsNullOrWhi
         exit
     }
 } else {
-    Write-Host " [!] Che do thu nghiem cuc bo khi chua gan link API Google Script." -ForegroundColor Yellow
-    if ($key -ne "TEST" -and $key -ne "VTCH@ADMIN#2026") {
-        Write-Host " [-] O che do test, vui long nhap 'TEST' hoac 'VTCH@ADMIN#2026' de tiep tuc." -ForegroundColor Red
-        Read-Host " Nhan Enter de thoat..."
-        exit
-    }
-    Write-Host " [OK] Xac thuc ma Test thanh cong!" -ForegroundColor Green
+    Write-Host " [-] Chua cau hinh may chu xac thuc. Dung cai dat." -ForegroundColor Red
+    exit 1
 }
 
 # 6. Trien khai goi cai dat vao C:\ProgramData\VuaTroChoi

@@ -82,9 +82,15 @@ let pageRevision = 0;
 let stopFeatured = () => {};
 let stopComboSlider = () => {};
 
-let exhaustedGames = new Set(['1636440', 'Qingning0115', 'silent_hill']);
+let exhaustedGames = new Set([
+  '1636440', 'Qingning0115', 'silent_hill', '9746',
+  'combo_31', 'combo', 'whkzw21078', 'whkzw21078_b', '28951', '9041', '1659040',
+  '2322010', 'Aereww111', 'god_of_war', '18159'
+]);
 let exhaustedDetails = new Map([
-  ['1636440', { id: '1636440', account: 'Qingning0115', remainingHours: 24 }]
+  ['1636440', { id: '1636440', account: 'Qingning0115', remainingHours: 24 }],
+  ['combo_31', { id: 'combo_31', account: 'whkzw21078', remainingHours: 24 }],
+  ['2322010', { id: '2322010', account: 'Aereww111', remainingHours: 24 }]
 ]);
 
 async function fetchStockStatus() {
@@ -252,6 +258,12 @@ function createComboShowcase(showDrawerByDefault = false, customComboMatches = n
   const tagCount = make('span', '31 GAME TRONG 1 TÀI KHOẢN', 'combo-tag-count');
   tagRow.append(tagHot, tagCount);
 
+  const isComboExhausted = exhaustedGames.has('combo_31') || exhaustedGames.has('combo') || exhaustedGames.has('whkzw21078');
+  if (isComboExhausted) {
+    const outBadge = make('span', 'TẠM HẾT HÀNG (24H)', 'card-badge badge-out-of-stock');
+    tagRow.append(outBadge);
+  }
+
   const title = make('h2', 'Gói Siêu Combo (Trọn Bộ 31 Game Bom Tấn Steam)', 'combo-title');
   const desc = make('p', '', 'combo-description');
   desc.innerHTML = 'Sở hữu trọn bộ 31 siêu phẩm AAA đình đám nhất trên Steam: <strong>Black Myth: Wukong, Elden Ring, Baldur\'s Gate 3, The Last of Us I & II, Cyberpunk 2077, trọn bộ Resident Evil (2, 4, 7, Village), Hades, Detroit: Become Human, Slay the Spire 2</strong>...';
@@ -269,19 +281,36 @@ function createComboShowcase(showDrawerByDefault = false, customComboMatches = n
   const priceOrig = make('span', '1.550.000đ', 'combo-price-orig');
   const discountBadge = make('span', '-93%', 'combo-badge-discount');
   priceGroup.append(price, priceOrig, discountBadge);
+  if (isComboExhausted) {
+    priceGroup.append(make('span', 'Tạm hết slot • LH Admin', 'card-price-exhausted'));
+  }
 
   const actions = make('div', '', 'combo-actions');
-  const buyBtn = make('button', 'Mua Gói Combo 100k', 'primary combo-buy-btn');
-  buyBtn.type = 'button';
-  buyBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    openDirectPaymentModal({
-      gameId: 'combo_31',
-      title: 'Gói Siêu Combo: 31 Game Bom Tấn AAA',
-      price: 100000,
-      isCombo: true
+  let buyBtn;
+  if (isComboExhausted) {
+    buyBtn = make('button', '📞 Liên hệ Admin lấy tài khoản thủ công', 'btn-contact-admin combo-buy-btn');
+    buyBtn.type = 'button';
+    buyBtn.onclick = (e) => {
+      e.preventDefault();
+      openContactAdminModal({
+        gameId: 'combo_31',
+        title: 'Gói Siêu Combo: 31 Game Bom Tấn Steam',
+        account: 'Tài khoản thủ công qua Admin'
+      });
+    };
+  } else {
+    buyBtn = make('button', 'Mua Gói Combo 100k', 'primary combo-buy-btn');
+    buyBtn.type = 'button';
+    buyBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openDirectPaymentModal({
+        gameId: 'combo_31',
+        title: 'Gói Siêu Combo: 31 Game Bom Tấn AAA',
+        price: 100000,
+        isCombo: true
+      });
     });
-  });
+  }
 
   const toggleBtn = make('button', '', 'combo-toggle-list-btn');
   toggleBtn.type = 'button';
@@ -699,16 +728,19 @@ function route() {
       'hero-plan-desc'
     );
     
-    const isExhausted = exhaustedGames.has(String(game.id));
+    const isComboExhausted = exhaustedGames.has('combo_31') || exhaustedGames.has('combo') || exhaustedGames.has('whkzw21078');
+    const isExhausted = exhaustedGames.has(String(game.id)) || (isCombo && isComboExhausted);
     if (isExhausted) {
       const alertBox = make('div', '', 'exhausted-alert-box');
       alertBox.innerHTML = `
         <div class="exhausted-alert-header">
           <span class="exhausted-alert-icon">⚠️</span>
-          <strong>TẠM HẾT TÀI KHOẢN TỰ ĐỘNG (24H)</strong>
+          <strong>${isCombo ? 'TẠM HẾT TÀI KHOẢN GÓI SIÊU COMBO (24H)' : 'TẠM HẾT TÀI KHOẢN TỰ ĐỘNG (24H)'}</strong>
         </div>
         <p class="exhausted-alert-desc">
-          Tài khoản tự động cho game này đã chạm hạn mức 5 lượt cấp mã Steam Guard trong ngày. 
+          ${isCombo 
+            ? 'Tài khoản Gói Siêu Combo (31 Game Steam AAA) đã chạm hạn mức 5 lượt cấp mã Steam Guard trong ngày.' 
+            : 'Tài khoản tự động cho game này đã chạm hạn mức 5 lượt cấp mã Steam Guard trong ngày.'} 
           Hệ thống sẽ <strong>tự động mở lại sau 24h</strong> khi máy chủ cấp mã hồi phục.
         </p>
         <p class="exhausted-alert-contact">
@@ -727,11 +759,14 @@ function route() {
         e.preventDefault();
         openContactAdminModal({
           gameId: isCombo ? 'combo_31' : game.id,
-          title: game.name || 'Game Steam Offline',
+          title: isCombo ? 'Gói Siêu Combo (31 Game Steam AAA)' : (game.name || 'Game Steam Offline'),
           account: 'Tài khoản thủ công qua Admin'
         });
       };
-      const contactNote = make('p', '⚠️ Game đang tạm hết slot tự động 24h • Admin hỗ trợ cấp tài khoản riêng thủ công ngay', 'hero-guarantee hero-guarantee-exhausted');
+      const contactNote = make('p', isCombo 
+        ? '⚠️ Gói Siêu Combo đang tạm hết slot tự động 24h • Admin hỗ trợ cấp tài khoản riêng thủ công ngay' 
+        : '⚠️ Game đang tạm hết slot tự động 24h • Admin hỗ trợ cấp tài khoản riêng thủ công ngay', 
+        'hero-guarantee hero-guarantee-exhausted');
       actions.append(buyBtn, contactNote);
     } else {
       buyBtn = make('button', isCombo ? 'Mua Gói Combo 100.000đ' : 'Mua Game Này 50.000đ', 'primary hero-buy-btn');

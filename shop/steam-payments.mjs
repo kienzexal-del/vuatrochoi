@@ -93,15 +93,108 @@ function translateUpstreamError(rawMsg) {
 
 // Map of exhausted slots: key -> expiry timestamp (24h)
 const exhaustedSlots = new Map();
+let lastUpstreamScan = 0;
+const SCAN_INTERVAL_MS = 60000;
+
+export async function scanUpstreamStock(force = false) {
+  const now = Date.now();
+  if (!force && (now - lastUpstreamScan < SCAN_INTERVAL_MS)) {
+    return;
+  }
+  lastUpstreamScan = now;
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch('https://a.zuhaox.cn/', {
+      signal: controller.signal,
+      headers: {
+        'Cookie': `userCard=${USER_CARD}`,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+    clearTimeout(timer);
+
+    if (!res.ok) return;
+    const html = await res.text();
+    const regex = /id=["']textToCopy(\d+)["']\s+value=["']([^"']+)["'][\s\S]*?id=["']span_\1["']>(\d+)<\/span>/g;
+
+    const comboRemaining = [];
+    let m;
+    while ((m = regex.exec(html)) !== null) {
+      const yzid = m[1];
+      const account = m[2];
+      const remaining = parseInt(m[3], 10);
+      const expireTime = now + 24 * 3600 * 1000;
+
+      if (remaining <= 0) {
+        exhaustedSlots.set(yzid, expireTime);
+        exhaustedSlots.set(account, expireTime);
+        for (const [k, v] of Object.entries(ACCOUNT_TO_YZID)) {
+          if (v === yzid) exhaustedSlots.set(k, expireTime);
+        }
+      } else {
+        exhaustedSlots.delete(yzid);
+        exhaustedSlots.delete(account);
+        for (const [k, v] of Object.entries(ACCOUNT_TO_YZID)) {
+          if (v === yzid && k !== 'whkzw21078' && k !== 'whkzw21078_b') {
+            exhaustedSlots.delete(k);
+          }
+        }
+      }
+
+      if (account === 'whkzw21078' || yzid === '28951' || yzid === '9041') {
+        comboRemaining.push(remaining);
+      }
+    }
+
+    if (comboRemaining.length > 0 && comboRemaining.every(r => r <= 0)) {
+      const expireTime = now + 24 * 3600 * 1000;
+      exhaustedSlots.set('combo_31', expireTime);
+      exhaustedSlots.set('combo', expireTime);
+      exhaustedSlots.set('1659040', expireTime);
+    } else if (comboRemaining.some(r => r > 0)) {
+      exhaustedSlots.delete('combo_31');
+      exhaustedSlots.delete('combo');
+      exhaustedSlots.delete('1659040');
+    }
+  } catch (err) {
+    // Upstream network hiccup, fallback to memory
+  }
+}
 
 export function ensureInitialExhausted() {
   const now = Date.now();
   const expireTime = now + 24 * 3600 * 1000;
-  const current = exhaustedSlots.get('1636440') || 0;
-  if (current <= now) {
+
+  // Gói Siêu Combo (31 Game Steam AAA) - whkzw21078 (cả slot chính 28951 và slot phụ 9041 đều 0 lượt)
+  const currentCombo = exhaustedSlots.get('combo_31') || 0;
+  if (currentCombo <= now) {
+    exhaustedSlots.set('combo_31', expireTime);
+    exhaustedSlots.set('combo', expireTime);
+    exhaustedSlots.set('whkzw21078', expireTime);
+    exhaustedSlots.set('whkzw21078_b', expireTime);
+    exhaustedSlots.set('28951', expireTime);
+    exhaustedSlots.set('9041', expireTime);
+    exhaustedSlots.set('1659040', expireTime);
+  }
+
+  // Silent Hill: Townfall (1636440) - Qingning0115 (9746: 0 lượt)
+  const currentSilent = exhaustedSlots.get('1636440') || 0;
+  if (currentSilent <= now) {
     exhaustedSlots.set('1636440', expireTime);
     exhaustedSlots.set('Qingning0115', expireTime);
     exhaustedSlots.set('silent_hill', expireTime);
+    exhaustedSlots.set('9746', expireTime);
+  }
+
+  // God of War Ragnarök (2322010) - Aereww111 (18159: 0 lượt)
+  const currentGow = exhaustedSlots.get('2322010') || 0;
+  if (currentGow <= now) {
+    exhaustedSlots.set('2322010', expireTime);
+    exhaustedSlots.set('Aereww111', expireTime);
+    exhaustedSlots.set('god_of_war', expireTime);
+    exhaustedSlots.set('18159', expireTime);
   }
 }
 
@@ -295,6 +388,7 @@ export async function steamPaymentRoute(request, env) {
   }
 
   if (url.pathname === '/api/steam/stock-status' && (request.method === 'GET' || request.method === 'POST')) {
+    await scanUpstreamStock().catch(() => {});
     if (env?.STEAM_DB) {
       try {
         await env.STEAM_DB.prepare(
@@ -307,14 +401,6 @@ export async function steamPaymentRoute(request, env) {
           for (const row of results) {
             exhaustedSlots.set(row.key, row.expire_time);
           }
-        } else {
-          const expireTime = now + 24 * 3600 * 1000;
-          await env.STEAM_DB.prepare(
-            'INSERT OR REPLACE INTO steam_exhausted (key, expire_time) VALUES (?, ?), (?, ?), (?, ?)'
-          ).bind('1636440', expireTime, 'Qingning0115', expireTime, 'silent_hill', expireTime).run();
-          exhaustedSlots.set('1636440', expireTime);
-          exhaustedSlots.set('Qingning0115', expireTime);
-          exhaustedSlots.set('silent_hill', expireTime);
         }
       } catch {}
     }
@@ -322,6 +408,23 @@ export async function steamPaymentRoute(request, env) {
     const list = getExhaustedList();
     return Response.json({
       ok: true,
+      exhausted: list.map(x => x.id),
+      details: list
+    }, {
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'no-store'
+      }
+    });
+  }
+
+  if (url.pathname === '/api/steam/scan-stock') {
+    await scanUpstreamStock(true).catch(() => {});
+    const list = getExhaustedList();
+    return Response.json({
+      ok: true,
+      scanned: true,
       exhausted: list.map(x => x.id),
       details: list
     }, {

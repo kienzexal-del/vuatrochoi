@@ -1,5 +1,13 @@
 import {googleProfile, readGoogleSession, requestGoogleSession, saveGoogleSession, subscribeGoogleSession} from '/shop/google-session.mjs';
 const byId = id => document.getElementById(id);
+function enableFeaturedSound() {
+  const video = document.querySelector('#featured-games video');
+  if (!video) return;
+  video.muted = false;
+  void video.play().catch(() => { video.muted = true; });
+}
+document.addEventListener('pointerdown', enableFeaturedSound, {capture: true});
+document.addEventListener('keydown', enableFeaturedSound, {capture: true});
 const make = (tag, text, className) => {
   const node = document.createElement(tag);
   if (text) node.textContent = text;
@@ -527,19 +535,6 @@ function trailer(game, revision, featuredPreview = false) {
         if (error.name === 'NotAllowedError') {
           video.muted = true;
           await video.play().then(() => play.remove()).catch(() => { play.disabled = false; });
-          if (featuredPreview && video.isConnected) {
-            const sound = make('button', 'Bật tiếng', 'primary featured-sound');
-            sound.addEventListener('click', async () => {
-              video.muted = false;
-              try {
-                await video.play();
-                sound.remove();
-              } catch {
-                video.muted = true;
-              }
-            });
-            panel.append(sound);
-          }
         } else {
           play.disabled = false;
         }

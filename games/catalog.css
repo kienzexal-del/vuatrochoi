@@ -951,3 +951,13 @@
   background: rgba(255, 255, 255, 0.16);
   color: #fff;
 }
+
+/* Wide desktop catalog: use the screen while retaining breathing room. */
+@media (min-width:1440px){
+ .catalog-page .shell{width:92%;max-width:1650px;box-sizing:border-box;padding-inline:0}
+ .catalog-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
+ .combo-card-main{grid-template-columns:minmax(0,1fr) minmax(360px,600px)}
+}
+@media (min-width:1600px){
+ .catalog-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+}

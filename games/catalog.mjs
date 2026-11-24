@@ -82,6 +82,26 @@ let pageRevision = 0;
 let stopFeatured = () => {};
 let stopComboSlider = () => {};
 
+let exhaustedGames = new Set(['1636440', 'Qingning0115', 'silent_hill']);
+let exhaustedDetails = new Map([
+  ['1636440', { id: '1636440', account: 'Qingning0115', remainingHours: 24 }]
+]);
+
+async function fetchStockStatus() {
+  try {
+    const res = await fetch('/api/steam/stock-status');
+    if (res.ok) {
+      const data = await res.json().catch(() => null);
+      if (data && data.ok && Array.isArray(data.exhausted)) {
+        exhaustedGames = new Set(data.exhausted.map(String));
+        if (Array.isArray(data.details)) {
+          data.details.forEach(d => exhaustedDetails.set(String(d.id), d));
+        }
+      }
+    }
+  } catch {}
+}
+
 function specs(markup = '') {
   const clean = markup.replace(/<br\s*\/?\s*>|<\/li>/gi, '\n');
   const doc = new DOMParser().parseFromString(clean,'text/html');
@@ -333,7 +353,8 @@ function renderCatalog() {
   const nodes = [];
 
   function makeSingleCard(game) {
-    const card = make('a', '', 'game-card');
+    const isExhausted = exhaustedGames.has(String(game.id));
+    const card = make('a', '', 'game-card' + (isExhausted ? ' card-exhausted' : ''));
     card.href = '#game/' + game.id;
     const cover = make('img');
     cover.alt = '';
@@ -343,11 +364,16 @@ function renderCatalog() {
     const label = make('div', '', 'game-card-content');
     const title = make('h2', game.name);
     const meta = make('div', '', 'game-card-meta');
-    const badge = make('span', 'Game Lẻ Steam', 'card-badge badge-single');
+    const badge = isExhausted
+      ? make('span', 'TẠM HẾT HÀNG (24H)', 'card-badge badge-out-of-stock')
+      : make('span', 'Game Lẻ Steam', 'card-badge badge-single');
     const priceBox = make('div', '', 'card-price-box');
     const price = make('strong', '50.000đ', 'card-price');
     const origPrice = make('span', '1.200.000đ', 'card-price-orig');
     priceBox.append(price, origPrice);
+    if (isExhausted) {
+      priceBox.append(make('span', 'Tạm hết slot • LH Admin', 'card-price-exhausted'));
+    }
     meta.append(badge, priceBox);
     label.append(title, meta);
     card.append(cover, label);
@@ -673,21 +699,55 @@ function route() {
       'hero-plan-desc'
     );
     
+    const isExhausted = exhaustedGames.has(String(game.id));
+    if (isExhausted) {
+      const alertBox = make('div', '', 'exhausted-alert-box');
+      alertBox.innerHTML = `
+        <div class="exhausted-alert-header">
+          <span class="exhausted-alert-icon">⚠️</span>
+          <strong>TẠM HẾT TÀI KHOẢN TỰ ĐỘNG (24H)</strong>
+        </div>
+        <p class="exhausted-alert-desc">
+          Tài khoản tự động cho game này đã chạm hạn mức 5 lượt cấp mã Steam Guard trong ngày. 
+          Hệ thống sẽ <strong>tự động mở lại sau 24h</strong> khi máy chủ cấp mã hồi phục.
+        </p>
+        <p class="exhausted-alert-contact">
+          👉 <strong>Cần nhận tài khoản chơi ngay?</strong> Vui lòng liên hệ Admin để được cấp tài khoản thủ công trực tiếp!
+        </p>
+      `;
+      pricingPanel.prepend(alertBox);
+    }
+
     const actions = make('div', '', 'hero-actions');
-    const buyBtn = make('button', isCombo ? 'Mua Gói Combo 100.000đ' : 'Mua Game Này 50.000đ', 'primary hero-buy-btn');
-    buyBtn.type = 'button';
-    buyBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      openDirectPaymentModal({
-        gameId: isCombo ? 'combo_31' : game.id,
-        title: isCombo ? 'Gói Siêu Combo: 31 Game Bom Tấn AAA' : (game.name || 'Game Steam Offline'),
-        price: isCombo ? 100000 : 50000,
-        isCombo
+    let buyBtn;
+    if (isExhausted) {
+      buyBtn = make('button', '📞 Liên hệ Admin lấy tài khoản thủ công', 'btn-contact-admin');
+      buyBtn.type = 'button';
+      buyBtn.onclick = (e) => {
+        e.preventDefault();
+        openContactAdminModal({
+          gameId: isCombo ? 'combo_31' : game.id,
+          title: game.name || 'Game Steam Offline',
+          account: 'Tài khoản thủ công qua Admin'
+        });
+      };
+      const contactNote = make('p', '⚠️ Game đang tạm hết slot tự động 24h • Admin hỗ trợ cấp tài khoản riêng thủ công ngay', 'hero-guarantee hero-guarantee-exhausted');
+      actions.append(buyBtn, contactNote);
+    } else {
+      buyBtn = make('button', isCombo ? 'Mua Gói Combo 100.000đ' : 'Mua Game Này 50.000đ', 'primary hero-buy-btn');
+      buyBtn.type = 'button';
+      buyBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openDirectPaymentModal({
+          gameId: isCombo ? 'combo_31' : game.id,
+          title: isCombo ? 'Gói Siêu Combo: 31 Game Bom Tấn AAA' : (game.name || 'Game Steam Offline'),
+          price: isCombo ? 100000 : 50000,
+          isCombo
+        });
       });
-    });
-    
-    const guarantee = make('p', '✓ Nhận tài khoản & mật khẩu kèm mã Steam Guard tự động ngay sau khi thanh toán', 'hero-guarantee');
-    actions.append(buyBtn, guarantee);
+      const guarantee = make('p', '✓ Nhận tài khoản & mật khẩu kèm mã Steam Guard tự động ngay sau khi thanh toán', 'hero-guarantee');
+      actions.append(buyBtn, guarantee);
+    }
     
     pricingPanel.append(priceRow, planDesc, actions);
     heading.append(title, genre, pricingPanel);
@@ -791,6 +851,76 @@ function showToast(msg) {
   const t = make('div', msg, 'toast catalog-toast');
   document.body.append(t);
   setTimeout(() => t.remove(), 2500);
+}
+
+export function openContactAdminModal({ title, gameId, orderId, account } = {}) {
+  let dialog = document.getElementById('modal-contact-admin');
+  if (!dialog) {
+    dialog = make('dialog', '', 'admin-contact-dialog');
+    dialog.id = 'modal-contact-admin';
+    document.body.append(dialog);
+  }
+  dialog.replaceChildren();
+
+  const header = make('div', '', 'modal-header');
+  const h3 = make('h3', 'Liên Hệ Admin Lấy Tài Khoản Thủ Công');
+  const closeBtn = make('button', '✕', 'modal-close-btn');
+  closeBtn.type = 'button';
+  closeBtn.onclick = () => dialog.close();
+  header.append(h3, closeBtn);
+
+  const body = make('div', '', 'modal-body');
+
+  const alertBanner = make('div', '', 'contact-admin-banner');
+  alertBanner.innerHTML = `
+    <div class="contact-admin-badge">⚠️ TẠM HẾT SLOT TỰ ĐỘNG (24H)</div>
+    <div class="contact-admin-game">Tựa game: <strong>${title || 'Game Steam Offline'}</strong></div>
+    <p class="contact-admin-desc">
+      Hệ thống cấp mã tự động cho game này đã chạm hạn mức hôm nay và đang tạm ngắt trong 24h để chờ hồi phục. 
+      <strong>Admin luôn có sẵn tài khoản dự phòng riêng để cấp ngay cho bạn chơi tức thì!</strong>
+    </p>
+  `;
+
+  const channelsBox = make('div', '', 'admin-channels-grid');
+
+  const zaloBtn = make('a', '', 'btn-admin-channel btn-channel-zalo');
+  zaloBtn.href = 'https://zalo.me/0987654321';
+  zaloBtn.target = '_blank';
+  zaloBtn.rel = 'noopener';
+  zaloBtn.innerHTML = `
+    <span class="channel-icon">💬</span>
+    <div class="channel-info">
+      <strong>Nhắn Admin qua Zalo</strong>
+      <small>Hỗ trợ 24/7 • Hotline: 0987.654.321</small>
+    </div>
+  `;
+
+  const teleBtn = make('a', '', 'btn-admin-channel btn-channel-telegram');
+  teleBtn.href = 'https://t.me/vuatrochoi_support';
+  teleBtn.target = '_blank';
+  teleBtn.rel = 'noopener';
+  teleBtn.innerHTML = `
+    <span class="channel-icon">✈️</span>
+    <div class="channel-info">
+      <strong>Nhắn Admin qua Telegram</strong>
+      <small>@vuatrochoi_support</small>
+    </div>
+  `;
+
+  channelsBox.append(zaloBtn, teleBtn);
+
+  const copyBox = make('div', '', 'admin-copy-template-box');
+  const templateText = `Chào Admin, mình cần lấy tài khoản thủ công cho game "${title || gameId || 'Game Steam'}" (web báo hết lượt cấp mã tự động hôm nay). Nhờ Admin cấp tài khoản giúp mình với ạ!`;
+  const copyBtn = make('button', '📋 Sao chép tin nhắn mẫu gửi Admin', 'btn-copy-template');
+  copyBtn.type = 'button';
+  copyBtn.onclick = () => {
+    copyText(templateText, 'Đã sao chép tin nhắn gửi Admin!');
+  };
+  copyBox.append(copyBtn);
+
+  body.append(alertBanner, channelsBox, copyBox);
+  dialog.append(header, body);
+  dialog.showModal();
 }
 
 export async function openDirectPaymentModal({ gameId, title, price, isCombo }) {
@@ -1029,6 +1159,48 @@ function renderFulfilledModalView(dialog, body, order, meta) {
           if (data.password) { order.password = data.password; pwdVal.textContent = data.password; }
         }
       } else {
+        const isExhaustedResp = data?.exhausted || res.status === 410 ||
+          (data?.message && (data.message.includes('hết') || data.message.includes('tạm hết')));
+
+        if (isExhaustedResp) {
+          const gameKey = String(order.gameId || meta?.gameId || '');
+          if (gameKey) exhaustedGames.add(gameKey);
+          if (order.account) exhaustedGames.add(String(order.account));
+
+          fetchBtn.disabled = true;
+          fetchBtn.textContent = '⚠️ TẠM HẾT LƯỢT 24H (LH ADMIN)';
+          clearInterval(cooldownTimer);
+
+          let alertEl = guardCard.querySelector('.guard-exhausted-alert');
+          if (!alertEl) {
+            alertEl = make('div', '', 'guard-exhausted-alert');
+            guardCard.append(alertEl);
+          }
+          alertEl.innerHTML = `
+            <div class="guard-exhausted-title">⚠️ ĐÃ HẾT 5 LƯỢT CẤP MÃ HÔM NAY (TẠM NGẮT 24H)</div>
+            <p class="guard-exhausted-desc">
+              Tài khoản này đã dùng hết hạn mức cấp mã tự động trong ngày. Hệ thống tự động gắn mác <strong>Tạm hết hàng 24h</strong> để chờ hồi phục.
+            </p>
+            <div class="guard-exhausted-btns">
+              <a href="https://zalo.me/0987654321" target="_blank" rel="noopener" class="btn-guard-zalo">
+                💬 Nhắn Admin Zalo (0987.654.321)
+              </a>
+              <a href="https://t.me/vuatrochoi_support" target="_blank" rel="noopener" class="btn-guard-tele">
+                ✈️ Nhắn Admin Telegram
+              </a>
+              <button type="button" class="btn-guard-copy-msg" id="btn-copy-guard-exhausted">
+                📋 Sao chép thông tin gửi Admin
+              </button>
+            </div>
+          `;
+          const copyBtn = alertEl.querySelector('#btn-copy-guard-exhausted');
+          if (copyBtn) {
+            copyBtn.onclick = () => {
+              const msg = `Chào Admin, đơn hàng của mình (${order.orderId || meta?.title || 'Game Steam'}) đã hết 5 lượt cấp mã hôm nay. Nhờ Admin cấp tài khoản thủ công thay thế giúp mình nhé!`;
+              copyText(msg, 'Đã sao chép tin nhắn gửi Admin!');
+            };
+          }
+        }
         const msg = data?.message || 'Chưa nhận được mã từ Steam. Vui lòng bấm Đăng nhập trên Steam trước rồi thử lại.';
         showToast(msg);
       }
@@ -1063,6 +1235,7 @@ subscribeGoogleSession(renderCatalogAccount);
 requestGoogleSession();
 
 try {
+  await fetchStockStatus();
   const response = await fetch(new URL('games.json', import.meta.url).pathname);
   if (!response.ok) throw new Error('Catalog unavailable');
   games = await response.json();

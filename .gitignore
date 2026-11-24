@@ -1,3 +1,7 @@
 .preview-state.json
 shop/.preview-state.json
 scratch/
+.wrangler/
+audit-security.mjs
+run-security-audit.ps1
+graphify-out/

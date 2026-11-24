@@ -739,5 +739,74 @@ body::before {
   line-height: 1.5;
 }
 
+/* Guard Quota Exhausted Alert & Admin Contact */
+.guard-exhausted-alert {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.guard-exhausted-title {
+  font-size: 13px;
+  font-weight: 750;
+  color: #ef4444;
+  margin-bottom: 4px;
+}
+
+.guard-exhausted-desc {
+  font-size: 12px;
+  color: #cbd5e1;
+  line-height: 1.45;
+  margin: 0 0 10px;
+}
+
+.guard-exhausted-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-guard-zalo {
+  display: block;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #0068ff;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.btn-guard-tele {
+  display: block;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #229ed9;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.btn-guard-copy-msg {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--line);
+  color: #cbd5e1;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background .2s;
+}
+
+.btn-guard-copy-msg:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
 
 

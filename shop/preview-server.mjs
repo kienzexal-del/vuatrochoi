@@ -92,6 +92,18 @@ export const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (path === '/api/steam/stock-status' && (req.method === 'GET' || req.method === 'POST')) {
+    const exhausted = ['1636440', 'Qingning0115', 'silent_hill'];
+    json({
+      ok: true,
+      exhausted,
+      details: [
+        { id: '1636440', account: 'Qingning0115', remainingHours: 24, expireTime: Date.now() + 24 * 3600 * 1000 }
+      ]
+    }, 200);
+    return;
+  }
+
   if (path === '/api/steam/guard' && req.method === 'POST') {
     let body = '';
     for await (const chunk of req) body += chunk;

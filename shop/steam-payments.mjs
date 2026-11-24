@@ -91,6 +91,32 @@ function translateUpstreamError(rawMsg) {
   return rawMsg;
 }
 
+// Map of exhausted slots: key -> expiry timestamp (24h)
+const exhaustedSlots = new Map();
+
+// Initialize Silent Hill (1636440 / Qingning0115) which is currently exhausted
+const initialExhaustTime = Date.now() + 24 * 3600 * 1000;
+exhaustedSlots.set('1636440', initialExhaustTime);
+exhaustedSlots.set('Qingning0115', initialExhaustTime);
+exhaustedSlots.set('silent_hill', initialExhaustTime);
+
+export function getExhaustedList() {
+  const now = Date.now();
+  const list = [];
+  for (const [key, expireTime] of exhaustedSlots.entries()) {
+    if (now >= expireTime) {
+      exhaustedSlots.delete(key);
+    } else {
+      list.push({
+        id: key,
+        expireTime,
+        remainingHours: Math.max(1, Math.ceil((expireTime - now) / 3600000))
+      });
+    }
+  }
+  return list;
+}
+
 const guardCache = new Map(); // key: yzid, value: { code, timestamp }
 
 async function handleSteamGuard(request, env) {
@@ -172,6 +198,47 @@ async function handleSteamGuard(request, env) {
       });
     }
 
+    const rawMsg = String(data?.msg || '');
+    if (rawMsg.includes('当日获取次数已用完') || rawMsg.includes('次数已用完')) {
+      const expireTime = Date.now() + 24 * 3600 * 1000;
+      if (account) exhaustedSlots.set(account, expireTime);
+      if (gameId) exhaustedSlots.set(gameId, expireTime);
+      if (slotId) exhaustedSlots.set(slotId, expireTime);
+      exhaustedSlots.set(yzidKey, expireTime);
+      for (const [k, v] of Object.entries(ACCOUNT_TO_YZID)) {
+        if (v === yzidKey) exhaustedSlots.set(k, expireTime);
+      }
+
+      if (env?.STEAM_DB) {
+        try {
+          await env.STEAM_DB.prepare(
+            'CREATE TABLE IF NOT EXISTS steam_exhausted (key TEXT PRIMARY KEY, expire_time INTEGER NOT NULL)'
+          ).run();
+          const targetKey = gameId || account || yzidKey;
+          await env.STEAM_DB.prepare(
+            'INSERT OR REPLACE INTO steam_exhausted (key, expire_time) VALUES (?, ?)'
+          ).bind(targetKey, expireTime).run();
+        } catch {}
+      }
+
+      return Response.json({
+        ok: false,
+        exhausted: true,
+        error: 'QUOTA_EXHAUSTED',
+        message: 'Hạn mức lấy mã hôm nay của tài khoản này đã hết (5 lần/ngày). Đơn hàng tự động gắn mác TẠM HẾT HÀNG 24H để chờ hệ thống hồi lượt. Vui lòng liên hệ Admin để nhận tài khoản thủ công thay thế!',
+        rawMsg: data?.msg,
+        remainingHours: 24,
+        expireTime
+      }, {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-store'
+        }
+      });
+    }
+
     const errorMsg = translateUpstreamError(data?.msg);
     return Response.json({
       ok: false,
@@ -221,6 +288,37 @@ export async function steamPaymentRoute(request, env) {
     return handleSteamGuard(request, env);
   }
 
+  if (url.pathname === '/api/steam/stock-status' && (request.method === 'GET' || request.method === 'POST')) {
+    if (env?.STEAM_DB) {
+      try {
+        await env.STEAM_DB.prepare(
+          'CREATE TABLE IF NOT EXISTS steam_exhausted (key TEXT PRIMARY KEY, expire_time INTEGER NOT NULL)'
+        ).run();
+        const now = Date.now();
+        await env.STEAM_DB.prepare('DELETE FROM steam_exhausted WHERE expire_time <= ?').bind(now).run();
+        const { results } = await env.STEAM_DB.prepare('SELECT key, expire_time FROM steam_exhausted').all();
+        if (results && results.length) {
+          for (const row of results) {
+            exhaustedSlots.set(row.key, row.expire_time);
+          }
+        }
+      } catch {}
+    }
+
+    const list = getExhaustedList();
+    return Response.json({
+      ok: true,
+      exhausted: list.map(x => x.id),
+      details: list
+    }, {
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'no-store'
+      }
+    });
+  }
+
   if (Number(request.headers.get('Content-Length') || 0) > 16384) return reply({ok: false}, 413);
   if (!env.STEAM_DB || !env.PAYMENT_ACCOUNT || !env.SEPAY_WEBHOOK_SECRET ||
       !env.GOOGLE_CLIENT_ID) return reply({ok: false, error: 'NOT_CONFIGURED'}, 503);
@@ -258,6 +356,13 @@ export async function steamPaymentRoute(request, env) {
     return reply({ok: true, orders: results.map(publicSteamOrder)});
   }
   if (url.pathname === '/api/steam/checkout') {
+    if (exhaustedSlots.has(String(body.gameId))) {
+      return reply({
+        ok: false,
+        error: 'OUT_OF_STOCK',
+        message: 'Tài khoản game này đã hết 5 lượt cấp mã Steam Guard hôm nay. Đơn hàng tạm hết hàng trong 24h. Vui lòng liên hệ Admin để được cấp tài khoản thủ công.'
+      }, 410);
+    }
     const product = body.gameId === 'combo_31' ? {price: 100000} :
       games.some(game => String(game.id) === String(body.gameId)) ? {price: 50000} : null;
     if (!product || !Number.isSafeInteger(product.price) || product.price <= 0 ||

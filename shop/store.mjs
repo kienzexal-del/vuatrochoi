@@ -372,6 +372,45 @@ function displayOrder(order) {
               if (data.password) { order.password = data.password; pwdVal.textContent = data.password; }
             }
           } else {
+            const isExhaustedResp = data?.exhausted || res.status === 410 ||
+              (data?.message && (data.message.includes('hết') || data.message.includes('tạm hết')));
+
+            if (isExhaustedResp) {
+              fetchBtn.disabled = true;
+              fetchBtn.textContent = '⚠️ TẠM HẾT LƯỢT 24H (LH ADMIN)';
+              clearInterval(cooldownTimer);
+
+              let alertEl = guardCard.querySelector('.guard-exhausted-alert');
+              if (!alertEl) {
+                alertEl = el('div', undefined, 'guard-exhausted-alert');
+                guardCard.append(alertEl);
+              }
+              alertEl.innerHTML = `
+                <div class="guard-exhausted-title">⚠️ ĐÃ HẾT 5 LƯỢT CẤP MÃ HÔM NAY (TẠM NGẮT 24H)</div>
+                <p class="guard-exhausted-desc">
+                  Tài khoản này đã dùng hết hạn mức cấp mã tự động trong ngày. Hệ thống tự động gắn mác <strong>Tạm hết hàng 24h</strong> để chờ hồi phục.
+                </p>
+                <div class="guard-exhausted-btns">
+                  <a href="https://zalo.me/0987654321" target="_blank" rel="noopener" class="btn-guard-zalo">
+                    💬 Nhắn Admin Zalo (0987.654.321)
+                  </a>
+                  <a href="https://t.me/vuatrochoi_support" target="_blank" rel="noopener" class="btn-guard-tele">
+                    ✈️ Nhắn Admin Telegram
+                  </a>
+                  <button type="button" class="btn-guard-copy-msg" id="btn-copy-store-exhausted">
+                    📋 Sao chép thông tin gửi Admin
+                  </button>
+                </div>
+              `;
+              const copyBtn = alertEl.querySelector('#btn-copy-store-exhausted');
+              if (copyBtn) {
+                copyBtn.onclick = () => {
+                  const msg = `Chào Admin, đơn hàng ${order.id} (${order.account || 'Game Steam'}) của mình đã hết 5 lượt cấp mã hôm nay. Nhờ Admin cấp tài khoản thủ công thay thế giúp mình nhé!`;
+                  copy(msg);
+                  toast('Đã sao chép tin nhắn gửi Admin!');
+                };
+              }
+            }
             const msg = data?.message || 'Chưa nhận được mã từ Steam. Vui lòng bấm Đăng nhập trên Steam trước rồi thử lại.';
             toast(msg);
           }

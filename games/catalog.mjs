@@ -278,9 +278,7 @@ function createComboShowcase(showDrawerByDefault = false, customComboMatches = n
   const pricingBar = make('div', '', 'combo-pricing-bar');
   const priceGroup = make('div', '', 'combo-price-group');
   const price = make('span', '100.000đ', 'combo-price');
-  const priceOrig = make('span', '1.550.000đ', 'combo-price-orig');
-  const discountBadge = make('span', '-93%', 'combo-badge-discount');
-  priceGroup.append(price, priceOrig, discountBadge);
+  priceGroup.append(price);
   if (isComboExhausted) {
     priceGroup.append(make('span', 'Tạm hết slot • LH Admin', 'card-price-exhausted'));
   }
@@ -398,8 +396,7 @@ function renderCatalog() {
       : make('span', 'Game Lẻ Steam', 'card-badge badge-single');
     const priceBox = make('div', '', 'card-price-box');
     const price = make('strong', '50.000đ', 'card-price');
-    const origPrice = make('span', '1.200.000đ', 'card-price-orig');
-    priceBox.append(price, origPrice);
+    priceBox.append(price);
     if (isExhausted) {
       priceBox.append(make('span', 'Tạm hết slot • LH Admin', 'card-price-exhausted'));
     }
@@ -718,9 +715,7 @@ function route() {
     const pricingPanel = make('div', '', 'hero-pricing');
     const priceRow = make('div', '', 'hero-price-row');
     const price = make('span', isCombo ? '100.000đ' : '50.000đ', 'hero-price-tag');
-    const orig = make('span', isCombo ? '1.550.000đ' : '1.200.000đ', 'hero-price-orig');
-    const discount = make('span', isCombo ? '-93%' : '-95%', 'hero-discount');
-    priceRow.append(price, orig, discount);
+    priceRow.append(price);
     
     const planDesc = make('p', isCombo 
       ? 'Gói Siêu Combo: Mua 1 tài khoản sở hữu trọn bộ 31 Game Bom Tấn Steam (Black Myth: Wukong, Baldur\'s Gate 3, Elden Ring, The Last of Us I & II, Cyberpunk 2077, Resident Evil...).' 

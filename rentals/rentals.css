@@ -1,0 +1,11 @@
+@media(min-width:1440px){.rental-page .shell{width:92%;max-width:1650px;box-sizing:border-box;padding-inline:0}.rental-page .translation-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:1600px){.rental-page .translation-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.rental-carousel{min-width:0;overflow:hidden;align-self:center;touch-action:pan-y}
+.rental-slides{display:flex;transition:transform .45s ease}
+.rental-slides>img{display:block;width:100%;min-width:100%;height:auto;aspect-ratio:460/215;object-fit:contain}
+.rental-dots{display:flex;justify-content:center;flex-wrap:wrap;gap:3px;padding:8px}
+.rental-dots button{display:grid;place-items:center;width:24px;height:28px;background:transparent;border:0;padding:0;cursor:pointer}
+.rental-dots button::after{content:'';width:12px;height:5px;border-radius:5px;background:rgba(255,255,255,.3)}
+.rental-dots button[aria-current=true]::after{background:#80d8ff}
+.rental-dots button:focus-visible{outline:2px solid #80d8ff;outline-offset:1px}
+@media(prefers-reduced-motion:reduce){.rental-slides{transition:none}}

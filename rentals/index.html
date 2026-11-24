@@ -24,9 +24,9 @@
   <link rel="apple-touch-icon" href="/shop/game-gia-re.png">
   <link rel="stylesheet" href="/shop/store.css">
   <link rel="stylesheet" href="/games/catalog.css"><link rel="stylesheet" href="/translations/catalog.css">
-  <script type="module" src="/rentals/account.mjs"></script>
-</head>
-<body><header class="header"><div class="shell">
+  <script type="module" src="/rentals/account.mjs"></script><script type="module" src="/rentals/carousel.mjs"></script>
+<link rel="stylesheet" href="/rentals/rentals.css"></head>
+<body class="rental-page"><header class="header"><div class="shell">
     <button class="site-menu-toggle" aria-label="Mở menu" aria-haspopup="dialog" aria-controls="site-menu">☰</button>
     <a class="brand catalog-brand" href="/games/">
       <img class="brand-logo" src="/shop/game-gia-re.png" alt="">
@@ -37,7 +37,7 @@
 <a class="social-link social-tiktok" href="https://www.tiktok.com/@ggrshop0" target="_blank" rel="noopener noreferrer" aria-label="Xem TikTok Game Giá Rẻ" title="TikTok Game Giá Rẻ"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#25f4ee" transform="translate(-.7,-.5)" d="M15 3h3c.4 2 1.7 3.3 4 3.7v3a9 9 0 0 1-4-1.2V16a6 6 0 1 1-6-6v3a3 3 0 1 0 3 3Z"/><path fill="#fe2c55" transform="translate(.7,.5)" d="M15 3h3c.4 2 1.7 3.3 4 3.7v3a9 9 0 0 1-4-1.2V16a6 6 0 1 1-6-6v3a3 3 0 1 0 3 3Z"/><path fill="white" d="M15 3h3c.4 2 1.7 3.3 4 3.7v3a9 9 0 0 1-4-1.2V16a6 6 0 1 1-6-6v3a3 3 0 1 0 3 3Z"/></svg></a>
 </div><div class="account" id="catalog-account"><a class="catalog-login" href="/buy?signin=catalog">Đăng nhập</a></div></div>
   </div></header><main class="shell localization-page"><div class="catalog-intro"><h1>Thuê tài khoản Steam</h1><p>Trải nghiệm thư viện game trong cùng một tài khoản. Liên hệ admin để được tư vấn gói thuê.</p></div>      <section class="rental-banner" aria-labelledby="rental-title">
-        <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2050650/header.jpg" alt="Resident Evil 4" loading="lazy" width="460" height="215">
+        <div class="rental-carousel" aria-label="Game trong gói thuê"><div class="rental-slides"></div><div class="rental-dots" aria-label="Chọn banner game"></div></div>
         <div class="rental-content">
           <span class="rental-label">CHO THUÊ TÀI KHOẢN STEAM</span>
           <h2 id="rental-title">Combo 280 game · 150.000đ</h2>

@@ -349,14 +349,19 @@ function displayOrder(order) {
           const res = await fetch('/api/steam/guard', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orderId: order.id })
+            body: JSON.stringify({ 
+              orderId: order.id,
+              account: order.account,
+              gameId: order.gameId,
+              slotId: order.slotId
+            })
           });
-          const data = await res.json();
-          if (res.ok && data.ok) {
+          const data = await res.json().catch(() => null);
+          if (res.ok && data && data.ok && data.code) {
             codeVal.textContent = data.code;
             codeBox.hidden = false;
             delivered = true;
-            toast('Đã nhận mã Steam Guard thành công!');
+            toast('Đã nhận mã Steam Guard từ nhà cung cấp: ' + data.code);
             if (data.remainingCalls !== undefined) {
               const qc = $('guard-quota-count');
               if (qc) qc.textContent = `${data.remainingCalls} lần / ngày`;
@@ -366,17 +371,12 @@ function displayOrder(order) {
               if (data.account) { order.account = data.account; accVal.textContent = data.account; }
               if (data.password) { order.password = data.password; pwdVal.textContent = data.password; }
             }
+          } else {
+            const msg = data?.message || 'Chưa nhận được mã từ Steam. Vui lòng bấm Đăng nhập trên Steam trước rồi thử lại.';
+            toast(msg);
           }
-        } catch (err) {}
-
-        if (!delivered) {
-          const sampleCodes = ['W6TD7', '76B9R', '595YR', 'C6Y5K', '2RKRV', 'M4X89', '9K2P4', 'T8N5Q', 'F3D7W'];
-          const currentCode = codeVal.textContent;
-          const filtered = sampleCodes.filter(c => c !== currentCode);
-          const generatedCode = filtered[Math.floor(Math.random() * filtered.length)] || 'W6TD7';
-          codeVal.textContent = generatedCode;
-          codeBox.hidden = false;
-          toast('Đã nhận mã xác thực Steam Guard thành công!');
+        } catch (err) {
+          toast('Lỗi kết nối máy chủ cấp mã. Vui lòng thử lại sau.');
         }
       });
 

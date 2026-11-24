@@ -1010,32 +1010,30 @@ function renderFulfilledModalView(dialog, body, order, meta) {
       const res = await fetch('/api/steam/guard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: order.orderId })
+        body: JSON.stringify({ 
+          orderId: order.orderId, 
+          account: order.account || accVal?.textContent,
+          gameId: order.gameId || meta?.gameId,
+          slotId: order.slotId
+        })
       });
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.ok && data.code) {
-          codeVal.textContent = data.code;
-          codeBox.hidden = false;
-          delivered = true;
-          showToast('Đã nhận mã Steam Guard thành công!');
-          if (data.slotRotated) {
-            showToast('Đã tự động đổi sang slot tài khoản dự phòng mới!');
-            if (data.account) { order.account = data.account; accVal.textContent = data.account; }
-            if (data.password) { order.password = data.password; pwdVal.textContent = data.password; }
-          }
+      const data = await res.json().catch(() => null);
+      if (res.ok && data && data.ok && data.code) {
+        codeVal.textContent = data.code;
+        codeBox.hidden = false;
+        delivered = true;
+        showToast('Đã nhận mã Steam Guard từ nhà cung cấp: ' + data.code);
+        if (data.slotRotated) {
+          showToast('Đã tự động đổi sang slot tài khoản dự phòng mới!');
+          if (data.account) { order.account = data.account; accVal.textContent = data.account; }
+          if (data.password) { order.password = data.password; pwdVal.textContent = data.password; }
         }
+      } else {
+        const msg = data?.message || 'Chưa nhận được mã từ Steam. Vui lòng bấm Đăng nhập trên Steam trước rồi thử lại.';
+        showToast(msg);
       }
-    } catch {}
-
-    if (!delivered) {
-      const sampleCodes = ['W6TD7', '76B9R', '595YR', 'C6Y5K', '2RKRV', 'M4X89', '9K2P4', 'T8N5Q', 'F3D7W'];
-      const currentCode = codeVal.textContent;
-      const filtered = sampleCodes.filter(c => c !== currentCode);
-      const generatedCode = filtered[Math.floor(Math.random() * filtered.length)] || 'W6TD7';
-      codeVal.textContent = generatedCode;
-      codeBox.hidden = false;
-      showToast('Đã nhận mã xác thực Steam Guard thành công!');
+    } catch {
+      showToast('Lỗi kết nối máy chủ cấp mã. Vui lòng thử lại sau.');
     }
   };
 

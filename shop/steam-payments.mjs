@@ -15,9 +15,188 @@ export function publicSteamOrder(row) {
   };
 }
 
+const USER_CARD = '21DVkRqH3S7KzN/QDp9MuxSTCefhYb5P0aha/vnfPnFXOa4ZpWyllsVPMqY33Au0XjnqvRj1mb/sZmTQnee4fA==';
+const UPSTREAM_ENDPOINT = 'https://a.zuhaox.cn/addons/cms/api/getEmail';
+
+const ACCOUNT_TO_YZID = {
+  'Qingning0115': '9746',
+  '1636440': '9746',
+  'silent_hill': '9746',
+  'Aereww111': '18159',
+  '2322010': '18159',
+  'god_of_war': '18159',
+  'whkzw21078': '28951',
+  'whkzw21078_b': '9041',
+  'combo_31': '28951',
+  '1659040': '28951',
+  'hitman_woa': '28951',
+  'shuaihua20251001': '28715',
+  '1091500': '28715',
+  'cyberpunk_2077': '28715',
+  '5z8uk9iff': '27630',
+  '1817190': '27630',
+  'spiderman_miles': '27630',
+  'smzh44444': '21810',
+  'h3z2k_mw4': '21810',
+  '1938090': '21810',
+  'cod_mw': '21810',
+  'kbe140289': '18309',
+  '3321460': '18309',
+  'crimson_desert': '18309',
+  'xiaofang215': '15052',
+  'xiaofang215_2': '8885',
+  'xiaofang215_3': '8530',
+  '2638890': '15052',
+  '761620': '15052',
+  'onimusha': '15052',
+  'frq844042': '13604',
+  '1942280': '13604',
+  'brotato': '13604',
+  '289070': '12273',
+  'civ_6': '12273',
+  'civ6_vip': '12273',
+  'kwxmktz49': '10371',
+  '2103140': '10371',
+  'magicraft': '10371',
+  'vxl557811': '13594',
+  '2012510': '13594',
+  'stormgate': '13594'
+};
+
+function translateUpstreamError(rawMsg) {
+  if (!rawMsg || typeof rawMsg !== 'string') {
+    return 'Chưa nhận được mã từ Steam. Vui lòng thử lại sau giây lát.';
+  }
+  if (rawMsg.includes('租用记录不存在')) {
+    return 'Đơn hàng chưa được kích hoạt hoặc đã hết hạn thuê. Vui lòng liên hệ Admin.';
+  }
+  if (rawMsg.includes('当日获取次数已用完') || rawMsg.includes('次数已用完')) {
+    return 'Hạn mức lấy mã hôm nay của tài khoản này đã hết. Vui lòng liên hệ shop để hỗ trợ cấp slot mới.';
+  }
+  if (rawMsg.includes('卡密已过期') || rawMsg.includes('卡密不存在') || rawMsg.includes('过期') || rawMsg.includes('不存在')) {
+    return 'Tài khoản hiện đang bảo trì. Vui lòng liên hệ Admin để đổi tài khoản mới.';
+  }
+  if (rawMsg.includes('频繁') || rawMsg.includes('过于频繁')) {
+    return 'Thao tác quá nhanh. Vui lòng đợi 3 giây trước khi lấy lại mã.';
+  }
+  if (rawMsg.includes('密码错误') || rawMsg.includes('账号错误') || rawMsg.includes('封禁') || rawMsg.includes('冻结')) {
+    return 'Tài khoản đang được cập nhật hoặc đổi mật khẩu. Vui lòng liên hệ Admin để được hỗ trợ.';
+  }
+  if (rawMsg.includes('验证码') || rawMsg.includes('获取失败') || rawMsg.includes('未收到')) {
+    return 'Chưa nhận được mã xác nhận mới từ Steam. Hãy chắc chắn bạn đã bấm "Đăng nhập" trên Steam PC rồi thử lại.';
+  }
+  if (/[\u4e00-\u9fa5]/.test(rawMsg)) {
+    return 'Hệ thống Steam đang bận hoặc tài khoản đang cập nhật, vui lòng thử lại sau giây lát.';
+  }
+  return rawMsg;
+}
+
+async function handleSteamGuard(request, env) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const account = String(body.account || '').trim();
+    const gameId = String(body.gameId || '').trim();
+    const slotId = String(body.slotId || '').trim();
+    const orderId = String(body.orderId || '').trim();
+
+    let yzid = body.yzid;
+    if (!yzid && account) yzid = ACCOUNT_TO_YZID[account];
+    if (!yzid && gameId) yzid = ACCOUNT_TO_YZID[gameId];
+    if (!yzid && slotId) yzid = ACCOUNT_TO_YZID[slotId];
+    if (!yzid && orderId && env.STEAM_DB) {
+      try {
+        const row = await env.STEAM_DB.prepare(
+          'SELECT s.username, o.product_id FROM steam_orders o LEFT JOIN steam_stock s ON s.order_id=o.id WHERE o.id=?'
+        ).bind(orderId).first();
+        if (row?.username) yzid = ACCOUNT_TO_YZID[row.username];
+        if (!yzid && row?.product_id) yzid = ACCOUNT_TO_YZID[row.product_id];
+      } catch {}
+    }
+
+    if (!yzid) {
+      yzid = '9746';
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+
+    const upstreamRes = await fetch(UPSTREAM_ENDPOINT, {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Cookie': `userCard=${USER_CARD}`,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      },
+      body: new URLSearchParams({ yzid: String(yzid) }).toString()
+    });
+    clearTimeout(timer);
+
+    const data = await upstreamRes.json().catch(() => null);
+    if (data && data.code === 1 && data.data) {
+      return Response.json({
+        ok: true,
+        code: String(data.data).trim(),
+        source: 'upstream',
+        account
+      }, {
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-store'
+        }
+      });
+    }
+
+    const errorMsg = translateUpstreamError(data?.msg);
+    return Response.json({
+      ok: false,
+      error: 'UPSTREAM_NO_CODE',
+      message: errorMsg,
+      rawMsg: data?.msg
+    }, {
+      status: 400,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'no-store'
+      }
+    });
+  } catch (err) {
+    return Response.json({
+      ok: false,
+      error: 'TIMEOUT_OR_NETWORK',
+      message: 'Không thể kết nối máy chủ cấp mã lúc này. Vui lòng bấm thử lại.'
+    }, {
+      status: 504,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'no-store'
+      }
+    });
+  }
+}
+
 export async function steamPaymentRoute(request, env) {
   const url = new URL(request.url);
   if (!url.pathname.startsWith('/api/steam/')) return null;
+
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      }
+    });
+  }
+
+  if (url.pathname === '/api/steam/guard' && request.method === 'POST') {
+    return handleSteamGuard(request, env);
+  }
+
   if (Number(request.headers.get('Content-Length') || 0) > 16384) return reply({ok: false}, 413);
   if (!env.STEAM_DB || !env.PAYMENT_ACCOUNT || !env.SEPAY_WEBHOOK_SECRET ||
       !env.GOOGLE_CLIENT_ID) return reply({ok: false, error: 'NOT_CONFIGURED'}, 503);

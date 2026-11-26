@@ -149,9 +149,7 @@ function doGet(e) {
         targetSheet.getRange(foundRowIndex, 8).setValue(remainingText);
       } else {
         targetSheet.getRange(foundRowIndex, 2).setValue("Used");
-        if (sheetTrial) {
-          cleanTrialKeysForHwid(sheetTrial, hwid);
-        }
+        cleanTrialKeysForHwid(hwid);
       }
 
       targetSheet.getRange(foundRowIndex, 3).setValue(hwid);
@@ -1205,7 +1203,7 @@ function showDualSheetStats() {
 }
 
 // Hàm dọn sạch key dùng thử cũ khi khách nâng cấp lên Vĩnh Viễn
-function cleanTrialKeysForHwid(sheetTrial, hwid) {
+function cleanTrialKeysForHwid(hwid) {
   try {
     if (!hwid) return;
     var ss = SpreadsheetApp.getActiveSpreadsheet();

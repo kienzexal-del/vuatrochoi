@@ -90,23 +90,21 @@ let pageRevision = 0;
 let stopFeatured = () => {};
 let stopComboSlider = () => {};
 
-let exhaustedGames = new Set([
-  '1636440', 'Qingning0115', 'silent_hill', '9746',
-  '2322010', 'Aereww111', 'god_of_war', '18159'
-]);
-let exhaustedDetails = new Map([
-  ['1636440', { id: '1636440', account: 'Qingning0115', remainingHours: 24 }],
-  ['2322010', { id: '2322010', account: 'Aereww111', remainingHours: 24 }]
-]);
+let exhaustedGames = new Set();
+let exhaustedDetails = new Map();
 
 async function fetchStockStatus() {
   try {
     const before = [...exhaustedGames].sort().join(',');
-    const res = await fetch('/api/steam/stock-status', {signal: AbortSignal.timeout(20000)});
+    const res = await fetch('/api/steam/stock-status?t=' + Date.now(), {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(15000)
+    });
     if (res.ok) {
       const data = await res.json().catch(() => null);
       if (data && data.ok && Array.isArray(data.exhausted)) {
         exhaustedGames = new Set(data.exhausted.map(String));
+        exhaustedDetails.clear();
         if (Array.isArray(data.details)) {
           data.details.forEach(d => exhaustedDetails.set(String(d.id), d));
         }
@@ -114,7 +112,24 @@ async function fetchStockStatus() {
       }
     }
   } catch {}
+  return false;
 }
+
+// Real-time stock sync on tab focus, visibility change & periodic interval
+window.addEventListener('focus', async () => {
+  const changed = await fetchStockStatus();
+  if (changed) { renderCatalog(); route(); }
+});
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'visible') {
+    const changed = await fetchStockStatus();
+    if (changed) { renderCatalog(); route(); }
+  }
+});
+setInterval(async () => {
+  const changed = await fetchStockStatus();
+  if (changed) { renderCatalog(); route(); }
+}, 30000);
 
 function specs(markup = '') {
   const clean = markup.replace(/<br\s*\/?\s*>|<\/li>/gi, '\n');
@@ -1280,7 +1295,7 @@ try {
   setupFeatured();
   route();
   void stockRefresh.then(changed => {
-    if (changed) renderCatalog();
+    if (changed) { renderCatalog(); route(); }
   });
 } catch {
   // Catalog load failed

@@ -96,7 +96,7 @@ function translateUpstreamError(rawMsg) {
 // Map of exhausted slots: key -> expiry timestamp (24h)
 const exhaustedSlots = new Map();
 let lastUpstreamScan = 0;
-const SCAN_INTERVAL_MS = 60000;
+const SCAN_INTERVAL_MS = 30000;
 
 export async function scanUpstreamStock(force = false) {
   const now = Date.now();
@@ -107,7 +107,7 @@ export async function scanUpstreamStock(force = false) {
 
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 8000);
+    const timer = setTimeout(() => controller.abort(), 15000);
     const res = await fetch('https://a.zuhaox.cn/', {
       signal: controller.signal,
       headers: {
@@ -139,8 +139,14 @@ export async function scanUpstreamStock(force = false) {
       const expireTime = now + 24 * 3600 * 1000;
       if (remaining <= 0) {
         exhaustedSlots.set(yzid, expireTime);
+        for (const [k, v] of Object.entries(ACCOUNT_TO_YZID)) {
+          if (v === yzid) exhaustedSlots.set(k, expireTime);
+        }
       } else {
         exhaustedSlots.delete(yzid);
+        for (const [k, v] of Object.entries(ACCOUNT_TO_YZID)) {
+          if (v === yzid) exhaustedSlots.delete(k);
+        }
       }
     }
 
@@ -148,8 +154,14 @@ export async function scanUpstreamStock(force = false) {
       const expireTime = now + 24 * 3600 * 1000;
       if (maxRemaining <= 0) {
         exhaustedSlots.set(account, expireTime);
+        for (const [k, v] of Object.entries(ACCOUNT_TO_YZID)) {
+          if (k === account) exhaustedSlots.set(k, expireTime);
+        }
       } else {
         exhaustedSlots.delete(account);
+        for (const [k, v] of Object.entries(ACCOUNT_TO_YZID)) {
+          if (k === account) exhaustedSlots.delete(k);
+        }
       }
     }
 
@@ -161,7 +173,7 @@ export async function scanUpstreamStock(force = false) {
       exhaustedSlots.delete('1659040');
       exhaustedSlots.delete('hitman_woa');
       exhaustedSlots.delete('33285');
-    } else {
+    } else if (accountMaxRemaining.has('whkzw21078') && whkRemaining <= 0) {
       const expireTime = now + 24 * 3600 * 1000;
       exhaustedSlots.set('combo_31', expireTime);
       exhaustedSlots.set('combo', expireTime);
@@ -173,31 +185,7 @@ export async function scanUpstreamStock(force = false) {
   }
 }
 
-export function ensureInitialExhausted() {
-  const now = Date.now();
-  const expireTime = now + 24 * 3600 * 1000;
-
-  // Silent Hill: Townfall (1636440) - Qingning0115 (9746: 0 lượt)
-  const currentSilent = exhaustedSlots.get('1636440') || 0;
-  if (currentSilent <= now) {
-    exhaustedSlots.set('1636440', expireTime);
-    exhaustedSlots.set('Qingning0115', expireTime);
-    exhaustedSlots.set('silent_hill', expireTime);
-    exhaustedSlots.set('9746', expireTime);
-  }
-
-  // God of War Ragnarök (2322010) - Aereww111 (18159: 0 lượt)
-  const currentGow = exhaustedSlots.get('2322010') || 0;
-  if (currentGow <= now) {
-    exhaustedSlots.set('2322010', expireTime);
-    exhaustedSlots.set('Aereww111', expireTime);
-    exhaustedSlots.set('god_of_war', expireTime);
-    exhaustedSlots.set('18159', expireTime);
-  }
-}
-
 export function getExhaustedList() {
-  ensureInitialExhausted();
   const now = Date.now();
   const list = [];
   for (const [key, expireTime] of exhaustedSlots.entries()) {
@@ -394,10 +382,10 @@ export async function steamPaymentRoute(request, env) {
         ).run();
         const now = Date.now();
         await env.STEAM_DB.prepare('DELETE FROM steam_exhausted WHERE expire_time <= ?').bind(now).run();
-        if (!exhaustedSlots.has('combo_31')) {
-          await env.STEAM_DB.prepare(
-            'DELETE FROM steam_exhausted WHERE key IN (?, ?, ?, ?, ?)'
-          ).bind('combo_31', 'combo', 'whkzw21078', '1659040', '33285').run();
+        for (const [key] of Object.entries(ACCOUNT_TO_YZID)) {
+          if (!exhaustedSlots.has(key)) {
+            await env.STEAM_DB.prepare('DELETE FROM steam_exhausted WHERE key = ?').bind(key).run().catch(() => {});
+          }
         }
         const { results } = await env.STEAM_DB.prepare('SELECT key, expire_time FROM steam_exhausted').all();
         if (results && results.length) {
@@ -426,10 +414,12 @@ export async function steamPaymentRoute(request, env) {
     await scanUpstreamStock(true).catch(() => {});
     if (env?.STEAM_DB) {
       try {
-        if (!exhaustedSlots.has('combo_31')) {
-          await env.STEAM_DB.prepare(
-            'DELETE FROM steam_exhausted WHERE key IN (?, ?, ?, ?, ?)'
-          ).bind('combo_31', 'combo', 'whkzw21078', '1659040', '33285').run();
+        const now = Date.now();
+        await env.STEAM_DB.prepare('DELETE FROM steam_exhausted WHERE expire_time <= ?').bind(now).run().catch(() => {});
+        for (const [key] of Object.entries(ACCOUNT_TO_YZID)) {
+          if (!exhaustedSlots.has(key)) {
+            await env.STEAM_DB.prepare('DELETE FROM steam_exhausted WHERE key = ?').bind(key).run().catch(() => {});
+          }
         }
       } catch {}
     }

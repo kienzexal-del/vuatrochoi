@@ -93,17 +93,10 @@ export const server = http.createServer(async (req, res) => {
   }
 
   if (path === '/api/steam/stock-status' && (req.method === 'GET' || req.method === 'POST')) {
-    const exhausted = [
-      '1636440', 'Qingning0115', 'silent_hill', '9746',
-      '2322010', 'Aereww111', 'god_of_war', '18159'
-    ];
     json({
       ok: true,
-      exhausted,
-      details: [
-        { id: '1636440', account: 'Qingning0115', remainingHours: 24, expireTime: Date.now() + 24 * 3600 * 1000 },
-        { id: '2322010', account: 'Aereww111', remainingHours: 24, expireTime: Date.now() + 24 * 3600 * 1000 }
-      ]
+      exhausted: [],
+      details: []
     }, 200);
     return;
   }

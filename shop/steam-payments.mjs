@@ -202,6 +202,8 @@ export function getExhaustedList() {
   return list;
 }
 
+const VERIFIED_SLOT_YZIDS = {"slot-combo-2":"9041","slot-onimusha-2":"8885","slot-onimusha-3":"8530","slot-hitman-2":"9041"};
+
 const guardCache = new Map(); // key: yzid, value: { code, timestamp }
 
 async function handleSteamGuard(request, env) {
@@ -216,12 +218,13 @@ async function handleSteamGuard(request, env) {
     if (!yzid && account) yzid = ACCOUNT_TO_YZID[account];
     if (!yzid && gameId) yzid = ACCOUNT_TO_YZID[gameId];
     if (!yzid && slotId) yzid = ACCOUNT_TO_YZID[slotId];
-    if (!yzid && orderId && env.STEAM_DB) {
+    if (orderId && env.STEAM_DB) {
       try {
         const row = await env.STEAM_DB.prepare(
-          'SELECT s.username, o.product_id FROM steam_orders o LEFT JOIN steam_stock s ON s.order_id=o.id WHERE o.id=?'
+          'SELECT s.id AS stock_id, s.username, o.product_id FROM steam_orders o LEFT JOIN steam_stock s ON s.order_id=o.id WHERE o.id=?'
         ).bind(orderId).first();
-        if (row?.username) yzid = ACCOUNT_TO_YZID[row.username];
+        if (row?.stock_id && VERIFIED_SLOT_YZIDS[row.stock_id]) yzid = VERIFIED_SLOT_YZIDS[row.stock_id];
+        else if (row?.username) yzid = ACCOUNT_TO_YZID[row.username] || yzid;
         if (!yzid && row?.product_id) yzid = ACCOUNT_TO_YZID[row.product_id];
       } catch {}
     }

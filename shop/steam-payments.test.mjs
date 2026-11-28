@@ -52,5 +52,16 @@ test('history and credentials belong to the verified Google account across clien
     assert.equal((await (await call('111', 'order', {orderId: first.orders[0].id})).json()).order.account, 'test-account');
     const pending = await (await call('222', 'order', {orderId: 'SG222222222222222222222222'})).json();
     assert.equal(pending.order.password, undefined);
+    // Shared login names must not overwrite the provider slot attached to the paid order.
+    db.prepare('UPDATE steam_stock SET id=? WHERE id=?').run('slot-combo-2','stock-test');
+    let requestedYzid;
+    globalThis.fetch=async (_url,options)=>{
+      requestedYzid=new URLSearchParams(options.body).get('yzid');
+      return Response.json({code:1,data:'TEST-CODE'});
+    };
+    const guard=await (await call('111','guard',{orderId:first.orders[0].id,account:'whkzw21078',gameId:'combo_31'})).json();
+    assert.equal(guard.ok,true);
+    assert.equal(requestedYzid,'9041');
+
   } finally { globalThis.fetch = originalFetch; }
 });

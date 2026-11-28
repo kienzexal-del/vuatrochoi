@@ -167,7 +167,7 @@ test('3. Slot Rotation: Hitman Combo (Slot 1 [28951] -> Slot 2 [9041])', async (
   assert.equal(res.ok, true);
   assert.equal(res.slotRotated, true);
   assert.equal(order.slotId, 'slot-combo-2'); // Auto-rotated to slot 2!
-  assert.equal(order.account, 'whkzw21078_b');
+  assert.equal(order.account, 'whkzw21078');
 
   // Verify that upstream was called with slot 2's yzid (9041)
   assert.equal(queriedYzids[queriedYzids.length - 1], '9041');

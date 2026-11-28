@@ -325,8 +325,8 @@ export const INITIAL_SLOTS = [
   {
     id: 'slot-combo-2',
     gameId: 'combo_31',
-    account: 'whkzw21078_b',
-    password: 'yamvd58819_b',
+    account: "whkzw21078",
+    password: "yamvd58819",
     yzid: '9041',
     active: true,
     timestamps: []
@@ -345,8 +345,8 @@ export const INITIAL_SLOTS = [
   {
     id: 'slot-onimusha-2',
     gameId: 'onimusha',
-    account: 'xiaofang215_2',
-    password: 'xiaofang215_pwd2',
+    account: "xiaofang215",
+    password: "11681168",
     yzid: '8885',
     active: true,
     timestamps: []
@@ -354,8 +354,8 @@ export const INITIAL_SLOTS = [
   {
     id: 'slot-onimusha-3',
     gameId: 'onimusha',
-    account: 'xiaofang215_3',
-    password: 'xiaofang215_pwd3',
+    account: "songjiefeng2",
+    password: "27782778",
     yzid: '8530',
     active: true,
     timestamps: []
@@ -374,8 +374,8 @@ export const INITIAL_SLOTS = [
   {
     id: 'slot-hitman-2',
     gameId: 'hitman_woa',
-    account: 'whkzw21078_b',
-    password: 'yamvd58819_b',
+    account: "whkzw21078",
+    password: "yamvd58819",
     yzid: '9041',
     active: true,
     timestamps: []
